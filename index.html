@@ -478,7 +478,17 @@ function montarTabela(b) {
   const chips = [
     ['todos', 'Todas'], ['pendente', 'Pendentes'], ['atrasada', 'Atrasadas'], ['concluida', 'Concluídas'],
   ];
-  if (b.sem_tarefa) chips.push(['sem_tarefa', `Sem tarefa (${nfmt(b.sem_tarefa)})`]);
+  // fora da conta, por motivo: dá para auditar em vez de confiar no total
+  const fora = b.fora_da_conta || [];
+  const porMotivo = {};
+  fora.forEach(x => { porMotivo[x.motivo] = (porMotivo[x.motivo] || 0) + 1; });
+  const rotulos = { filial_matriz:'Filiais', scp:'SCP', mei:'MEI',
+                    dispensada:'Dispensadas', sem_tarefa:'Sem tarefa' };
+  ['filial_matriz','scp','mei','dispensada','sem_tarefa'].forEach(m => {
+    if (porMotivo[m]) chips.push(['fora:' + m, `${rotulos[m]} (${nfmt(porMotivo[m])})`]);
+  });
+  const aConferir = fora.filter(x => x.suspeita).length;
+  if (aConferir) chips.push(['fora:conferir', `A conferir (${nfmt(aConferir)})`]);
   $('chips').innerHTML = chips.map(([k, l]) =>
     `<button class="chip${filtroStatus === k ? ' on' : ''}" data-k="${k}">${l}</button>`).join('');
   $('chips').querySelectorAll('.chip').forEach(c => c.onclick = () => {
@@ -488,8 +498,9 @@ function montarTabela(b) {
   $('btn-csv').onclick = () => baixarCSV(filtrar(b));
 
   const linhas = filtrar(b);
-  $('tbl-conta').textContent = filtroStatus === 'sem_tarefa'
-    ? `${nfmt(linhas.length)} empresas ativas sem tarefa de fechamento nesta competência`
+  $('tbl-conta').textContent = String(filtroStatus).startsWith('fora:')
+    ? `${nfmt(linhas.length)} empresas fora da conta do fechamento — ${
+        linhas.length ? linhas[0].status : ''}`
     : `${nfmt(linhas.length)} de ${nfmt(b.empresas.length)} empresas · clique numa pessoa no gráfico ao lado para filtrar`;
 
   $('tbody').innerHTML = linhas.map(e => `
@@ -507,14 +518,16 @@ function montarTabela(b) {
 
 function filtrar(b) {
   const q = busca.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  const base = filtroStatus === 'sem_tarefa'
-    ? (b.sem_tarefa_lista || []).map(e => ({
-        ...e, obrigacao: '', status: 'Sem tarefa cadastrada', semaforo: 'gray',
-        entregue: false, responsavel: '', prazo: '', entrega: '', dias_atraso: 0
-      }))
-    : b.empresas;
+  let base = b.empresas;
+  if (String(filtroStatus).startsWith('fora:')) {
+    const alvo = filtroStatus.slice(5);
+    base = (b.fora_da_conta || [])
+      .filter(x => alvo === 'conferir' ? x.suspeita : x.motivo === alvo)
+      .map(e => ({ ...e, obrigacao: '', status: e.rotulo, semaforo: e.suspeita ? 'red' : 'gray',
+                   entregue: false, responsavel: '', prazo: '', entrega: '', dias_atraso: 0 }));
+  }
   return base.filter(e => {
-    if (filtroStatus === 'sem_tarefa') { /* lista propria, sem filtro de status */ }
+    if (String(filtroStatus).startsWith('fora:')) { /* lista própria, sem filtro de status */ }
     else if (filtroStatus === 'concluida' && !e.entregue) return false;
     if (filtroStatus === 'pendente' && !(e.semaforo === 'amber')) return false;
     if (filtroStatus === 'atrasada' && !(e.semaforo === 'red')) return false;

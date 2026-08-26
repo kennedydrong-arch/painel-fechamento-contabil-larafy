@@ -349,6 +349,44 @@ def bloco_fechamento(linhas, competencias, empresas_ativas=None):
             "dispensadas_ou_sem_tarefa": len(resto),
         }
 
+        # Nome a nome de quem ficou fora e por quê, para dar para conferir em
+        # vez de acreditar no total. "sem_explicacao" é o que precisa de olho:
+        # empresa que faz balancete, não fecha, e não tem matriz fechando por ela.
+        dispensadas_cnpj = {a["cnpj"] for a in fech
+                            if a["competencia"] == comp and a["status_semaforo"] == "gray"}
+        com_balancete = {a["cnpj"] for a in apoio
+                         if a["competencia"] == comp and a["status_semaforo"] != "gray"
+                         and sem_acento(a["obrigacao"]).upper() == "BALANCETE MENSAL"}
+        fora_lista = []
+        conta_motivo = defaultdict(int)
+        for c in sorted(fora, key=lambda x: empresas_ativas[x].get("empresa", "")):
+            d = empresas_ativas[c]
+            nome = d.get("empresa", "")
+            regime = d.get("regime", "")
+            # ordem importa: o primeiro motivo que explicar é o que vale
+            if c in set(filial_da_matriz):
+                motivo, rotulo = "filial_matriz", "Filial · fecha na matriz"
+            elif re.search(r"\bSCP\b", nome, re.I) or "SCP" in regime.upper():
+                # Sociedade em Conta de Participação não fecha balanço próprio:
+                # a escrituração é da sócia ostensiva.
+                motivo, rotulo = "scp", "SCP · fecha na sócia ostensiva"
+            elif regime.upper() == "MEI":
+                motivo, rotulo = "mei", "MEI · sem contabilidade completa"
+            elif c in dispensadas_cnpj:
+                motivo, rotulo = "dispensada", "Dispensada no Acessórias"
+            else:
+                motivo, rotulo = "sem_tarefa", "Sem a tarefa cadastrada"
+            # o que precisa de olho: faz balancete todo mês mas não fecha
+            suspeita = motivo in ("dispensada", "sem_tarefa") and c in com_balancete
+            conta_motivo[motivo] += 1
+            fora_lista.append({
+                "cnpj": c, "empresa": nome, "uf": d.get("uf", ""), "regime": regime,
+                "motivo": motivo, "rotulo": rotulo,
+                "faz_balancete": c in com_balancete, "suspeita": suspeita,
+            })
+        cobertura["por_motivo"] = dict(conta_motivo)
+        cobertura["a_conferir"] = len([x for x in fora_lista if x["suspeita"]])
+
         prazos = [a["prazo_legal"] for a in alvo if a["prazo_legal"]]
         tecnicos = [a["prazo_tecnico"] for a in alvo if a["prazo_tecnico"]]
         por_comp[comp] = {
@@ -363,6 +401,7 @@ def bloco_fechamento(linhas, competencias, empresas_ativas=None):
             "dispensadas": dispensadas,
             "sem_tarefa": len(sem_tarefa),
             "cobertura": cobertura,
+            "fora_da_conta": fora_lista,
             "sem_tarefa_lista": sem_tarefa,
             "percentual": pct(len(concluidas), total),
             "percentual_pendentes": pct(len(pendentes), total),

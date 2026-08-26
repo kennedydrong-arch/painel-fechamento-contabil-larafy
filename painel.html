@@ -271,12 +271,14 @@ function desenhar() {
 function explicaTotal(b) {
   const c = b.cobertura;
   if (!c || c.empresas_no_escritorio <= c.nesta_conta) return '';
-  const partes = [];
-  if (c.filial_que_fecha_na_matriz)
-    partes.push(`${nfmt(c.filial_que_fecha_na_matriz)} filiais fecham junto com a matriz`);
-  if (c.dispensadas_ou_sem_tarefa)
-    partes.push(`${nfmt(c.dispensadas_ou_sem_tarefa)} estão dispensadas ou sem a tarefa`);
-  return ` · das ${nfmt(c.empresas_no_escritorio)} do escritório, ${partes.join(' e ')}`;
+  const m = c.por_motivo || {};
+  const nomes = { filial_matriz: 'filiais fecham na matriz',
+                  scp: 'SCP fecham na sócia ostensiva',
+                  mei: 'MEI', dispensada: 'dispensadas', sem_tarefa: 'sem a tarefa' };
+  const partes = ['filial_matriz', 'scp', 'mei', 'dispensada', 'sem_tarefa']
+    .filter(k => m[k]).map(k => `${nfmt(m[k])} ${nomes[k]}`);
+  return ` · as outras ${nfmt(c.empresas_no_escritorio - c.nesta_conta)} de ${
+    nfmt(c.empresas_no_escritorio)}: ${partes.join(', ')}`;
 }
 
 function corDo(b) {
@@ -398,6 +400,11 @@ function avisoFinal(b) {
       tres ? `, ${nfmt(tres)} delas há três` : ''}.`);
   if (pior) partes.push(
     `<b>${esc(pior.obrigacao)}</b> está atrasada em ${nfmt(pior.atrasadas)} empresas.`);
+  const conf = (b.fora_da_conta || []).filter(x => x.suspeita);
+  if (conf.length) partes.push(
+    `<b>${nfmt(conf.length)} ${conf.length === 1 ? 'empresa faz' : 'empresas fazem'} balancete
+     mas não ${conf.length === 1 ? 'tem' : 'têm'} fechamento</b>: ${
+       conf.slice(0, 2).map(x => esc(x.empresa)).join(', ')}.`);
   if (!partes.length) return '';
   return `<div class="aviso" style="margin-top:auto">${partes.join(' ')}</div>`;
 }
