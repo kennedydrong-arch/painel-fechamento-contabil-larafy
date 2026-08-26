@@ -7,41 +7,41 @@
 <title>Fechamento Contábil · LaraFy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --navy: #0a2638;
-    --navy-light: #143a52;
-    --cyan: #35b9d7;
-    --cyan-dim: #1d8aa3;
+    --navy: #002e43;
+    --navy-light: #0b4258;
+    --cyan: #07e0ff;
+    --cyan-dim: #00738f;      /* o cyan da marca nao tem contraste para texto */
 
-    --bg: #f4f6f8;
+    --bg: #f6f8f9;
     --surface: #ffffff;
     --border: #e3e8ed;
     --border-strong: #cdd6de;
 
-    --text: #0a2638;
+    --text: #002e43;
     --text-secondary: #4a6378;
     --text-muted: #8095a6;
 
     /* status - reservados, nunca usados como "mais uma série" */
-    --ok: #10b981;
-    --ok-bg: #e7f7f1;
-    --wait: #f59e0b;
-    --wait-bg: #fdf3e2;
-    --late: #dc2626;
-    --late-bg: #fbeaea;
+    --ok: #1baf7a;
+    --ok-bg: #e4f6ee;
+    --wait: #eda100;
+    --wait-bg: #fcf3dd;
+    --late: #d93a63;
+    --late-bg: #fbe8ee;
     --off: #94a3b8;
     --off-bg: #eef1f4;
 
-    --shadow: 0 1px 2px rgba(10,38,56,.05), 0 4px 16px rgba(10,38,56,.05);
+    --shadow: 0 1px 2px rgba(0,46,67,.05), 0 4px 16px rgba(0,46,67,.05);
     --radius: 12px;
   }
 
   body {
-    font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg);
     color: var(--text);
     font-size: 14px;
@@ -56,6 +56,10 @@
     padding: 14px 28px;
     display: flex; align-items: center; justify-content: space-between;
     gap: 20px; flex-wrap: wrap;
+  }
+  /* Montserrat nos titulos, como manda o Manual de Marca */
+  .brand-name, .card-title, .tile-val, .hero-pct b, .hero-count, thead th {
+    font-family: 'Montserrat', 'IBM Plex Sans', sans-serif;
   }
   .brand { display: flex; align-items: baseline; gap: 10px; }
   .brand-name { font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
@@ -72,7 +76,7 @@
     background: var(--cyan); color: var(--navy); border: 0; border-radius: 999px;
     padding: 6px 14px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
   }
-  .btn-print:hover { background: #4fc9e3; }
+  .btn-print:hover { background: #57e9ff; }
 
   /* --------------------------------------------------------- barra filtro */
   .filters {
@@ -159,7 +163,7 @@
   .tip {
     position: absolute; pointer-events: none; opacity: 0; transition: opacity .1s;
     background: var(--navy); color: #fff; border-radius: 8px; padding: 9px 12px;
-    font-size: 12.5px; box-shadow: 0 6px 20px rgba(10,38,56,.25); z-index: 30;
+    font-size: 12.5px; box-shadow: 0 6px 20px rgba(0,46,67,.22); z-index: 30;
     white-space: nowrap; transform: translate(-50%, -100%);
   }
   .tip b { font-variant-numeric: tabular-nums; }
@@ -206,11 +210,24 @@
     display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px;
     border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap;
   }
-  .tag.ok { background: var(--ok-bg); color: #0a6b4f; }
-  .tag.wait { background: var(--wait-bg); color: #92600a; }
-  .tag.late { background: var(--late-bg); color: #a01b1b; }
+  .tag.ok { background: var(--ok-bg); color: #0a6a48; }
+  .tag.wait { background: var(--wait-bg); color: #8a5d00; }
+  .tag.late { background: var(--late-bg); color: #a32043; }
   .tag.off { background: var(--off-bg); color: #55697a; }
   .muted { color: var(--text-muted); }
+
+  .aviso {
+    display: flex; gap: 11px; align-items: flex-start;
+    background: var(--wait-bg); border: 1px solid #f0d9a0;
+    border-radius: var(--radius); padding: 13px 16px; font-size: 13px; color: #6b4a05;
+  }
+  .aviso b { color: #513806; }
+  .aviso-icone {
+    flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--wait);
+    color: #fff; font-size: 12px; font-weight: 700; display: flex;
+    align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .aviso-linha + .aviso-linha { margin-top: 5px; }
 
   footer { padding: 8px 28px 30px; color: var(--text-muted); font-size: 12px; text-align: center; }
   .loading { padding: 70px 20px; text-align: center; color: var(--text-muted); }
@@ -254,8 +271,11 @@
 <div class="tip" id="tip"></div>
 
 <script>
-const COR = { ok:'#10b981', wait:'#f59e0b', late:'#dc2626', off:'#94a3b8',
-              atual:'#35b9d7', ant:'#94a3b8' };
+// Slots da paleta da marca, ja validados para daltonismo e contraste.
+// A serie usa o azul-petroleo #0090B3, nao o cyan da marca: o cyan e
+// marca-texto, some numa linha de 2px.
+const COR = { ok:'#1baf7a', wait:'#eda100', late:'#d93a63', off:'#94a3b8',
+              atual:'#0090b3', ant:'#94a3b8' };
 const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril',
                       mai:'maio', jun:'junho', jul:'julho', ago:'agosto',
@@ -346,6 +366,7 @@ function render() {
   if (!b) { $('app').innerHTML = '<div class="loading">Sem tarefa de fechamento nesta competência.</div>'; return; }
 
   $('app').innerHTML = `
+    ${avisosHTML(b)}
     <section class="top">
       ${heroHTML(b)}
       <div style="display:grid;gap:18px;align-content:start">
@@ -422,6 +443,29 @@ function render() {
   montarTabela(b);
 }
 
+/* ---------------------------------------------------------------- avisos
+   Duas coisas que fariam o número ser lido errado se ficassem escondidas:
+   competência com base menor (não dá para comparar com o mês atual) e
+   empresa ativa sem a tarefa cadastrada (o painel não enxerga). */
+function avisosHTML(b) {
+  const linhas = [];
+  const foco = DADOS.fechamento[DADOS.competencia_foco];
+  if (foco && b.total < foco.total * 0.75) {
+    linhas.push(`<div class="aviso-linha">Nesta competência apenas
+      <b>${nfmt(b.total)}</b> empresas tinham a tarefa de fechamento cadastrada —
+      hoje são <b>${nfmt(foco.total)}</b>. O percentual é real, mas
+      <b>não dá para comparar com os meses recentes</b>: mudou a base, não o desempenho.</div>`);
+  }
+  if (b.sem_tarefa) {
+    linhas.push(`<div class="aviso-linha"><b>${nfmt(b.sem_tarefa)}</b> empresas ativas
+      não têm nenhuma tarefa de fechamento nesta competência — nem dispensada.
+      Elas ficam de fora do total. Veja quais no filtro
+      <b>"Sem tarefa"</b> da tabela abaixo.</div>`);
+  }
+  if (!linhas.length) return '';
+  return `<div class="aviso"><span class="aviso-icone">!</span><div>${linhas.join('')}</div></div>`;
+}
+
 /* ----------------------------------------------------------------- hero */
 function heroHTML(b) {
   const R = 78, C = 2 * Math.PI * R, p = Math.max(0, Math.min(100, b.percentual));
@@ -466,7 +510,7 @@ function comparativoHTML(b) {
   const ate = bAnt.curva.filter(p => p.dia <= alvoDia);
   const ref = ate.length ? ate[ate.length - 1].percentual : 0;
   const dif = b.percentual - ref;
-  const cor = dif >= 0 ? '#0a6b4f' : '#a01b1b';
+  const cor = dif >= 0 ? '#0a6a48' : '#a32043';
   const seta = dif >= 0 ? '▲' : '▼';
   return `<div class="hero-prazo" style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border)">
     No mesmo ponto do mês, ${esc(anterior)} tinha <b>${pctTxt(ref)}</b><br>
@@ -551,8 +595,9 @@ function desenharEvolucao(b) {
   const M = { t: 14, r: 54, b: 30, l: 40 };
   const maxX = Math.max(1, ...sA.map(p => p.x), ...sB.map(p => p.x),
                         diaPrazo || 0, diaHoje != null ? diaHoje : 0);
+  const minX = Math.min(0, ...sA.map(p => p.x), ...sB.map(p => p.x));
   const maxY = Math.max(20, Math.ceil(Math.max(...sA.map(p => p.y), ...sB.map(p => p.y), 0) / 10) * 10);
-  const px = x => M.l + (x / maxX) * (W - M.l - M.r);
+  const px = x => M.l + ((x - minX) / (maxX - minX)) * (W - M.l - M.r);
   const py = y => H - M.b - (y / maxY) * (H - M.t - M.b);
   const linha = s => s.map((p, i) => (i ? 'L' : 'M') + px(p.x).toFixed(1) + ' ' + py(p.y).toFixed(1)).join(' ');
 
@@ -599,7 +644,7 @@ function desenharEvolucao(b) {
     const r = svg.getBoundingClientRect();
     const escala = W / r.width;
     const xSvg = (ev.clientX - r.left) * escala;
-    const xVal = Math.round(((xSvg - M.l) / (W - M.l - M.r)) * maxX);
+    const xVal = Math.round(minX + ((xSvg - M.l) / (W - M.l - M.r)) * (maxX - minX));
     const pA = sA.length ? maisPerto(sA, xVal) : null;
     const pB = sB.length ? maisPerto(sB, xVal) : null;
     if (pA) { cross.setAttribute('x1', px(pA.x)); cross.setAttribute('x2', px(pA.x)); cross.setAttribute('opacity', '.35'); }
@@ -645,7 +690,7 @@ function desenharResponsaveis(b) {
 
 function desenharRegimes(b) {
   $('bars-regime').innerHTML = b.por_regime.map(r => `
-    <div class="bar-row" style="grid-template-columns:64px 1fr 92px">
+    <div class="bar-row" style="grid-template-columns:112px 1fr 92px">
       <div class="bar-name">${esc(r.regime)}</div>
       <div class="bar-track"><i style="width:${r.percentual}%;background:${COR.ok}"></i></div>
       <div class="bar-val"><b>${pctTxt(r.percentual)}</b> · ${nfmt(r.concluidas)}/${nfmt(r.total)}</div>
@@ -657,6 +702,7 @@ function montarTabela(b) {
   const chips = [
     ['todos', 'Todas'], ['pendente', 'Pendentes'], ['atrasada', 'Atrasadas'], ['concluida', 'Concluídas'],
   ];
+  if (b.sem_tarefa) chips.push(['sem_tarefa', `Sem tarefa (${nfmt(b.sem_tarefa)})`]);
   $('chips').innerHTML = chips.map(([k, l]) =>
     `<button class="chip${filtroStatus === k ? ' on' : ''}" data-k="${k}">${l}</button>`).join('');
   $('chips').querySelectorAll('.chip').forEach(c => c.onclick = () => {
@@ -666,8 +712,9 @@ function montarTabela(b) {
   $('btn-csv').onclick = () => baixarCSV(filtrar(b));
 
   const linhas = filtrar(b);
-  $('tbl-conta').textContent =
-    `${nfmt(linhas.length)} de ${nfmt(b.empresas.length)} empresas · clique numa pessoa no gráfico ao lado para filtrar`;
+  $('tbl-conta').textContent = filtroStatus === 'sem_tarefa'
+    ? `${nfmt(linhas.length)} empresas ativas sem tarefa de fechamento nesta competência`
+    : `${nfmt(linhas.length)} de ${nfmt(b.empresas.length)} empresas · clique numa pessoa no gráfico ao lado para filtrar`;
 
   $('tbody').innerHTML = linhas.map(e => `
     <tr>
@@ -684,8 +731,15 @@ function montarTabela(b) {
 
 function filtrar(b) {
   const q = busca.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  return b.empresas.filter(e => {
-    if (filtroStatus === 'concluida' && !e.entregue) return false;
+  const base = filtroStatus === 'sem_tarefa'
+    ? (b.sem_tarefa_lista || []).map(e => ({
+        ...e, obrigacao: '', status: 'Sem tarefa cadastrada', semaforo: 'gray',
+        entregue: false, responsavel: '', prazo: '', entrega: '', dias_atraso: 0
+      }))
+    : b.empresas;
+  return base.filter(e => {
+    if (filtroStatus === 'sem_tarefa') { /* lista propria, sem filtro de status */ }
+    else if (filtroStatus === 'concluida' && !e.entregue) return false;
     if (filtroStatus === 'pendente' && !(e.semaforo === 'amber')) return false;
     if (filtroStatus === 'atrasada' && !(e.semaforo === 'red')) return false;
     if (!q) return true;

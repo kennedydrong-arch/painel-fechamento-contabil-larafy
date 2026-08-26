@@ -180,9 +180,10 @@ def regime_de(linha):
     return SIGLA_REGIME.get(resto, resto.upper() or "Sem regime")
 
 
-def bloco_fechamento(linhas, competencias):
+def bloco_fechamento(linhas, competencias, empresas_ativas=None):
     fech = [a for a in linhas if RE_FECHAMENTO.match(sem_acento(a["obrigacao"]))]
     apoio = [a for a in linhas if sem_acento(a["obrigacao"]).upper() in APOIO]
+    empresas_ativas = empresas_ativas or {}
     por_comp = {}
 
     for comp in competencias:
@@ -263,6 +264,16 @@ def bloco_fechamento(linhas, competencias):
                 ap[chave] = {"nome": nome, "total": len(c), "concluidas": ok,
                              "percentual": pct(ok, len(c))}
 
+        # Empresa ativa que nao tem NENHUMA tarefa de fechamento na competencia -
+        # nem dispensada. Ela nao entra no total, entao o painel nao a enxerga:
+        # se deveria ter fechamento, o indicador esta medindo menos do que deveria.
+        com_tarefa = {a["cnpj"] for a in fech if a["competencia"] == comp}
+        sem_tarefa = sorted(
+            ({"cnpj": c, "empresa": d.get("empresa", ""), "regime": d.get("regime", ""),
+              "uf": d.get("uf", "")}
+             for c, d in empresas_ativas.items() if c not in com_tarefa),
+            key=lambda x: x["empresa"])
+
         prazos = [a["prazo_legal"] for a in alvo if a["prazo_legal"]]
         tecnicos = [a["prazo_tecnico"] for a in alvo if a["prazo_tecnico"]]
         por_comp[comp] = {
@@ -275,6 +286,8 @@ def bloco_fechamento(linhas, competencias):
             "pendentes": len(pendentes),
             "atrasadas": len(atrasadas),
             "dispensadas": dispensadas,
+            "sem_tarefa": len(sem_tarefa),
+            "sem_tarefa_lista": sem_tarefa,
             "percentual": pct(len(concluidas), total),
             "percentual_pendentes": pct(len(pendentes), total),
             "percentual_atrasadas": pct(len(atrasadas), total),
@@ -356,7 +369,21 @@ def main():
     comps = [c for c in comps if ordem_comp(c) <= ordem_comp(limite)]
     linhas = [a for a in linhas if a["competencia"] in comps]
 
-    fechamento = bloco_fechamento(linhas, comps)
+    # cadastro das empresas ativas, para saber quem ficou de fora do painel
+    empresas_ativas = {}
+    for emp in bruto.get("empresas", []):
+        cad = emp.get("_cadastro") or {}
+        if (cad.get("Status") or emp.get("Status") or "Ativa") != "Ativa":
+            continue
+        cnpj = so_digitos(emp.get("Identificador"))
+        if cnpj:
+            empresas_ativas[cnpj] = {
+                "empresa": (emp.get("Razao") or "").strip(),
+                "regime": (cad.get("Regime") or "").strip(),
+                "uf": (cad.get("UF") or "").strip(),
+            }
+
+    fechamento = bloco_fechamento(linhas, comps, empresas_ativas)
     comps_fech = [c for c in comps if c in fechamento]
 
     # Competencia em foco = a mais recente que o time JA comecou a trabalhar.
