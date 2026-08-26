@@ -1,146 +1,131 @@
 <!doctype html>
-<!-- O painel vive numa TV: tema escuro fixo, sem alternancia. -->
+<!-- O painel vive numa TV: tema escuro fixo. -->
 <html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Fechamento Contábil · LaraFy</title>
-<link rel="stylesheet" href="larafy-tokens.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="kit.css">
 <style>
 /* ============================================================
    Fechamento contábil — painel de parede.
 
-   Regra que rege esta tela: ela é lida de longe, de relance, por
-   quem não vai parar para estudar número. Por isso são poucos
-   blocos, cada um grande, e quase nada de texto corrido: o que
-   comunica é o tamanho do número, a barra e a curva.
+   As peças são as do kit LaraFy (kit.css), usadas como estão:
+   .faixa-num, .deitadas, .colunas, .destaque, .aviso, .mrc.
+   Aqui só existe o que o kit não tem: o arranjo da tela.
 
-   16:9 sem rolagem, tudo em cqw para escalar do notebook à TV.
-   Cores, fontes e medidas saem de larafy-tokens.css.
+   O palco é desenhado em 1600×900 e escalado inteiro para caber
+   na janela. É o que permite manter as medidas do kit em pixel,
+   sem deformar peça nenhuma, do notebook à TV.
    ============================================================ */
 
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100%; overflow:hidden; }
-body {
-  font-family: var(--lf-f-texto); background: var(--lf-navy-esc);
-  color: var(--lf-tinta); -webkit-font-smoothing: antialiased;
-  display:grid; place-items:center;
+/* A cor do dado vem do site da LaraTAX (#00c4e5), não do azul apagado que o
+   modo escuro do kit usa. É a mesma cor que a marca aplica de verdade, e no
+   fundo escuro ela aparece; o #07e0ff continua reservado ao acento. */
+:root[data-theme="dark"] {
+  --s1: #00c4e5;
+  --trilho: #142832;
+  --fio: #1E333F;
+  --fio2: #17272F;
 }
-.palco {
-  width: min(100vw, 177.78vh); height: min(56.25vw, 100vh);
-  container-type: size; background: var(--lf-fundo);
-  display:flex; flex-direction:column; overflow:hidden;
-}
-.d { font-family: var(--lf-f-mono); font-variant-numeric: tabular-nums; }
-.rot { font-size:.82cqw; font-weight:600; color: var(--lf-tinta-2); }
-.rot span { font-weight:400; color: var(--lf-tinta-3); }
 
-/* ------------------------------------------------------- cabeçalho */
-.topo { flex:none; background: var(--lf-navy); color:#fff; display:flex;
-        align-items:center; gap:1.4cqw; padding:0 1.8cqw; height:4.6cqw; }
-.logo { height:2cqw; width:auto; display:block; }
-.topo h1 { font-family: var(--lf-f-titulo); font-weight:700; font-size:1.2cqw;
-           letter-spacing:-.03em; white-space:nowrap; }
-.topo h1 em { font-style:normal; font-weight:400; color:#9dbccc; }
-.comp-nav { display:flex; align-items:center; gap:.2cqw; }
-.comp-seta { background:transparent; border:0; color:#9dbccc; cursor:pointer;
-             font-size:1.05cqw; line-height:1; padding:.25cqw .45cqw; border-radius: var(--lf-r1); }
-.comp-seta:hover:not(:disabled) { color:#fff; background: rgba(255,255,255,.1); }
-.comp-seta:disabled { opacity:.25; cursor:default; }
-.comp-atual { font-family: var(--lf-f-mono); font-size:.86cqw; color:#fff; min-width:4.6cqw;
-              text-align:center; border-bottom:2px solid var(--lf-cyan); padding-bottom:.15cqw; }
-.fonte { margin-left:auto; display:flex; align-items:center; gap:.6cqw;
-         font-size:.74cqw; color:#9dbccc; white-space:nowrap; }
-.fonte .pt { width:.44cqw; height:.44cqw; border-radius:50%; background: var(--lf-cyan); flex:none; }
-.fonte.velha { color:#ffc9c2; } .fonte.velha .pt { background: var(--lf-erro); }
-.btn-tv { background:transparent; border:1px solid rgba(255,255,255,.24); color:#9dbccc;
-          font-family: var(--lf-f-texto); font-size:.72cqw; border-radius: var(--lf-r2);
-          padding:.28cqw .65cqw; cursor:pointer; }
-.btn-tv:hover { color:#fff; border-color:#fff; }
-:focus-visible { outline:2px solid var(--lf-cyan); outline-offset:2px; }
+html, body { height:100%; overflow:hidden; }
+body { margin:0; background:var(--fundo); display:grid; place-items:center; }
+
+.moldura { width:100vw; height:100vh; display:grid; place-items:center; overflow:hidden; }
+.palco {
+  width:1600px; height:900px; flex:none;
+  background:var(--fundo); color:var(--tin);
+  display:flex; flex-direction:column;
+  transform:scale(var(--esc, 1)); transform-origin:center;
+}
 .palco.sem-ponteiro, .palco.sem-ponteiro * { cursor:none; }
 
-/* --------------------------------------------------------- estrutura */
-.corpo { flex:1; min-height:0; display:grid; grid-template-columns:30cqw 1fr;
-         grid-template-rows:1fr auto; }
-.bloco { padding:1.5cqw 1.9cqw; min-height:0; display:flex; flex-direction:column; }
-.bl-num { border-right:1px solid var(--lf-fio); }
-.bl-curva { min-width:0; }
-.rodape-blocos { grid-column:1 / -1; border-top:1px solid var(--lf-fio);
-                 display:grid; grid-template-columns:30cqw 1fr; }
+/* ------------------------------------------------------ cabeçalho */
+.topo {
+  flex:none; height:62px; background:#002E43; color:#fff;
+  display:flex; align-items:center; gap:22px; padding:0 30px;
+}
+:root[data-theme="dark"] .topo { background:#02202F; }
+.topo img { height:26px; width:auto; display:block; }
+.topo h1 { font-family:var(--fd); font-weight:800; font-size:19px;
+           letter-spacing:-.035em; margin:0; white-space:nowrap; }
+.topo h1 span { color:#8FB0C0; font-weight:400; letter-spacing:-.02em; }
+.nav-comp { display:flex; align-items:center; gap:2px; }
+.nav-comp button {
+  background:none; border:0; color:#8FB0C0; cursor:pointer; font-size:17px;
+  line-height:1; padding:4px 8px; border-radius:3px;
+}
+.nav-comp button:hover:not(:disabled) { color:#fff; background:rgba(255,255,255,.09); }
+.nav-comp button:disabled { opacity:.25; cursor:default; }
+.nav-comp .agora {
+  font-family:var(--fm); font-size:13px; color:#fff; min-width:66px; text-align:center;
+  border-bottom:2px solid #07E0FF; padding-bottom:2px;
+}
+.fonte {
+  margin-left:auto; display:flex; align-items:center; gap:12px;
+  font-family:var(--fm); font-size:11.5px; color:#8FB0C0; white-space:nowrap;
+}
+.fonte .pt { width:7px; height:7px; border-radius:99px; background:#07E0FF; flex:none; }
+.fonte.velha { color:#F0B3AC; } .fonte.velha .pt { background:#E8807A; }
+.btn-tv {
+  background:none; border:1px solid rgba(255,255,255,.26); color:#8FB0C0;
+  font-family:var(--fb); font-size:12px; border-radius:4px; padding:4px 10px; cursor:pointer;
+}
+.btn-tv:hover { color:#fff; border-color:#fff; }
 
-/* ------------------------------------------------- o número principal */
-.gigante { font-family: var(--lf-f-titulo); font-weight:800; font-size:8.2cqw;
-           line-height:.8; letter-spacing:-.05em; font-variant-numeric: tabular-nums; }
-.sub { font-size:1.05cqw; color: var(--lf-tinta-2); margin-top:.9cqw; }
-.sub b { font-family: var(--lf-f-mono); color: var(--lf-tinta); font-weight:500; }
+/* --------------------------------------------------------- arranjo */
+.corpo { flex:1; min-height:0; display:flex; flex-direction:column; padding:0 30px; }
 
-.barrona { height:1.1cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r2);
-           display:flex; overflow:hidden; margin-top:1.1cqw; }
-.barrona i { display:block; height:100%; }
-.barrona i + i { border-left:2px solid var(--lf-fundo); }
+.abre { display:flex; align-items:flex-end; gap:26px; padding:24px 0 20px; }
+.abre .pc {
+  font-family:var(--fd); font-weight:800; font-size:92px; line-height:.82;
+  letter-spacing:-.045em; font-variant-numeric:tabular-nums;
+}
+.abre .txt { padding-bottom:6px; }
+.abre .txt .l1 { font-family:var(--fd); font-weight:700; font-size:21px; letter-spacing:-.03em; }
+.abre .txt .l1 u { font-family:var(--fm); font-weight:500; text-decoration:none; }
+.abre .txt .l2 { color:var(--tin2); font-size:14.5px; margin-top:5px; }
+.abre .marcas { margin-left:auto; display:flex; gap:8px; padding-bottom:8px; }
 
-.tres { display:grid; grid-template-columns:repeat(3,1fr); gap:1cqw; margin-top:1.5cqw; }
-.tres .v { font-family: var(--lf-f-titulo); font-weight:700; font-size:2.6cqw;
-           line-height:1; letter-spacing:-.035em; font-variant-numeric: tabular-nums; }
-.tres .k { font-size:.76cqw; color: var(--lf-tinta-3); margin-top:.35cqw; }
-.c-ok { color: var(--lf-ok); } .c-at { color: var(--lf-atencao); } .c-er { color: var(--lf-erro); }
+.meio { flex:1; min-height:0; display:grid; grid-template-columns:1fr 470px; gap:38px;
+        padding:22px 0 0; border-top:1px solid var(--fio); }
+.meio > div { min-width:0; display:flex; flex-direction:column; }
 
-/* ritmo: duas barras comparáveis, não texto */
-.ritmo { margin-top:auto; padding-top:1.3cqw; border-top:1px solid var(--lf-fio); }
-.rit-linha { display:grid; grid-template-columns:4.6cqw 1fr; gap:.8cqw;
-             align-items:center; margin-top:.7cqw; }
-.rit-linha .n { font-family: var(--lf-f-mono); font-size:1.5cqw; font-weight:500;
-                text-align:right; line-height:1; }
-.rit-linha .bar { height:.85cqw; border-radius: var(--lf-r1); }
-.rit-linha .leg { grid-column:2; font-size:.74cqw; color: var(--lf-tinta-3); margin-top:-.15cqw; }
+.tit-graf { display:flex; align-items:baseline; justify-content:space-between; gap:14px; }
+.linha-svg { flex:1; min-height:0; margin-top:10px; }
+.linha-svg svg { width:100%; height:100%; display:block; }
+.eixo-t { fill:var(--fr); font-family:var(--fm); font-size:11px; }
+.malha-l { stroke:var(--fio2); stroke-width:1; }
+.rot-l { font-family:var(--fm); font-size:12.5px; }
 
-/* ------------------------------------------------------------- curva */
-.curva { flex:1; min-height:0; margin-top:.7cqw; }
-.curva svg { width:100%; height:100%; display:block; }
-.eixo { fill: var(--lf-tinta-3); font-family: var(--lf-f-mono); font-size:.7cqw; }
-.malha { stroke: var(--lf-fio-suave); stroke-width:1; }
-.marca { stroke: var(--lf-tinta-3); stroke-width:1; }
-.rot-curva { font-family: var(--lf-f-mono); font-size:.78cqw; }
+.fecha { flex:none; padding:20px 0 22px; border-top:1px solid var(--fio); margin-top:20px;
+         display:grid; grid-template-columns:1fr 470px; gap:38px; align-items:end; }
 
-/* -------------------------------------------- barras de quem segura */
-.pessoas { display:grid; gap:.75cqw; margin-top:.85cqw; }
-.p-linha { display:grid; grid-template-columns:8.5cqw 1fr 3.4cqw; gap:1cqw; align-items:center; }
-.p-nome { font-size:1cqw; color: var(--lf-tinta-2); white-space:nowrap;
-          overflow:hidden; text-overflow:ellipsis; }
-.p-bar { height:1.35cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r1);
-         display:flex; overflow:hidden; }
-.p-bar i { display:block; height:100%; }
-.p-bar i + i { border-left:2px solid var(--lf-fundo); }
-.p-val { font-family: var(--lf-f-mono); font-size:1.15cqw; font-weight:500;
-         text-align:right; color: var(--lf-tinta); }
+.graf-col { height:90px; position:relative; max-width:430px; }
+.graf-col .colunas { gap:10px; }
+.graf-col .colunas b { opacity:.5; }
+.graf-col .colunas b.hoje { opacity:1; background:var(--s1); }
+.graf-col .colunas b { border-radius:3px 3px 0 0; }
+.meses-r { display:flex; gap:10px; margin:6px 0 0 46px; max-width:384px; }
+.meses-r span { flex:1; text-align:center; font-family:var(--fm); font-size:11px; color:var(--fr); }
+.meses-r span.hoje { color:var(--tin); }
 
-/* --------------------------------------------- histórico e destaques */
-.meses { display:flex; gap:.6cqw; align-items:flex-end; height:5.4cqw; margin-top:.8cqw; }
-.mes { flex:1; display:flex; flex-direction:column; align-items:center; gap:.3cqw; }
-.mes .p { font-family: var(--lf-f-mono); font-size:.76cqw; color: var(--lf-tinta-3); }
-.mes .b { width:100%; border-radius: var(--lf-r1) var(--lf-r1) 0 0; }
-.mes .m { font-family: var(--lf-f-mono); font-size:.72cqw; color: var(--lf-tinta-3); }
-.mes.atual .p { color: var(--lf-tinta); }
-
-.destaques { display:grid; grid-template-columns:repeat(3,1fr); align-items:center; }
-.dest { padding:0 1.9cqw; border-left:1px solid var(--lf-fio); }
-.dest:first-child { border-left:0; }
-.dest .v { font-family: var(--lf-f-titulo); font-weight:800; font-size:3.1cqw;
-           line-height:1; letter-spacing:-.04em; font-variant-numeric: tabular-nums; }
-.dest .k { font-size:.82cqw; color: var(--lf-tinta-2); margin-top:.4cqw; line-height:1.35; }
-.dest .k b { color: var(--lf-tinta); font-weight:600; }
-
-.aviso-topo { flex:none; background: var(--lf-erro-fundo); color: var(--lf-erro);
-              border-bottom:1px solid var(--lf-erro-fio); padding:.5cqw 1.9cqw;
-              font-size:.8cqw; display:flex; gap:.6cqw; align-items:center; }
-.aviso-topo b { font-family: var(--lf-f-mono); }
-.carregando { display:grid; place-items:center; height:100%; color: var(--lf-tinta-3); font-size:1.1cqw; }
+.carregando { display:grid; place-items:center; height:100%; color:var(--fr); font-size:16px; }
 </style>
 </head>
 <body>
-<div class="palco" id="palco"><div class="carregando">Lendo o Acessórias…</div></div>
+<div class="moldura"><div class="palco" id="palco"><div class="carregando">Lendo o Acessórias…</div></div></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M12 8v5M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-relogio" viewBox="0 0 24 24"><path d="M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></symbol>
+</svg>
 
 <script src="logos.js"></script>
 <script src="comum.js"></script>
@@ -170,21 +155,22 @@ const dataBR = iso => {
   const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
   return m ? `${m[3]}/${m[2]}` : '—';
 };
-function primeiroNome(n) {
+function nomeCurto(n) {
   const t = String(n || '').trim();
   if (!t) return '—';
   if (/^sem respons/i.test(t)) return 'Sem responsável';
   const [a, b] = t.split(' ');
   return b ? `${a} ${b[0]}.` : a;
 }
-
 function compVizinha(c, passo) {
   const l = FECH.competencias.slice().sort((a, b) => ordemComp(a) - ordemComp(b));
   const i = l.indexOf(c);
   return (i >= 0 && i + passo >= 0 && i + passo < l.length) ? l[i + passo] : null;
 }
+const marca = (cls, icone, txt) =>
+  `<span class="mrc ${cls}"><svg><use href="#${icone}"></use></svg>${esc(txt)}</span>`;
 
-/* --------------------------------------------------------- dados */
+/* ------------------------------------------------------------ dados */
 const ler = () => Promise.all([
   fetch('data/fechamento.json?ts=' + Date.now()).then(r => r.json()),
   fetch('data/operacional.json?ts=' + Date.now()).then(r => r.json()),
@@ -207,43 +193,70 @@ async function carregar() {
   }, 5 * 60 * 1000);
 }
 
-/* -------------------------------------------------------- desenho */
+/* ---------------------------------------------------------- desenho */
 function desenhar() {
   const b = FECH.fechamento[COMP];
   const idade = idadeDosDados(FECH.meta);
   const antes = compVizinha(COMP, -1), depois = compVizinha(COMP, 1);
+  const r = b.ritmo || {};
+  const falta = b.total - b.concluidas;
+
+  const estado = r.prazo_vencido
+    ? (falta === 0 ? marca('ok', 'i-check', 'competência fechada')
+                   : marca('mal', 'i-x', `prazo venceu em ${dataBR(b.prazo_legal)}`))
+    : falta === 0 ? marca('ok', 'i-check', 'competência fechada')
+    : marca('al', 'i-alerta', `prazo em ${r.dias_uteis_restantes} dia${
+        r.dias_uteis_restantes === 1 ? '' : 's'} úteis`);
 
   $('#palco').innerHTML = `
     <header class="topo">
-      <img class="logo" src="${LOGOS.larafy_branca}" alt="LaraFy">
-      <h1>Fechamento contábil <em>— ${esc(compLongo(COMP))}</em></h1>
-      <div class="comp-nav">
-        <button class="comp-seta" id="ant" ${antes ? '' : 'disabled'}
-                aria-label="Competência anterior">&lsaquo;</button>
-        <span class="comp-atual">${esc(COMP)}</span>
-        <button class="comp-seta" id="prox" ${depois ? '' : 'disabled'}
-                aria-label="Próxima competência">&rsaquo;</button>
+      <img src="${LOGOS.larafy_branca}" alt="LaraFy">
+      <h1>Fechamento contábil <span>— ${esc(compLongo(COMP))}</span></h1>
+      <div class="nav-comp">
+        <button id="ant" ${antes ? '' : 'disabled'} aria-label="Competência anterior">&lsaquo;</button>
+        <span class="agora">${esc(COMP)}</span>
+        <button id="prox" ${depois ? '' : 'disabled'} aria-label="Próxima competência">&rsaquo;</button>
       </div>
       <div class="fonte${idade.velho ? ' velha' : ''}">
         <span class="pt"></span>
         <span>Acessórias · ${nfmt(FECH.meta.total_empresas)} empresas ·
-          ${idade.velho ? 'sem atualizar desde ' + esc(idade.quando) : 'atualizado ' + esc(idade.texto)}</span>
+          ${idade.velho ? 'sem atualizar desde ' + esc(idade.quando)
+                        : 'atualizado ' + esc(idade.texto)}</span>
         <button class="btn-tv" id="cheia" title="Tecla F">${
           document.fullscreenElement ? 'Sair' : 'Tela cheia'}</button>
       </div>
     </header>
-    ${idade.velho ? `<div class="aviso-topo">
-      Os números são de <b>${esc(idade.quando)}</b> — a atualização automática não rodou desde então.
-    </div>` : ''}
 
     <div class="corpo">
-      <div class="bloco bl-num">${blocoNumero(b)}</div>
-      <div class="bloco bl-curva">${blocoCurva()}</div>
-      <div class="rodape-blocos">
-        <div class="bloco" style="border-right:1px solid var(--lf-fio);padding-top:1.2cqw">
-          ${blocoMeses()}
+      <div class="abre">
+        <span class="pc" style="color:${corDo(b)}">${pct(b.percentual)}</span>
+        <span class="txt">
+          <span class="l1"><u>${nfmt(b.concluidas)}</u> de <u>${nfmt(b.total)}</u> empresas fechadas</span>
+          <span class="l2">faltam ${nfmt(falta)} para o mês fechar${
+            b.dispensadas ? ` · ${nfmt(b.dispensadas)} dispensadas ficam fora da conta` : ''}</span>
+        </span>
+        <span class="marcas">${estado}</span>
+      </div>
+
+      ${faixaNumeros(b)}
+
+      <div class="meio">
+        <div>
+          <div class="tit-graf">
+            <p class="marca" style="margin:0">Empresas fechadas ao longo do ciclo</p>
+            <span class="txt-est" id="leg-curva"></span>
+          </div>
+          <div class="linha-svg"><svg id="curva" preserveAspectRatio="none"></svg></div>
         </div>
-        <div class="bloco" style="padding:1.2cqw 0">${blocoDestaques(b)}</div>
+        <div>${colunaDireita(b)}${avisoFinal(b)}</div>
+      </div>
+
+      <div class="fecha">
+        <div>
+          <p class="marca">Onde cada mês terminou</p>
+          ${grafMeses()}
+        </div>
+        <div>${numerosFinais()}</div>
       </div>
     </div>`;
 
@@ -253,161 +266,152 @@ function desenhar() {
   desenharCurva(b);
 }
 
-/* Coluna da esquerda: o número, os três estados e o ritmo em barras. */
-function blocoNumero(b) {
+function corDo(b) {
   const r = b.ritmo || {};
-  const falta = b.total - b.concluidas;
-  const w = n => b.total ? (n / b.total) * 100 : 0;
-  const cor = r.prazo_vencido
-    ? (b.percentual >= 95 ? 'var(--lf-ok)' : b.percentual >= 80 ? 'var(--lf-atencao)' : 'var(--lf-erro)')
-    : 'var(--lf-serie-1)';
-
-  // as duas barras do ritmo dividem a mesma escala: dá para ver o tamanho da diferença
-  const maxRitmo = Math.max(r.por_dia || 0, r.por_dia_necessario || 0, 1);
-  const prazoTxt = r.prazo_vencido
-    ? `prazo venceu em ${dataBR(b.prazo_legal)}`
-    : `prazo em ${r.dias_uteis_restantes} dia${r.dias_uteis_restantes === 1 ? '' : 's'} úteis`;
-
-  return `
-    <div class="gigante" style="color:${cor}">${pct(b.percentual)}</div>
-    <div class="sub"><b>${nfmt(b.concluidas)}</b> de <b>${nfmt(b.total)}</b> empresas fechadas</div>
-    <div class="barrona">
-      ${b.concluidas ? `<i style="width:${w(b.concluidas)}%;background:${cor}"></i>` : ''}
-      ${b.atrasadas ? `<i style="width:${w(b.atrasadas)}%;background:var(--lf-erro)"></i>` : ''}
-      ${b.pendentes ? `<i style="width:${w(b.pendentes)}%;background:var(--lf-atencao)"></i>` : ''}
-    </div>
-    <div class="tres">
-      <div><div class="v c-ok">${nfmt(b.concluidas)}</div><div class="k">fechadas</div></div>
-      <div><div class="v c-at">${nfmt(falta)}</div><div class="k">faltam</div></div>
-      <div><div class="v c-er">${nfmt(b.atrasadas)}</div><div class="k">atrasadas</div></div>
-    </div>
-    ${blocoRegime(b)}
-    <div class="ritmo">
-      <div class="rot">Ritmo por dia útil <span>· ${prazoTxt}</span></div>
-      <div class="rit-linha">
-        <span class="n">${dec(r.por_dia)}</span>
-        <span class="bar" style="width:${((r.por_dia || 0) / maxRitmo) * 100}%;
-              background:var(--lf-serie-1)"></span>
-        <span class="leg">fechando hoje</span>
-      </div>
-      <div class="rit-linha">
-        <span class="n" style="color:var(--lf-erro)">${
-          r.por_dia_necessario === null ? '—' : dec(r.por_dia_necessario)}</span>
-        <span class="bar" style="width:${((r.por_dia_necessario || 0) / maxRitmo) * 100}%;
-              background:var(--lf-erro)"></span>
-        <span class="leg">precisaria fechar</span>
-      </div>
-    </div>`;
+  if (!r.prazo_vencido) return 'var(--s1)';
+  return b.percentual >= 95 ? 'var(--ok)' : b.percentual >= 80 ? 'var(--al)' : 'var(--mal)';
 }
 
-/* Por regime: três barras curtas, para ver de relance qual carteira anda. */
-function blocoRegime(b) {
-  const lista = (b.por_regime || []).filter(r => r.total >= 5).slice(0, 4);
-  if (!lista.length) return '';
-  return `
-    <div style="margin-top:1.6cqw;padding-top:1.3cqw;border-top:1px solid var(--lf-fio)">
-      <div class="rot">Por regime</div>
-      <div class="pessoas" style="gap:.6cqw;margin-top:.7cqw">
-        ${lista.map(r => `<div class="p-linha" style="grid-template-columns:7.6cqw 1fr 3.2cqw">
-          <span class="p-nome" style="font-size:.86cqw">${esc(r.regime)}</span>
-          <span class="p-bar" style="height:1cqw">
-            <i style="width:${r.percentual}%;background:var(--lf-ok)"></i>
-          </span>
-          <span class="p-val" style="font-size:.95cqw">${dec(r.percentual, 0)}%</span>
-        </div>`).join('')}
-      </div>
-    </div>`;
+/* Peça do kit: faixa de números, células separadas por fio. O valor é mono. */
+function faixaNumeros(b) {
+  const r = b.ritmo || {};
+  const ref = refAnterior(b);
+  const cel = (rot, val, det, cls) => `<div>
+    <div class="r">${rot}</div>
+    <div class="v${cls ? ' ' + cls : ''}">${val}</div>
+    <div class="d">${det}</div></div>`;
+  return `<div class="faixa-num">
+    ${cel('Fechadas', nfmt(b.concluidas),
+          ref ? `${ref.dif >= 0 ? '+' : '−'}${dec(Math.abs(ref.dif))} p.p. vs ${ref.comp} no mesmo ponto`
+              : `${pct(b.percentual)} do total`)}
+    ${cel('Em aberto', nfmt(b.pendentes + b.atrasadas),
+          b.atrasadas ? `${nfmt(b.atrasadas)} já em atraso` : 'nenhuma em atraso ainda',
+          b.atrasadas ? 'mal' : '')}
+    ${cel('Fechando por dia útil', dec(r.por_dia),
+          `em ${r.dias_uteis_corridos} dias de ciclo`)}
+    ${cel('Precisaria por dia', r.por_dia_necessario === null ? '—' : dec(r.por_dia_necessario),
+          r.prazo_vencido ? 'prazo vencido'
+            : `nos ${r.dias_uteis_restantes} dias úteis que restam`,
+          r.por_dia_necessario > r.por_dia ? 'mal' : '')}
+  </div>`;
 }
 
-/* Coluna da direita: a curva em cima, quem está segurando embaixo. */
-function blocoCurva() {
-  return `
-    <div class="rot">Empresas fechadas ao longo do ciclo <span id="sub-curva"></span></div>
-    <div class="curva"><svg id="curva" preserveAspectRatio="none"></svg></div>
-    <div id="quem"></div>`;
+/* Onde a competência anterior estava no MESMO ponto do ciclo. */
+function refAnterior(b) {
+  const ant = compVizinha(COMP, -1);
+  const bAnt = ant ? FECH.fechamento[ant] : null;
+  if (!bAnt || !b.abre_em || !bAnt.abre_em) return null;
+  const dia = Math.floor((Date.now() - new Date(b.abre_em + 'T00:00:00')) / 86400000);
+  if (dia < 0) return null;
+  const alvo = new Date(new Date(bAnt.abre_em + 'T00:00:00').getTime() + dia * 86400000)
+    .toISOString().slice(0, 10);
+  const ate = bAnt.curva.filter(p => p.dia <= alvo);
+  const v = ate.length ? ate[ate.length - 1].percentual : 0;
+  return { comp: ant, percentual: v, dif: b.percentual - v };
 }
 
-function blocoQuem(b) {
+/* Peça do kit: barras deitadas, nome e valor acima do trilho. */
+function colunaDireita(b) {
   const lista = (b.por_responsavel || [])
     .filter(x => x.pendentes + x.atrasadas > 0)
     .sort((a, c) => (c.pendentes + c.atrasadas) - (a.pendentes + a.atrasadas))
-    .slice(0, 5);
-  if (!lista.length) return '';
-  const max = Math.max(...lista.map(x => x.pendentes + x.atrasadas));
+    .slice(0, 6);
+  const max = Math.max(1, ...lista.map(x => x.pendentes + x.atrasadas));
+  const r = b.ritmo || {};
+  const falta = b.total - b.concluidas;
+
+  const veredito = falta === 0
+    ? `<div class="destaque"><b>As ${nfmt(b.total)} empresas desta competência estão fechadas.</b></div>`
+    : r.prazo_vencido
+      ? `<div class="destaque"><b>${nfmt(falta)} empresas ficaram sem fechamento.</b>
+          O prazo terminou em ${dataBR(b.prazo_legal)}.</div>`
+      : r.por_dia_necessario > r.por_dia
+        ? `<div class="destaque"><b>No ritmo atual seriam necessários
+            ${nfmt(r.dias_uteis_no_ritmo)} dias úteis para as ${nfmt(falta)} que faltam.</b>
+            O prazo termina em ${r.dias_uteis_restantes}.</div>`
+        : `<div class="destaque"><b>O ritmo atual fecha as ${nfmt(falta)} que faltam no prazo.</b>
+            Restam ${r.dias_uteis_restantes} dias úteis.</div>`;
+
   return `
-    <div class="rot" style="margin-top:1.2cqw;padding-top:1.2cqw;
-         border-top:1px solid var(--lf-fio)">Quem está com mais fechamento em aberto</div>
-    <div class="pessoas">
+    ${veredito}
+    <p class="marca" style="margin:20px 0 10px">Quem está com mais fechamento em aberto</p>
+    <div class="deitadas">
       ${lista.map(x => {
-        const ab = x.pendentes + x.atrasadas, larg = (ab / max) * 100;
-        const pAtr = ab ? (x.atrasadas / ab) * larg : 0;
-        return `<div class="p-linha">
-          <span class="p-nome">${esc(primeiroNome(x.nome))}</span>
-          <span class="p-bar">
-            ${x.atrasadas ? `<i style="width:${pAtr}%;background:var(--lf-erro)"></i>` : ''}
-            ${x.pendentes ? `<i style="width:${larg - pAtr}%;background:var(--lf-atencao)"></i>` : ''}
-          </span>
-          <span class="p-val">${nfmt(ab)}</span>
+        const ab = x.pendentes + x.atrasadas;
+        return `<div>
+          <div class="l1"><span>${esc(nomeCurto(x.nome))}</span><u>${nfmt(ab)} de ${nfmt(x.total)}</u></div>
+          <div class="trilho"><i style="width:${(ab / max) * 100}%"></i></div>
         </div>`;
-      }).join('')}
+      }).join('') || '<div class="vazio"><b>Nada em aberto</b></div>'}
     </div>`;
 }
 
-/* Faixa de baixo, esquerda: onde cada mês terminou. */
-function blocoMeses() {
+/* Peça do kit: gráfico de colunas com eixo à esquerda. */
+function grafMeses() {
   const comps = FECH.competencias
     .filter(c => ordemComp(c) <= ordemComp(FECH.competencia_foco))
     .slice(0, 6).reverse();
   if (comps.length < 2) return '';
+  const alt = 90;
   return `
-    <div class="rot">Onde cada mês terminou</div>
-    <div class="meses">
-      ${comps.map(c => {
-        const x = FECH.fechamento[c], atual = c === COMP;
-        return `<div class="mes${atual ? ' atual' : ''}">
-          <span class="p">${dec(x.percentual, 0)}%</span>
-          <span class="b" style="height:${Math.max(3, (x.percentual / 100) * 68)}px;
-            background:${atual ? 'var(--lf-serie-1)' : 'var(--lf-serie-outros)'}"></span>
-          <span class="m">${esc(c.slice(0, 3))}</span>
-        </div>`;
-      }).join('')}
+    <div class="graf-col">
+      <div class="eixo">
+        <u style="top:0">100%</u><i style="top:0"></i>
+        <u style="top:${alt / 2}px">50%</u><i style="top:${alt / 2}px"></i>
+        <u style="top:${alt}px">0</u><i style="top:${alt - 1}px;background:var(--fio3)"></i>
+      </div>
+      <div class="colunas">
+        ${comps.map(c => {
+          const x = FECH.fechamento[c];
+          return `<b class="${c === COMP ? 'hoje' : ''}" style="height:${Math.max(1.5, x.percentual)}%">
+            <span class="dica">${esc(c)} · ${pct(x.percentual)}</span></b>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="meses-r">
+      ${comps.map(c => `<span class="${c === COMP ? 'hoje' : ''}">${esc(c.slice(0, 3))}</span>`).join('')}
     </div>`;
 }
 
-/* Faixa de baixo, direita: os três números que mandam agir. */
-function blocoDestaques(b) {
+/* Peça do kit: aviso — só quando há o que avisar, com número e nome. */
+function avisoFinal(b) {
   const tres = (FECH.arrastando || []).filter(x => x.total_meses >= 3).length;
-  const p = OPER ? OPER.passivo : null;
   const o = OPER ? OPER.por_competencia[OPER.competencia_foco] : null;
   const pior = o && (o.obrigacoes || []).filter(x => x.atrasadas > 0)
     .sort((a, c) => c.atrasadas - a.atrasadas)[0];
+  const partes = [];
+  if (FECH.arrastando_total) partes.push(
+    `<b>${nfmt(FECH.arrastando_total)} empresas</b> estão com o fechamento em aberto há mais de um mês${
+      tres ? `, ${nfmt(tres)} delas há três` : ''}.`);
+  if (pior) partes.push(
+    `<b>${esc(pior.obrigacao)}</b> está atrasada em ${nfmt(pior.atrasadas)} empresas.`);
+  if (!partes.length) return '';
+  return `<div class="aviso" style="margin-top:auto">${partes.join(' ')}</div>`;
+}
 
-  const itens = [];
-  itens.push({ v: nfmt(FECH.arrastando_total || 0), cor: 'var(--lf-erro)',
-    k: `empresas com o fechamento em aberto há <b>mais de um mês</b>${
-        tres ? ` — ${nfmt(tres)} delas há três` : ''}` });
-  if (pior) itens.push({ v: nfmt(pior.atrasadas), cor: 'var(--lf-erro)',
-    k: `empresas com <b>${esc(pior.obrigacao)}</b> atrasada` });
-  if (p) itens.push({ v: nfmt(p.total), cor: 'var(--lf-atencao)',
-    k: `obrigações do escritório venceram e <b>seguem sem entrega</b>` });
-
-  return `<div class="destaques">
-    ${itens.slice(0, 3).map(i => `<div class="dest">
-      <div class="v" style="color:${i.cor}">${i.v}</div>
-      <div class="k">${i.k}</div></div>`).join('')}
+/* Peça do kit: faixa de números, para o que vale do escritório inteiro. */
+function numerosFinais() {
+  const p = OPER ? OPER.passivo : null;
+  if (!p) return '';
+  const maior = Object.entries(p.por_time).sort((a, b) => b[1] - a[1])[0];
+  return `<div class="faixa-num" style="grid-template-columns:1fr 1fr">
+    <div><div class="r">Passivo do escritório</div>
+      <div class="v mal">${nfmt(p.total)}</div>
+      <div class="d">venceram e seguem sem entrega</div></div>
+    <div><div class="r">Com multa prevista</div>
+      <div class="v">${nfmt(p.com_multa)}</div>
+      <div class="d">maior parte no ${esc(maior[0])} (${nfmt(maior[1])})</div></div>
   </div>`;
 }
 
-/* ---------------------------------------------------------- curva */
+/* ------------------------------------------------------------ curva */
 function desenharCurva(b) {
-  const alvo = document.getElementById('quem');
-  if (alvo) alvo.innerHTML = blocoQuem(b);
-
   const svg = document.getElementById('curva');
   if (!svg) return;
   const caixa = svg.parentElement.getBoundingClientRect();
-  const W = Math.max(320, caixa.width), H = Math.max(90, caixa.height);
-  const M = { t: 18, r: 26, b: 22, l: 38 };
+  const esc0 = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--esc')) || 1;
+  const W = Math.max(320, caixa.width / esc0), H = Math.max(120, caixa.height / esc0);
+  const M = { t: 20, r: 30, b: 24, l: 44 };
 
   const serie = bloco => {
     if (!bloco || !bloco.curva || !bloco.curva.length) return [];
@@ -417,13 +421,13 @@ function desenharCurva(b) {
   };
   const ant = compVizinha(COMP, -1);
   const sA = serie(b), sB = serie(ant ? FECH.fechamento[ant] : null);
-  const sub = document.getElementById('sub-curva');
-  if (sub) sub.textContent = ant ? `· ${COMP} contra ${ant}, dia a dia` : `· ${COMP}`;
+  const leg = document.getElementById('leg-curva');
+  if (leg) leg.textContent = ant ? `${COMP} contra ${ant}, desde a abertura de cada ciclo` : COMP;
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   if (!sA.length && !sB.length) {
-    svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" class="eixo">
-      Nenhuma empresa fechada até agora</text>`;
+    svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" class="eixo-t">
+      Nenhuma empresa fechada até agora nesta competência</text>`;
     return;
   }
 
@@ -446,46 +450,45 @@ function desenharCurva(b) {
     if (!s.length) return '';
     const u = s[s.length - 1];
     const txt = `${nome} ${pct(u.y)}`;
-    const cabe = px(u.x) + 8 + txt.length * (H * 0.062) <= W - 2;
-    return `<circle cx="${px(u.x)}" cy="${py(u.y)}" r="3.6" fill="${cor}"/>
-      <text x="${px(u.x) + (cabe ? 8 : -8)}" y="${py(u.y) - 8}" class="rot-curva"
+    const cabe = px(u.x) + 9 + txt.length * 7.4 <= W - 2;
+    return `<circle cx="${px(u.x)}" cy="${py(u.y)}" r="3" fill="${cor}"/>
+      <text x="${px(u.x) + (cabe ? 9 : -9)}" y="${py(u.y) - 9}" class="rot-l"
         text-anchor="${cabe ? 'start' : 'end'}" fill="${cor}">${esc(txt)}</text>`;
   };
 
   svg.innerHTML = `
-    <defs><linearGradient id="sob" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="var(--lf-serie-1)" stop-opacity=".22"/>
-      <stop offset="100%" stop-color="var(--lf-serie-1)" stop-opacity="0"/>
-    </linearGradient></defs>
     ${[0, maxY / 2, maxY].map(v => `
-      <line class="malha" x1="${M.l}" x2="${W - M.r}" y1="${py(v)}" y2="${py(v)}"/>
-      <text class="eixo" x="${M.l - 7}" y="${py(v) + 4}" text-anchor="end">${v}%</text>`).join('')}
-    <text class="eixo" x="${px(0)}" y="${H - M.b + 15}" text-anchor="middle">abertura</text>
+      <line class="malha-l" x1="${M.l}" x2="${W - M.r}" y1="${py(v)}" y2="${py(v)}"/>
+      <text class="eixo-t" x="${M.l - 8}" y="${py(v) + 4}" text-anchor="end">${v}%</text>`).join('')}
+    <text class="eixo-t" x="${px(0)}" y="${H - M.b + 16}" text-anchor="middle">abertura</text>
     ${diaPrazo != null && diaPrazo <= maxX ? `
       <line x1="${px(diaPrazo)}" x2="${px(diaPrazo)}" y1="${M.t}" y2="${H - M.b}"
-            stroke="var(--lf-erro)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".7"/>
-      <text class="eixo" x="${px(diaPrazo)}" y="${H - M.b + 15}" text-anchor="middle"
-            fill="var(--lf-erro)">prazo</text>` : ''}
+            stroke="var(--mal)" stroke-width="1" stroke-dasharray="4 4"/>
+      <text class="eixo-t" x="${px(diaPrazo)}" y="${H - M.b + 16}" text-anchor="middle"
+            fill="var(--mal)">prazo</text>` : ''}
     ${diaHoje != null && diaHoje >= 0 && diaHoje <= maxX ? `
-      <line class="marca" x1="${px(diaHoje)}" x2="${px(diaHoje)}" y1="${M.t}" y2="${H - M.b}"/>
-      <text class="eixo" x="${px(diaHoje)}" y="${M.t - 5}" text-anchor="middle">hoje</text>` : ''}
-    ${sB.length ? `<path d="${dl(sB)}" fill="none" stroke="var(--lf-serie-outros)"
-        stroke-width="2" stroke-dasharray="6 5"/>` : ''}
-    ${sA.length ? `<path d="${area(sA)}" fill="url(#sob)" stroke="none"/>` : ''}
-    ${sA.length ? `<path d="${dl(sA)}" fill="none" stroke="var(--lf-serie-1)" stroke-width="3.2"
+      <line x1="${px(diaHoje)}" x2="${px(diaHoje)}" y1="${M.t}" y2="${H - M.b}"
+            stroke="var(--fr)" stroke-width="1"/>
+      <text class="eixo-t" x="${px(diaHoje)}" y="${M.t - 6}" text-anchor="middle">hoje</text>` : ''}
+    ${sB.length ? `<path d="${dl(sB)}" fill="none" stroke="var(--sOut)" stroke-width="1.8"
+        stroke-dasharray="5 4" stroke-linejoin="round"/>` : ''}
+    ${sA.length ? `<path d="${area(sA)}" fill="var(--s1)" opacity=".10"/>` : ''}
+    ${sA.length ? `<path d="${dl(sA)}" fill="none" stroke="var(--s1)" stroke-width="1.8"
         stroke-linejoin="round"/>` : ''}
-    ${rot(sB, 'var(--lf-serie-outros)', ant)}
-    ${rot(sA, 'var(--lf-serie-1)', COMP)}`;
+    ${rot(sB, 'var(--sOut)', ant)}
+    ${rot(sA, 'var(--s1)', COMP)}`;
 }
 
-/* ------------------------------------------------------ tela cheia */
+/* ------------------------------------------ escala e tela cheia */
+function ajustarEscala() {
+  const esc = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+  document.documentElement.style.setProperty('--esc', esc.toFixed(4));
+}
 async function alternarTelaCheia() {
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
     else await document.documentElement.requestFullscreen();
-  } catch (e) {
-    console.warn('Tela cheia indisponível neste navegador:', e.message);
-  }
+  } catch (e) { console.warn('Tela cheia indisponível neste navegador:', e.message); }
 }
 document.addEventListener('fullscreenchange', () => {
   const b = document.getElementById('cheia');
@@ -494,6 +497,7 @@ document.addEventListener('fullscreenchange', () => {
     clearTimeout(tempoPonteiro);
     document.querySelector('.palco')?.classList.remove('sem-ponteiro');
   } else esconderPonteiroDepois();
+  ajustarEscala();
   if (FECH) desenharCurva(FECH.fechamento[COMP]);
 });
 let tempoPonteiro;
@@ -515,9 +519,11 @@ document.addEventListener('keydown', ev => {
 
 let t;
 window.addEventListener('resize', () => {
+  ajustarEscala();
   clearTimeout(t);
   t = setTimeout(() => { if (FECH) desenharCurva(FECH.fechamento[COMP]); }, 150);
 });
+ajustarEscala();
 carregar();
 </script>
 </body>
