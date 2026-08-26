@@ -27,11 +27,23 @@ Se quiser só **abrir o painel** com os dados da última vez, duplo clique em
 
 | Tela | Para quê |
 |---|---|
-| **`painel.html`** | **A tela de apresentação.** Ocupa a tela inteira, não rola, tem relógio e troca claro/escuro. É a que se projeta numa reunião ou deixa numa TV. **É esta que você manda para a Juliane.** |
+| **`painel.html`** | **Tudo numa tela só.** Ocupa a tela inteira, não rola, tem relógio e troca claro/escuro. É a que se projeta numa reunião ou deixa numa TV. **É esta que você manda para a Juliane.** |
 | `index.html` | Fechamento empresa a empresa: tabela, busca, filtro, Excel |
 | `operacional.html` | Todas as obrigações do escritório, por área, com o passivo em aberto |
 
 As três têm as mesmas abas no topo para trocar entre elas.
+
+### O que cabe na tela do `painel.html`
+
+| Bloco | Responde |
+|---|---|
+| % do fechamento | quanto do mês está fechado, com concluídas / pendentes / atrasadas / dispensadas |
+| Onde cada mês terminou | as últimas 6 competências em barras — a régua de quanto é "normal" |
+| **Ritmo** | quantas empresas por dia útil o time está fechando, quantas **precisaria** fechar para bater o prazo, e onde o mês termina se o ritmo não mudar |
+| Curva do ciclo | o mês atual contra o anterior, dia a dia, com "hoje" marcado |
+| O escritório | % entregue de Fiscal, Contábil e Outras áreas, o que mais segura o mês e o passivo acumulado |
+| Por pessoa | quem está com fechamento em aberto |
+| **Arrastando** | empresas com o fechamento em aberto em 2 ou mais meses já vencidos — o problema que não aparece olhando só o mês |
 
 ---
 

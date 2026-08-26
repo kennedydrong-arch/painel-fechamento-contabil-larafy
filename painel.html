@@ -8,167 +8,174 @@
 <link rel="stylesheet" href="larafy-tokens.css">
 <style>
 /* ============================================================
-   Painel de apresentação do fechamento contábil.
-   Formato do painel comercial (16:9, sem rolagem, para projetar);
-   estética do pacote visual LaraFy (larafy-tokens.css).
+   Painel único do fechamento contábil.
 
-   Medidas em cqw: a tela inteira escala junto com a projeção,
-   de um notebook a uma TV, sem quebrar o enquadramento.
+   Tudo numa tela 16:9 que não rola: o fechamento, o ritmo, as três
+   áreas do escritório, quem está com trabalho em aberto e as
+   empresas que arrastam o fechamento há mais de um mês.
+
+   Formato do painel comercial; estética do pacote visual LaraFy
+   (larafy-tokens.css). Medidas em cqw para a tela inteira escalar
+   junto com a projeção, de um notebook a uma TV.
    ============================================================ */
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html, body { height:100%; overflow:hidden; }
-
 body {
-  font-family: var(--lf-f-texto);
-  background: var(--lf-fundo);
-  color: var(--lf-tinta);
-  -webkit-font-smoothing: antialiased;
-  display: grid; place-items: center;
+  font-family: var(--lf-f-texto); background: var(--lf-navy-esc);
+  color: var(--lf-tinta); -webkit-font-smoothing: antialiased;
+  display:grid; place-items:center;
 }
 
 .palco {
-  width: min(100vw, 177.78vh);
-  height: min(56.25vw, 100vh);
-  container-type: size;
-  position: relative;
-  display: flex; flex-direction: column;
-  padding: 1.5cqw 2.2cqw 1.2cqw;
-  background: var(--lf-fundo);
+  width: min(100vw, 177.78vh); height: min(56.25vw, 100vh);
+  container-type: size; background: var(--lf-fundo);
+  display:flex; flex-direction:column; overflow:hidden;
 }
 
-.titulo { font-family: var(--lf-f-titulo); font-weight:700; letter-spacing: var(--lf-aperto-titulo); }
-.mono   { font-family: var(--lf-f-mono); font-variant-numeric: tabular-nums; }
-.num    { font-variant-numeric: tabular-nums; }
-.rotulo {
-  font-family: var(--lf-f-mono); font-size:.68cqw; font-weight:500;
-  letter-spacing: var(--lf-solto-rotulo); text-transform: uppercase;
-  color: var(--lf-tinta-3);
+.mono { font-family: var(--lf-f-mono); font-variant-numeric: tabular-nums; }
+.rot {
+  font-family: var(--lf-f-mono); font-size:.66cqw; font-weight:500;
+  letter-spacing:.13em; text-transform:uppercase; color: var(--lf-tinta-3);
 }
 
-/* ---------------------------------------------------------- topo */
+/* ------------------------------------------------- faixa navy do topo */
 .topo {
-  display:flex; align-items:center; justify-content:space-between;
-  padding-bottom: 1.1cqw; border-bottom: 1px solid var(--lf-fio);
+  background: var(--lf-navy); color:#fff; display:flex; align-items:center;
+  gap:1.4cqw; padding:0 1.8cqw; height:5.2cqw; flex:none;
 }
-.topo-e { display:flex; align-items:center; gap:1.2cqw; }
-.logo { height:2.2cqw; width:auto; display:block; }
-.fio-v { width:1px; height:2cqw; background: var(--lf-fio); }
-.chapeu { font-family: var(--lf-f-titulo); font-weight:800; font-size:1.15cqw;
-          letter-spacing:-.03em; color: var(--lf-tinta); line-height:1.1; }
+.logo { height:2.1cqw; width:auto; display:block; }
+.fio-v { width:1px; height:2.2cqw; background: rgba(255,255,255,.22); }
+.chapeu { font-family: var(--lf-f-titulo); font-weight:800; font-size:1.25cqw;
+          letter-spacing:-.035em; line-height:1.1; }
 .chapeu small { display:block; font-family: var(--lf-f-mono); font-weight:400;
-                font-size:.66cqw; letter-spacing:.14em; text-transform:uppercase;
-                color: var(--lf-tinta-3); margin-top:.25cqw; }
-.topo-d { display:flex; align-items:center; gap:1.6cqw; }
-.vivo { display:flex; align-items:center; gap:.5cqw; }
-.vivo .ponto { width:.55cqw; height:.55cqw; border-radius:50%; background: var(--lf-cyan); }
-.relogio { font-family: var(--lf-f-mono); font-weight:500; font-size:1.6cqw;
-           letter-spacing:-.02em; line-height:1; text-align:right; }
-.relogio small { display:block; font-size:.66cqw; font-weight:400; color: var(--lf-tinta-3);
-                 margin-top:.2cqw; letter-spacing:.02em; }
-.btn-tema {
-  font-family: var(--lf-f-mono); font-size:.68cqw; letter-spacing:.1em; text-transform:uppercase;
-  color: var(--lf-tinta-3); background:transparent; border:1px solid var(--lf-fio);
-  border-radius: var(--lf-r2); padding:.4cqw .7cqw; cursor:pointer;
-}
-.btn-tema:hover { color: var(--lf-tinta); border-color: var(--lf-tinta-3); }
-
-/* ------------------------------------------------------- filtros */
-.filtros { display:flex; align-items:center; gap:.35cqw; padding:.9cqw 0 .2cqw; flex-wrap:wrap; }
+                font-size:.66cqw; letter-spacing:.13em; text-transform:uppercase;
+                color:#8fb3c4; margin-top:.2cqw; }
+.filtros { display:flex; gap:.3cqw; margin-left:1.2cqw; }
 .fbtn {
-  font-family: var(--lf-f-texto); font-weight:500; font-size:.78cqw;
-  color: var(--lf-tinta-2); background: var(--lf-superficie);
-  border:1px solid var(--lf-fio); border-radius: var(--lf-r2);
-  padding:.42cqw .85cqw; cursor:pointer; text-transform:capitalize;
+  font-family: var(--lf-f-texto); font-size:.76cqw; color:#b9d0dc;
+  background:transparent; border:1px solid rgba(255,255,255,.22);
+  border-radius: var(--lf-r2); padding:.35cqw .75cqw; cursor:pointer;
+  text-transform:capitalize;
 }
-.fbtn:hover { border-color: var(--lf-tinta-3); color: var(--lf-tinta); }
+.fbtn:hover { border-color:#fff; color:#fff; }
 .fbtn.ativo { background: var(--lf-cyan); border-color: var(--lf-cyan);
               color: var(--lf-navy); font-weight:600; }
-.filtro-nota { margin-left:auto; font-size:.72cqw; color: var(--lf-tinta-3); }
+.topo-d { margin-left:auto; display:flex; align-items:center; gap:1.3cqw; }
+.vivo { display:flex; align-items:center; gap:.45cqw; font-family: var(--lf-f-mono);
+        font-size:.66cqw; letter-spacing:.13em; text-transform:uppercase; color:#8fb3c4; }
+.vivo i { width:.5cqw; height:.5cqw; border-radius:50%; background: var(--lf-cyan); }
+.relogio { font-family: var(--lf-f-mono); font-size:1.5cqw; letter-spacing:-.02em;
+           line-height:1; text-align:right; }
+.relogio small { display:block; font-size:.62cqw; color:#8fb3c4; margin-top:.15cqw; }
+.btn-tema { font-family: var(--lf-f-mono); font-size:.64cqw; letter-spacing:.1em;
+            text-transform:uppercase; color:#b9d0dc; background:transparent;
+            border:1px solid rgba(255,255,255,.22); border-radius: var(--lf-r2);
+            padding:.3cqw .6cqw; cursor:pointer; }
+.btn-tema:hover { color:#fff; border-color:#fff; }
 
-/* --------------------------------------------------------- corpo */
-.corpo { flex:1; display:grid; grid-template-columns: 1fr 1px 1fr;
-         gap:0; padding-top:.9cqw; min-height:0; }
-.coluna { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
-.coluna.e { padding-right:2.2cqw; }
-.coluna.d { padding-left:2.2cqw; }
-.fio-col { background: var(--lf-fio); }
+/* ------------------------------------------------------------- grade */
+.grade {
+  flex:1; min-height:0; display:grid;
+  grid-template-columns: 21cqw 16cqw 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+.bloco { padding:1cqw 1.3cqw; border-right:1px solid var(--lf-fio);
+         border-bottom:1px solid var(--lf-fio); min-height:0;
+         display:flex; flex-direction:column; overflow:hidden;
+         background: var(--lf-superficie); }
+.bloco:nth-child(3), .bloco:nth-child(6) { border-right:0; }
+.bloco:nth-child(4), .bloco:nth-child(5), .bloco:nth-child(6) { border-bottom:0; }
+.bloco-cab { display:flex; align-items:baseline; justify-content:space-between;
+             gap:.6cqw; padding-bottom:.7cqw; }
+.bloco-cab .n { font-family: var(--lf-f-mono); font-size:.78cqw; color: var(--lf-tinta-2);
+                white-space:nowrap; }
 
-.secao { font-family: var(--lf-f-mono); font-size:.7cqw; font-weight:500;
-         letter-spacing:.14em; text-transform:uppercase; color: var(--lf-tinta-3);
-         padding-bottom:.6cqw; }
+/* --------------------------------------------------- número principal */
+.grandao { font-family: var(--lf-f-titulo); font-weight:800; font-size:5.4cqw;
+           line-height:.85; letter-spacing:-.045em; font-variant-numeric: tabular-nums; }
+.sub-grandao { font-size:.84cqw; color: var(--lf-tinta-2); margin-top:.55cqw; }
+.sub-grandao b { font-family: var(--lf-f-mono); color: var(--lf-tinta); font-weight:500; }
 
-/* número grande, sem caixa em volta */
-.destaque { display:flex; align-items:baseline; gap:1cqw; }
-.destaque .v { font-family: var(--lf-f-titulo); font-weight:800; font-size:6.4cqw;
-               line-height:.86; letter-spacing:-.04em; font-variant-numeric: tabular-nums; }
-.destaque .lado { padding-bottom:.5cqw; }
-.destaque .lado b { display:block; font-size:1.05cqw; font-weight:600; letter-spacing:-.01em; }
-.destaque .lado span { display:block; font-size:.78cqw; color: var(--lf-tinta-3); margin-top:.25cqw; }
+.barra { height:.5cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r1);
+         margin-top:.8cqw; display:flex; overflow:hidden; }
+.barra i { display:block; height:100%; }
+.barra i + i { border-left:1px solid var(--lf-superficie); }
 
-.trilho { height:.55cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r1);
-          margin-top:1.1cqw; display:flex; overflow:hidden; }
-.trilho i { display:block; height:100%; }
-.trilho i + i { border-left:1px solid var(--lf-fundo); }
+.quatro { display:grid; grid-template-columns:repeat(4,1fr); margin-top:auto;
+          border-top:1px solid var(--lf-fio); }
+.quatro > div { padding:.7cqw .3cqw 0; border-right:1px solid var(--lf-fio); }
+.quatro > div:last-child { border-right:0; }
+.quatro .v { font-family: var(--lf-f-titulo); font-weight:700; font-size:1.45cqw;
+             letter-spacing:-.03em; line-height:1; font-variant-numeric: tabular-nums; }
+.quatro .k { font-family: var(--lf-f-mono); font-size:.55cqw; letter-spacing:.08em;
+             text-transform:uppercase; color: var(--lf-tinta-3); margin-top:.3cqw; }
+.v-ok { color: var(--lf-ok); } .v-at { color: var(--lf-atencao); }
+.v-err { color: var(--lf-erro); } .v-off { color: var(--lf-tinta-3); }
 
-/* KPIs sem caixa: um fio separa, como manda o pacote */
-.kpis { display:grid; grid-template-columns: repeat(4,1fr);
-        border-top:1px solid var(--lf-fio); border-bottom:1px solid var(--lf-fio);
-        margin-top:1.2cqw; }
-.kpi { padding:.85cqw .9cqw .8cqw; border-right:1px solid var(--lf-fio); }
-.kpi:last-child { border-right:0; }
-.kpi .v { font-family: var(--lf-f-titulo); font-weight:700; font-size:2cqw;
-          letter-spacing:-.03em; line-height:1.05; font-variant-numeric: tabular-nums; }
-.kpi .k { font-family: var(--lf-f-mono); font-size:.62cqw; letter-spacing:.1em;
-          text-transform:uppercase; color: var(--lf-tinta-3); margin-top:.45cqw; }
-.kpi .obs { font-size:.68cqw; color: var(--lf-tinta-3); margin-top:.2cqw; }
-.kpi.ok  .v { color: var(--lf-ok); }
-.kpi.at  .v { color: var(--lf-atencao); }
-.kpi.err .v { color: var(--lf-erro); }
+/* --------------------------------------------------------- par ritmo */
+.par { display:grid; gap:.7cqw; }
+.par-item { display:grid; grid-template-columns:1fr auto; align-items:baseline;
+            gap:.5cqw; padding-bottom:.6cqw; border-bottom:1px solid var(--lf-fio-suave); }
+.par-item .t { font-size:.76cqw; color: var(--lf-tinta-2); line-height:1.3; }
+.par-item .t small { display:block; font-size:.64cqw; color: var(--lf-tinta-3); }
+.par-item .n { font-family: var(--lf-f-mono); font-size:1.3cqw; font-weight:500;
+               letter-spacing:-.02em; white-space:nowrap; }
+.alerta { background: var(--lf-erro-fundo); border:1px solid var(--lf-erro-fio);
+          border-radius: var(--lf-r2); padding:.55cqw .65cqw; margin-top:auto; }
+.alerta .t { font-size:.7cqw; color: var(--lf-erro); line-height:1.35; }
+.alerta .t b { font-family: var(--lf-f-mono); }
 
-.grafico { flex:1; min-height:0; display:flex; flex-direction:column; padding-top:1.1cqw; }
-.grafico svg { width:100%; flex:1; min-height:0; display:block; overflow:visible; }
-.eixo { fill: var(--lf-tinta-3); font-family: var(--lf-f-mono); font-size:.62cqw; }
+/* ------------------------------------------------------------ curva */
+.curva { flex:1; min-height:0; }
+.curva svg { width:100%; height:100%; display:block; }
+.eixo { fill: var(--lf-tinta-3); font-family: var(--lf-f-mono); font-size:.6cqw; }
 .malha { stroke: var(--lf-fio-suave); stroke-width:1; }
 
-/* barras da coluna da direita */
-.lista { display:grid; gap:.62cqw; }
-.linha { display:grid; grid-template-columns: 8.6cqw 1fr 5.4cqw; gap:.7cqw; align-items:center; }
-.linha .nome { font-size:.8cqw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-               color: var(--lf-tinta-2); }
-.linha .barra { height:.62cqw; background: var(--lf-serie-trilho);
+/* ------------------------------------------------------------ listas */
+.lista { display:grid; gap:.42cqw; align-content:start; overflow:hidden; }
+.item { display:grid; grid-template-columns:7.2cqw 1fr auto; gap:.55cqw; align-items:center; }
+.item .nome { font-size:.73cqw; color: var(--lf-tinta-2); white-space:nowrap;
+              overflow:hidden; text-overflow:ellipsis; }
+.item .trilho { height:.5cqw; background: var(--lf-serie-trilho);
                 border-radius: var(--lf-r1); display:flex; overflow:hidden; }
-.linha .barra i { display:block; height:100%; }
-.linha .barra i + i { border-left:1px solid var(--lf-superficie); }
-.linha .val { font-family: var(--lf-f-mono); font-size:.75cqw; text-align:right;
-              color: var(--lf-tinta-2); }
-.linha .val b { color: var(--lf-tinta); font-weight:500; }
+.item .trilho i { display:block; height:100%; }
+.item .trilho i + i { border-left:1px solid var(--lf-superficie); }
+.item .val { font-family: var(--lf-f-mono); font-size:.68cqw; color: var(--lf-tinta-3);
+             white-space:nowrap; }
+.item .val b { color: var(--lf-tinta); font-weight:500; }
 
-.bloco { padding-top:1.1cqw; margin-top:1.1cqw; border-top:1px solid var(--lf-fio); }
-.frases { display:grid; gap:.5cqw; font-size:.82cqw; color: var(--lf-tinta-2); }
-.frases b { color: var(--lf-tinta); font-weight:600; }
-.frases .mono { font-size:.8cqw; }
-.marca-estado { display:inline-flex; align-items:center; gap:.35cqw;
-  font-family: var(--lf-f-mono); font-size:.7cqw; padding:.15cqw .45cqw;
-  border-radius: var(--lf-r1); border:1px solid transparent; }
-.marca-estado.ok  { background: var(--lf-ok-fundo); border-color: var(--lf-ok-fio); color: var(--lf-ok); }
-.marca-estado.at  { background: var(--lf-atencao-fundo); border-color: var(--lf-atencao-fio); color: var(--lf-atencao); }
-.marca-estado.err { background: var(--lf-erro-fundo); border-color: var(--lf-erro-fio); color: var(--lf-erro); }
+.area { display:grid; grid-template-columns:6.2cqw 1fr 3.4cqw; gap:.55cqw;
+        align-items:center; padding:.4cqw 0; }
+.area .nome { font-size:.78cqw; color: var(--lf-tinta-2); }
+.area .trilho { height:.5cqw; background: var(--lf-serie-trilho);
+                border-radius: var(--lf-r1); overflow:hidden; }
+.area .trilho i { display:block; height:100%; background: var(--lf-ok); }
+.area .pct { font-family: var(--lf-f-mono); font-size:.9cqw; text-align:right; font-weight:500; }
 
-.rodape { display:flex; justify-content:space-between; align-items:center;
-          padding-top:.9cqw; margin-top:.3cqw; border-top:1px solid var(--lf-fio);
-          font-size:.68cqw; color: var(--lf-tinta-3); }
+.tabelinha { display:grid; grid-template-columns:1fr 1fr; gap:.3cqw 1.6cqw; overflow:hidden; }
+.tl { display:grid; grid-template-columns:1fr 3.6cqw 5.4cqw; gap:.4cqw; align-items:center;
+      font-size:.71cqw; padding-bottom:.28cqw; border-bottom:1px solid var(--lf-fio-suave); }
+.tl .e { color: var(--lf-tinta-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tl .m { font-family: var(--lf-f-mono); color: var(--lf-erro); }
+.tl .r { font-family: var(--lf-f-mono); font-size:.66cqw; color: var(--lf-tinta-3);
+         white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.destaque-num { font-family: var(--lf-f-titulo); font-weight:800; font-size:2.3cqw;
+                letter-spacing:-.04em; line-height:1; font-variant-numeric: tabular-nums; }
+.nota { font-size:.69cqw; color: var(--lf-tinta-3); margin-top:.4cqw; line-height:1.35; }
+.nota b { font-family: var(--lf-f-mono); color: var(--lf-tinta-2); }
+
+.rodape { flex:none; display:flex; justify-content:space-between; align-items:center;
+          padding:.5cqw 1.8cqw; border-top:1px solid var(--lf-fio);
+          font-size:.64cqw; color: var(--lf-tinta-3); background: var(--lf-superficie); }
 .rodape a { color: var(--lf-cyan-tinta); text-decoration:none; }
-
-.carregando { display:grid; place-items:center; height:100%; color: var(--lf-tinta-3);
-              font-size:1cqw; }
+.carregando { display:grid; place-items:center; height:100%; color: var(--lf-tinta-3); font-size:1cqw; }
 </style>
 </head>
 <body>
 
-<div class="palco" id="palco">
-  <div class="carregando">Lendo o Acessórias…</div>
-</div>
+<div class="palco" id="palco"><div class="carregando">Lendo o Acessórias…</div></div>
 
 <script src="logos.js"></script>
 <script>
@@ -182,8 +189,9 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 const nfmt = n => Number(n || 0).toLocaleString('pt-BR');
-const pctTxt = n => Number(n || 0).toLocaleString('pt-BR',
-  { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%';
+const dec = (n, d = 1) => Number(n || 0).toLocaleString('pt-BR',
+  { minimumFractionDigits: d, maximumFractionDigits: d });
+const pctTxt = n => dec(n) + '%';
 const compLongo = c => {
   const m = String(c || '').match(/([a-z]{3})\/(\d{2})/);
   return m ? `${MESES_LONGO[m[1]]} de 20${m[2]}` : c;
@@ -194,154 +202,124 @@ const ordemComp = c => {
 };
 function dataBR(iso) {
   const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return m ? `${m[3]}/${m[2]}/${m[1]}` : '—';
-}
-function diasAte(iso) {
-  if (!iso) return null;
-  const d = new Date(iso + 'T00:00:00'), h = new Date();
-  return Math.round((d - new Date(h.getFullYear(), h.getMonth(), h.getDate())) / 86400000);
+  return m ? `${m[3]}/${m[2]}` : '—';
 }
 function compAnterior(c) {
   const l = FECH.competencias.slice().sort((a, b) => ordemComp(a) - ordemComp(b));
   const i = l.indexOf(c);
   return i > 0 ? l[i - 1] : null;
 }
+const primeiroNome = n => String(n || '').split(' ').slice(0, 2).join(' ');
 
-/* ------------------------------------------------------------ dados */
+/* ------------------------------------------------------------- dados */
+async function ler() {
+  return Promise.all([
+    fetch('data/fechamento.json?ts=' + Date.now()).then(r => r.json()),
+    fetch('data/operacional.json?ts=' + Date.now()).then(r => r.json()),
+  ]);
+}
 async function carregar() {
-  try {
-    const [a, b] = await Promise.all([
-      fetch('data/fechamento.json?ts=' + Date.now()).then(r => r.json()),
-      fetch('data/operacional.json?ts=' + Date.now()).then(r => r.json()),
-    ]);
-    FECH = a; OPER = b;
-  } catch (e) {
-    $('#palco').innerHTML = `<div class="carregando">Não consegui ler os dados do Acessórias.
-      Abra o painel pelo atalho, não pelo arquivo. (${esc(e.message)})</div>`;
+  try { [FECH, OPER] = await ler(); }
+  catch (e) {
+    $('#palco').innerHTML = `<div class="carregando">Não consegui ler os dados do
+      Acessórias. Abra pelo atalho, não pelo arquivo. (${esc(e.message)})</div>`;
     return;
   }
   COMP = FECH.competencia_foco;
   desenhar();
   setInterval(relogio, 1000);
-  setInterval(recarregar, 5 * 60 * 1000);   // o arquivo é reescrito de manhã
+  setInterval(async () => {
+    try {
+      const [a, b] = await ler();
+      if (a.meta.atualizado_em === FECH.meta.atualizado_em) return;
+      FECH = a; OPER = b; desenhar();
+    } catch (e) { /* rede caiu: segue mostrando o último número lido */ }
+  }, 5 * 60 * 1000);
 }
 
-async function recarregar() {
-  try {
-    const [a, b] = await Promise.all([
-      fetch('data/fechamento.json?ts=' + Date.now()).then(r => r.json()),
-      fetch('data/operacional.json?ts=' + Date.now()).then(r => r.json()),
-    ]);
-    if (a.meta.atualizado_em === FECH.meta.atualizado_em) return;  // nada mudou
-    FECH = a; OPER = b; desenhar();
-  } catch (e) { /* rede caiu; segue mostrando o último número lido */ }
-}
-
-/* --------------------------------------------------------- desenho */
+/* ----------------------------------------------------------- desenho */
 function desenhar() {
   const b = FECH.fechamento[COMP];
   const escuro = document.documentElement.getAttribute('data-theme') === 'dark';
-  const logo = escuro ? LOGOS.larafy_branca : LOGOS.larafy;
-  const comps = FECH.competencias.slice(0, 6);
+  const comps = FECH.competencias.slice(0, 5);
 
   $('#palco').innerHTML = `
     <div class="topo">
-      <div class="topo-e">
-        <img class="logo" src="${logo}" alt="LaraFy">
-        <div class="fio-v"></div>
-        <div class="chapeu">Fechamento contábil<small>${esc(compLongo(COMP))}</small></div>
+      <img class="logo" src="${LOGOS.larafy_branca}" alt="LaraFy">
+      <div class="fio-v"></div>
+      <div class="chapeu">Fechamento contábil<small>${esc(compLongo(COMP))}</small></div>
+      <div class="filtros">
+        ${comps.map(c => `<button class="fbtn${c === COMP ? ' ativo' : ''}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}
       </div>
       <div class="topo-d">
-        <div class="vivo"><span class="ponto"></span><span class="rotulo">Acessórias</span></div>
+        <span class="vivo"><i></i>Acessórias · ${nfmt(FECH.meta.total_empresas)} empresas</span>
         <button class="btn-tema" id="btn-tema">${escuro ? 'Claro' : 'Escuro'}</button>
         <div class="relogio"><span id="hora">--:--</span><small id="hoje">—</small></div>
       </div>
     </div>
 
-    <div class="filtros">
-      ${comps.map(c => `<button class="fbtn${c === COMP ? ' ativo' : ''}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}
-      <span class="filtro-nota">${nfmt(FECH.meta.total_empresas)} empresas no Acessórias ·
-        dados de ${dataBR(String(FECH.meta.atualizado_em).slice(0, 10))}</span>
-    </div>
-
-    <div class="corpo">
-      <div class="coluna e">${colunaFechamento(b)}</div>
-      <div class="fio-col"></div>
-      <div class="coluna d">${colunaParado(b)}</div>
+    <div class="grade">
+      ${blocoFechamento(b)}
+      ${blocoRitmo(b)}
+      ${blocoCurva()}
+      ${blocoEscritorio()}
+      ${blocoPessoas(b)}
+      ${blocoArrasto()}
     </div>
 
     <div class="rodape">
-      <span>LaraFy · leitura direta da API do Acessórias</span>
+      <span>Leitura direta da API do Acessórias · atualizado
+        ${new Date(FECH.meta.atualizado_em).toLocaleString('pt-BR',
+          { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</span>
       <span><a href="index.html">Fechamento empresa a empresa</a> ·
         <a href="operacional.html">Todas as obrigações do escritório</a></span>
-    </div>
-  `;
+    </div>`;
 
   document.querySelectorAll('.fbtn').forEach(x => x.onclick = () => { COMP = x.dataset.c; desenhar(); });
   $('#btn-tema').onclick = () => {
-    const agora = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.documentElement.setAttribute('data-theme', agora ? 'light' : 'dark');
+    const e = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', e ? 'light' : 'dark');
     desenhar();
   };
   relogio();
   desenharCurva(b);
 }
 
-function colunaFechamento(b) {
-  const falta = b.total - b.concluidas;
-  const dias = diasAte(b.prazo_legal);
+/* 1 — o número do fechamento */
+function blocoFechamento(b) {
   const w = n => b.total ? (n / b.total) * 100 : 0;
+  const r = b.ritmo || {};
+  const cor = r.prazo_vencido
+    ? (b.percentual >= 95 ? 'var(--lf-ok)' : b.percentual >= 80 ? 'var(--lf-atencao)' : 'var(--lf-erro)')
+    : 'var(--lf-serie-1)';
   return `
-    <div class="secao">Empresas com o fechamento concluído</div>
-    <div class="destaque">
-      <span class="v">${pctTxt(b.percentual)}</span>
-      <span class="lado">
-        <b>${nfmt(b.concluidas)} de ${nfmt(b.total)}</b>
-        <span>faltam ${nfmt(falta)} para o mês fechar</span>
-      </span>
-    </div>
-    <div class="trilho">
-      ${b.concluidas ? `<i style="width:${w(b.concluidas)}%;background:var(--lf-ok)"></i>` : ''}
+  <div class="bloco">
+    <div class="bloco-cab"><span class="rot">Empresas com o fechamento concluído</span></div>
+    <div class="grandao" style="color:${cor}">${pctTxt(b.percentual)}</div>
+    <div class="sub-grandao"><b>${nfmt(b.concluidas)}</b> de <b>${nfmt(b.total)}</b> empresas ·
+      faltam <b>${nfmt(b.total - b.concluidas)}</b></div>
+    <div class="barra">
+      ${b.concluidas ? `<i style="width:${w(b.concluidas)}%;background:${cor}"></i>` : ''}
       ${b.atrasadas ? `<i style="width:${w(b.atrasadas)}%;background:var(--lf-erro)"></i>` : ''}
       ${b.pendentes ? `<i style="width:${w(b.pendentes)}%;background:var(--lf-atencao)"></i>` : ''}
     </div>
-
-    <div class="kpis">
-      <div class="kpi ok">
-        <div class="v">${nfmt(b.concluidas)}</div><div class="k">Concluídas</div>
-        <div class="obs">${nfmt(b.concluidas_atrasadas)} fora do prazo</div>
-      </div>
-      <div class="kpi at">
-        <div class="v">${nfmt(b.pendentes)}</div><div class="k">Pendentes</div>
-        <div class="obs">${dias === null ? '' : dias >= 0 ? `prazo em ${dias} dia${dias === 1 ? '' : 's'}` : 'prazo vencido'}</div>
-      </div>
-      <div class="kpi err">
-        <div class="v">${nfmt(b.atrasadas)}</div><div class="k">Atrasadas</div>
-        <div class="obs">${b.prazo_legal
-          ? (dias !== null && dias < 0 ? 'venceu ' : 'vence ') + dataBR(b.prazo_legal) : ''}</div>
-      </div>
-      <div class="kpi">
-        <div class="v">${nfmt(b.dispensadas)}</div><div class="k">Dispensadas</div>
-        <div class="obs">fora do total</div>
-      </div>
+    ${historicoHTML()}
+    <div class="quatro">
+      <div><div class="v v-ok">${nfmt(b.concluidas)}</div><div class="k">Concluídas</div></div>
+      <div><div class="v v-at">${nfmt(b.pendentes)}</div><div class="k">Pendentes</div></div>
+      <div><div class="v v-err">${nfmt(b.atrasadas)}</div><div class="k">Atrasadas</div></div>
+      <div><div class="v v-off">${nfmt(b.dispensadas)}</div><div class="k">Dispensadas</div></div>
     </div>
-
-    <div class="grafico">
-      <div class="secao" style="padding-top:1.1cqw">Empresas fechadas, dia a dia do ciclo</div>
-      <svg id="curva" preserveAspectRatio="none"></svg>
-    </div>`;
+  </div>`;
 }
 
-function colunaParado(b) {
-  const resp = b.por_responsavel
-    .filter(r => r.pendentes + r.atrasadas > 0)
-    .slice(0, 7);
-  const maxAberto = Math.max(1, ...resp.map(r => r.pendentes + r.atrasadas));
-  const anterior = compAnterior(COMP);
-  const bAnt = anterior ? FECH.fechamento[anterior] : null;
+/* 2 — o ritmo: o que transforma o % em decisão */
+function blocoRitmo(b) {
+  const r = b.ritmo;
+  if (!r) return '<div class="bloco"></div>';
+  const anterior = compAnterior(COMP), bAnt = anterior ? FECH.fechamento[anterior] : null;
 
-  // comparação no mesmo ponto do ciclo — a única honesta com o mês correndo
-  let ritmo = '';
+  let comparativo = '';
   if (bAnt && b.abre_em && bAnt.abre_em) {
     const dia = Math.floor((new Date() - new Date(b.abre_em + 'T00:00:00')) / 86400000);
     if (dia >= 0) {
@@ -350,127 +328,245 @@ function colunaParado(b) {
       const ate = bAnt.curva.filter(p => p.dia <= alvo);
       const ref = ate.length ? ate[ate.length - 1].percentual : 0;
       const dif = b.percentual - ref;
-      const cls = dif >= 0 ? 'ok' : 'err';
-      ritmo = `<div><span class="marca-estado ${cls}">${dif >= 0 ? 'à frente' : 'atrás'}
-        ${pctTxt(Math.abs(dif))}</span> do ritmo de ${esc(anterior)}, que no mesmo ponto
-        do ciclo tinha <b class="mono">${pctTxt(ref)}</b></div>`;
+      comparativo = `<div class="par-item">
+        <span class="t">Mesmo ponto de ${esc(anterior)}<small>${dif >= 0 ? 'estamos à frente' : 'estamos atrás'}</small></span>
+        <span class="n" style="color:${dif >= 0 ? 'var(--lf-ok)' : 'var(--lf-erro)'}">${pctTxt(ref)}</span>
+      </div>`;
     }
   }
 
-  const p = OPER ? OPER.passivo : null;
+  const falta = b.total - b.concluidas;
+  const inviavel = r.por_dia_necessario && r.por_dia && r.por_dia_necessario > r.por_dia * 2;
 
   return `
-    <div class="secao">Quem tem fechamento em aberto</div>
-    <div class="lista">
-      ${resp.map(r => {
-        const aberto = r.pendentes + r.atrasadas;
-        const larg = (aberto / maxAberto) * 100;
-        const parcAtras = aberto ? (r.atrasadas / aberto) * larg : 0;
-        return `<div class="linha">
-          <span class="nome">${esc(r.nome)}</span>
-          <span class="barra">
-            ${r.atrasadas ? `<i style="width:${parcAtras}%;background:var(--lf-erro)"></i>` : ''}
-            ${r.pendentes ? `<i style="width:${larg - parcAtras}%;background:var(--lf-atencao)"></i>` : ''}
-          </span>
-          <span class="val"><b>${nfmt(aberto)}</b> de ${nfmt(r.total)}</span>
-        </div>`;
-      }).join('') || '<div class="linha"><span class="nome">Nada em aberto</span></div>'}
-    </div>
-
-    <div class="bloco">
-      <div class="secao">Por regime</div>
-      <div class="lista">
-        ${b.por_regime.slice(0, 4).map(r => `
-          <div class="linha">
-            <span class="nome">${esc(r.regime)}</span>
-            <span class="barra"><i style="width:${r.percentual}%;background:var(--lf-serie-1)"></i></span>
-            <span class="val"><b>${pctTxt(r.percentual)}</b></span>
-          </div>`).join('')}
+  <div class="bloco">
+    <div class="bloco-cab"><span class="rot">Ritmo</span>
+      <span class="n">${r.dias_uteis_restantes} dia${r.dias_uteis_restantes === 1 ? '' : 's'} úteis</span></div>
+    <div class="par">
+      <div class="par-item">
+        <span class="t">Fechando por dia útil<small>em ${r.dias_uteis_corridos} dias desde a abertura</small></span>
+        <span class="n">${dec(r.por_dia)}</span>
       </div>
-    </div>
-
-    <div class="bloco">
-      <div class="secao">O que a gestão precisa saber</div>
-      <div class="frases">
-        ${ritmo}
-        ${b.prazo_legal ? `<div>Prazo do fechamento de ${esc(compLongo(COMP))}:
-          <b class="mono">${dataBR(b.prazo_legal)}</b></div>` : ''}
-        ${b.sem_tarefa ? `<div><b class="mono">${nfmt(b.sem_tarefa)}</b> empresas ativas não têm
-          a tarefa cadastrada nesta competência e ficam fora da conta</div>` : ''}
-        ${p ? `<div><b class="mono">${nfmt(p.total)}</b> obrigações de todas as áreas venceram e
-          seguem sem entrega — <b class="mono">${nfmt(p.com_multa)}</b> com multa prevista</div>` : ''}
+      <div class="par-item">
+        <span class="t">Precisaria por dia<small>para bater ${dataBR(b.prazo_legal)}</small></span>
+        <span class="n" style="color:${inviavel ? 'var(--lf-erro)' : 'var(--lf-tinta)'}">${
+          r.por_dia_necessario === null ? '—' : dec(r.por_dia_necessario)}</span>
       </div>
-    </div>`;
+      <div class="par-item">
+        <span class="t">No ritmo de hoje, chega em<small>até ${dataBR(b.prazo_legal)}</small></span>
+        <span class="n">${r.projecao_no_prazo === null ? '—' : pctTxt(r.projecao_no_prazo)}</span>
+      </div>
+      ${comparativo}
+    </div>
+    ${inviavel ? `<div class="alerta"><div class="t">
+      No ritmo atual, as <b>${nfmt(falta)}</b> empresas que faltam levariam
+      <b>${nfmt(r.dias_uteis_no_ritmo)}</b> dias úteis — o prazo é em
+      <b>${r.dias_uteis_restantes}</b>.</div></div>` : ''}
+  </div>`;
 }
 
-/* ---------------------------------------------------------- curva */
+/* 3 — a curva do ciclo */
+function blocoCurva() {
+  return `
+  <div class="bloco">
+    <div class="bloco-cab"><span class="rot">Empresas fechadas, dia a dia do ciclo</span>
+      <span class="n" id="leg-curva"></span></div>
+    <div class="curva"><svg id="curva" preserveAspectRatio="none"></svg></div>
+  </div>`;
+}
+
+/* 4 — o escritório inteiro, não só o fechamento */
+function blocoEscritorio() {
+  if (!OPER) return '<div class="bloco"></div>';
+  const o = OPER.por_competencia[OPER.competencia_foco];
+  if (!o) return '<div class="bloco"></div>';
+  const p = OPER.passivo;
+  const maior = Object.entries(p.por_time).sort((a, b) => b[1] - a[1])[0];
+  return `
+  <div class="bloco">
+    <div class="bloco-cab"><span class="rot">O escritório em ${esc(OPER.competencia_foco)}</span>
+      <span class="n">${nfmt(o.geral.total)} obrigações</span></div>
+    ${OPER.times.filter(t => o.times[t].total).map(t => {
+      const k = o.times[t];
+      return `<div class="area">
+        <span class="nome">${esc(OPER.nome_time[t] || t)}</span>
+        <span class="trilho"><i style="width:${k.percentual_entregues}%"></i></span>
+        <span class="pct">${pctTxt(k.percentual_entregues)}</span>
+      </div>`;
+    }).join('')}
+    ${travandoHTML(o)}
+    <div style="margin-top:auto;padding-top:.75cqw;border-top:1px solid var(--lf-fio)">
+      <span class="rot">Passivo · venceu e não foi entregue</span>
+      <div class="destaque-num" style="color:var(--lf-erro);margin-top:.3cqw">${nfmt(p.total)}</div>
+      <div class="nota"><b>${nfmt(p.com_multa)}</b> com multa prevista ·
+        maior parte no <b>${esc(maior[0])}</b> (<b>${nfmt(maior[1])}</b>)</div>
+    </div>
+  </div>`;
+}
+
+/* 5 — quem está com o fechamento em aberto */
+function blocoPessoas(b) {
+  const resp = b.por_responsavel.filter(r => r.pendentes + r.atrasadas > 0).slice(0, 11);
+  const max = Math.max(1, ...resp.map(r => r.pendentes + r.atrasadas));
+  const soma = resp.reduce((s, r) => s + r.pendentes + r.atrasadas, 0);
+  return `
+  <div class="bloco">
+    <div class="bloco-cab"><span class="rot">Fechamento em aberto, por pessoa</span>
+      <span class="n">${nfmt(soma)}</span></div>
+    <div class="lista">
+      ${resp.map(r => {
+        const ab = r.pendentes + r.atrasadas, larg = (ab / max) * 100;
+        const pAtr = ab ? (r.atrasadas / ab) * larg : 0;
+        return `<div class="item">
+          <span class="nome">${esc(primeiroNome(r.nome))}</span>
+          <span class="trilho">
+            ${r.atrasadas ? `<i style="width:${pAtr}%;background:var(--lf-erro)"></i>` : ''}
+            ${r.pendentes ? `<i style="width:${larg - pAtr}%;background:var(--lf-atencao)"></i>` : ''}
+          </span>
+          <span class="val"><b>${nfmt(ab)}</b>/${nfmt(r.total)}</span>
+        </div>`;
+      }).join('') || '<div class="item"><span class="nome">Nada em aberto</span></div>'}
+    </div>
+  </div>`;
+}
+
+/* 6 — as empresas que arrastam o fechamento há meses */
+function blocoArrasto() {
+  const lista = (FECH.arrastando || []).slice(0, 18);
+  const total = FECH.arrastando_total || 0;
+  if (!total) return '<div class="bloco"></div>';
+  const tres = (FECH.arrastando || []).filter(x => x.total_meses >= 3).length;
+  return `
+  <div class="bloco">
+    <div class="bloco-cab">
+      <span class="rot">Arrastando o fechamento há mais de um mês</span>
+      <span class="n" style="color:var(--lf-erro)">${nfmt(total)} empresas</span>
+    </div>
+    <div class="nota" style="margin:0 0 .55cqw">
+      Não é o atraso do mês: são empresas com o fechamento em aberto em
+      <b>2 ou mais competências já vencidas</b>${tres ? ` — <b>${nfmt(tres)}</b> delas há três` : ''}.
+    </div>
+    <div class="tabelinha">
+      ${lista.map(x => `<div class="tl">
+        <span class="e">${esc(x.empresa)}</span>
+        <span class="m">${x.total_meses} meses</span>
+        <span class="r">${esc(primeiroNome(x.responsavel) || '—')}</span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* Histórico curto: onde o mês fechou nas últimas competências. Dá a régua
+   sem obrigar ninguém a trocar de tela. */
+function historicoHTML() {
+  const comps = FECH.competencias
+    .filter(c => ordemComp(c) <= ordemComp(FECH.competencia_foco))
+    .slice(0, 6).reverse();
+  if (comps.length < 2) return '';
+  return `<div style="margin-top:.9cqw">
+    <span class="rot">Onde cada mês terminou</span>
+    <div style="display:flex;gap:.35cqw;align-items:flex-end;height:4.4cqw;margin-top:.5cqw">
+      ${comps.map(c => {
+        const x = FECH.fechamento[c];
+        const atual = c === COMP;
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.2cqw">
+          <span class="mono" style="font-size:.6cqw;color:var(--lf-tinta-${atual ? '2' : '3'})">${dec(x.percentual, 0)}%</span>
+          <span style="width:100%;height:${Math.max(2, (x.percentual / 100) * 34)}px;
+            background:${atual ? 'var(--lf-serie-1)' : 'var(--lf-serie-outros)'};
+            border-radius:var(--lf-r1)"></span>
+          <span class="mono" style="font-size:.56cqw;color:var(--lf-tinta-3)">${esc(c.slice(0, 3))}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+/* As obrigações que mais seguram o mês inteiro — não só o fechamento. */
+function travandoHTML(o) {
+  const top = (o.obrigacoes || []).filter(x => x.atrasadas + x.pendentes > 0).slice(0, 3);
+  if (!top.length) return '';
+  const max = Math.max(1, ...top.map(x => x.atrasadas + x.pendentes));
+  return `<div style="margin-top:.85cqw;padding-top:.75cqw;border-top:1px solid var(--lf-fio)">
+    <span class="rot">O que mais segura o mês</span>
+    <div class="lista" style="margin-top:.45cqw">
+      ${top.map(x => {
+        const ab = x.atrasadas + x.pendentes, larg = (ab / max) * 100;
+        const pAtr = ab ? (x.atrasadas / ab) * larg : 0;
+        return `<div class="item" style="grid-template-columns:8.4cqw 1fr auto">
+          <span class="nome" title="${esc(x.obrigacao)}">${esc(x.obrigacao)}</span>
+          <span class="trilho">
+            ${x.atrasadas ? `<i style="width:${pAtr}%;background:var(--lf-erro)"></i>` : ''}
+            ${x.pendentes ? `<i style="width:${larg - pAtr}%;background:var(--lf-atencao)"></i>` : ''}
+          </span>
+          <span class="val"><b>${nfmt(ab)}</b></span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+/* ------------------------------------------------------------ curva */
 function desenharCurva(b) {
   const svg = document.getElementById('curva');
   if (!svg) return;
   const caixa = svg.parentElement.getBoundingClientRect();
-  const W = Math.max(300, caixa.width), H = Math.max(120, caixa.height - 4);
-  const M = { t: 10, r: 44, b: 20, l: 34 };
+  const W = Math.max(300, caixa.width), H = Math.max(90, caixa.height);
+  const M = { t: 12, r: 92, b: 18, l: 30 };   // cabe 'jun/26 53,4%' sem cortar
 
   const serie = bloco => {
     if (!bloco || !bloco.curva.length) return [];
-    const base = bloco.abre_em || bloco.curva[0].dia;
-    const t0 = new Date(base + 'T00:00:00');
+    const t0 = new Date((bloco.abre_em || bloco.curva[0].dia) + 'T00:00:00');
     return bloco.curva.map(p => ({
-      x: Math.round((new Date(p.dia + 'T00:00:00') - t0) / 86400000),
-      y: p.percentual,
-    }));
+      x: Math.round((new Date(p.dia + 'T00:00:00') - t0) / 86400000), y: p.percentual }));
   };
   const anterior = compAnterior(COMP);
   const sA = serie(b), sB = serie(anterior ? FECH.fechamento[anterior] : null);
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const leg = document.getElementById('leg-curva');
+  if (leg) leg.textContent = anterior ? `${anterior} tracejado` : '';
 
   if (!sA.length && !sB.length) {
-    svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" class="eixo">
-      Nenhuma empresa fechada até agora nesta competência</text>`;
+    svg.innerHTML = `<text x="${W/2}" y="${H/2}" text-anchor="middle" class="eixo">
+      Nenhuma empresa fechada até agora</text>`;
     return;
   }
-
   const maxX = Math.max(1, ...sA.map(p => p.x), ...sB.map(p => p.x));
   const minX = Math.min(0, ...sA.map(p => p.x), ...sB.map(p => p.x));
   const maxY = Math.max(20, Math.ceil(Math.max(...sA.map(p => p.y), ...sB.map(p => p.y), 0) / 20) * 20);
   const px = x => M.l + ((x - minX) / (maxX - minX)) * (W - M.l - M.r);
   const py = y => H - M.b - (y / maxY) * (H - M.t - M.b);
-  const dLinha = s => s.map((p, i) => (i ? 'L' : 'M') + px(p.x).toFixed(1) + ' ' + py(p.y).toFixed(1)).join(' ');
+  const dl = s => s.map((p, i) => (i ? 'L' : 'M') + px(p.x).toFixed(1) + ' ' + py(p.y).toFixed(1)).join(' ');
   const hoje = b.abre_em
     ? Math.floor((new Date() - new Date(b.abre_em + 'T00:00:00')) / 86400000) : null;
-
-  const ticks = [];
-  for (let v = 0; v <= maxY; v += maxY / 2) ticks.push(v);
+  const ponta = (s, cor, nome) => {
+    const u = s[s.length - 1];
+    return `<circle cx="${px(u.x)}" cy="${py(u.y)}" r="3" fill="${cor}"/>
+      <text x="${px(u.x)+6}" y="${py(u.y)+3.5}" class="eixo" fill="${cor}">${esc(nome)} ${pctTxt(u.y)}</text>`;
+  };
 
   svg.innerHTML = `
-    ${ticks.map(v => `<line class="malha" x1="${M.l}" x2="${W - M.r}" y1="${py(v)}" y2="${py(v)}"/>
-      <text class="eixo" x="${M.l - 6}" y="${py(v) + 4}" text-anchor="end">${v}%</text>`).join('')}
-    <text class="eixo" x="${px(0)}" y="${H - M.b + 14}" text-anchor="middle">abertura</text>
-    <text class="eixo" x="${px(maxX)}" y="${H - M.b + 14}" text-anchor="end">dia ${maxX}</text>
+    ${[0, maxY/2, maxY].map(v => `
+      <line class="malha" x1="${M.l}" x2="${W-M.r}" y1="${py(v)}" y2="${py(v)}"/>
+      <text class="eixo" x="${M.l-5}" y="${py(v)+3.5}" text-anchor="end">${v}%</text>`).join('')}
+    <text class="eixo" x="${px(0)}" y="${H-M.b+12}" text-anchor="middle">abertura</text>
+    <text class="eixo" x="${px(maxX)}" y="${H-M.b+12}" text-anchor="end">dia ${maxX}</text>
     ${hoje !== null && hoje >= 0 && hoje <= maxX ? `
-      <line x1="${px(hoje)}" x2="${px(hoje)}" y1="${M.t}" y2="${H - M.b}"
+      <line x1="${px(hoje)}" x2="${px(hoje)}" y1="${M.t}" y2="${H-M.b}"
             stroke="var(--lf-tinta-3)" stroke-width="1"/>
-      <text class="eixo" x="${px(hoje)}" y="${M.t - 1}" text-anchor="middle">hoje</text>` : ''}
-    ${sB.length ? `<path d="${dLinha(sB)}" fill="none" stroke="var(--lf-serie-outros)"
-        stroke-width="2" stroke-dasharray="4 4"/>` : ''}
-    ${sA.length ? `<path d="${dLinha(sA)}" fill="none" stroke="var(--lf-serie-1)" stroke-width="2.5"/>` : ''}
-    ${sB.length ? rotulo(sB, 'var(--lf-serie-outros)', anterior, px, py) : ''}
-    ${sA.length ? rotulo(sA, 'var(--lf-serie-1)', COMP, px, py) : ''}`;
+      <text class="eixo" x="${px(hoje)}" y="${M.t-2}" text-anchor="middle">hoje</text>` : ''}
+    ${sB.length ? `<path d="${dl(sB)}" fill="none" stroke="var(--lf-serie-outros)"
+        stroke-width="1.8" stroke-dasharray="4 4"/>` : ''}
+    ${sA.length ? `<path d="${dl(sA)}" fill="none" stroke="var(--lf-serie-1)" stroke-width="2.4"/>` : ''}
+    ${sB.length ? ponta(sB, 'var(--lf-serie-outros)', anterior) : ''}
+    ${sA.length ? ponta(sA, 'var(--lf-serie-1)', COMP) : ''}`;
 }
 
-function rotulo(s, cor, nome, px, py) {
-  const u = s[s.length - 1];
-  return `<circle cx="${px(u.x)}" cy="${py(u.y)}" r="3.5" fill="${cor}"/>
-    <text x="${px(u.x) + 7}" y="${py(u.y) + 4}" class="eixo" fill="${cor}">${esc(nome)}</text>`;
-}
-
-/* --------------------------------------------------------- relógio */
 function relogio() {
   const h = document.getElementById('hora'), d = document.getElementById('hoje');
   if (!h) return;
   const a = new Date();
-  h.textContent = a.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  d.textContent = a.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  h.textContent = a.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  d.textContent = a.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
 }
 
 let t;

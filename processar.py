@@ -180,6 +180,63 @@ def regime_de(linha):
     return SIGLA_REGIME.get(resto, resto.upper() or "Sem regime")
 
 
+def dias_uteis(de, ate):
+    """Conta segunda a sexta entre duas datas (fim incluso).
+
+    Não considera feriado: o painel diz "dias úteis" e essa é a conta que o
+    time faz de cabeça. Feriado faria o número parecer mais preciso do que é.
+    """
+    if not de or not ate or ate < de:
+        return 0
+    n, d = 0, de
+    while d <= ate:
+        if d.weekday() < 5:
+            n += 1
+        d += dt.timedelta(days=1)
+    return n
+
+
+def bloco_ritmo(alvo, curva, abre_em, prazo, total, concluidas):
+    """Quanto o time anda por dia, quanto precisaria andar, e onde isso termina.
+
+    É o que transforma "12,9%" em decisão: no ritmo de agora o mês fecha em
+    quanto, e quantas empresas por dia útil faltam para bater o prazo.
+    """
+    hoje = dt.date.today()
+    d_abre = data_iso(abre_em)
+    d_prazo = data_iso(prazo)
+    if not d_abre:
+        return None
+
+    uteis_corridos = dias_uteis(d_abre, min(hoje, d_prazo or hoje))
+    uteis_restantes = dias_uteis(hoje + dt.timedelta(days=1), d_prazo) if d_prazo else 0
+    falta = total - concluidas
+
+    por_dia = round(concluidas / uteis_corridos, 1) if uteis_corridos > 0 else 0.0
+    preciso = round(falta / uteis_restantes, 1) if uteis_restantes > 0 else None
+
+    # onde o mês termina mantendo exatamente o ritmo atual
+    projecao = None
+    if por_dia > 0 and uteis_restantes > 0:
+        projecao = min(100.0, pct(concluidas + por_dia * uteis_restantes, total))
+    elif d_prazo and hoje > d_prazo:
+        projecao = pct(concluidas, total)
+
+    # quantos dias úteis ainda faltariam no ritmo atual, mesmo passando do prazo
+    dias_no_ritmo = int(round(falta / por_dia)) if por_dia > 0 and falta > 0 else None
+
+    return {
+        "dias_uteis_corridos": uteis_corridos,
+        "dias_uteis_restantes": uteis_restantes,
+        "por_dia": por_dia,
+        "por_dia_necessario": preciso,
+        "projecao_no_prazo": projecao,
+        "dias_uteis_no_ritmo": dias_no_ritmo,
+        "prazo_vencido": bool(d_prazo and hoje > d_prazo),
+        "melhor_dia": max(curva, key=lambda p: p["no_dia"]) if curva else None,
+    }
+
+
 def bloco_fechamento(linhas, competencias, empresas_ativas=None):
     fech = [a for a in linhas if RE_FECHAMENTO.match(sem_acento(a["obrigacao"]))]
     apoio = [a for a in linhas if sem_acento(a["obrigacao"]).upper() in APOIO]
@@ -293,6 +350,8 @@ def bloco_fechamento(linhas, competencias, empresas_ativas=None):
             "percentual_atrasadas": pct(len(atrasadas), total),
             "prazo_legal": max(prazos) if prazos else "",
             "curva": curva,
+            "ritmo": bloco_ritmo(alvo, curva, min(tecnicos) if tecnicos else "",
+                                 max(prazos) if prazos else "", total, len(concluidas)),
             "por_responsavel": ranking,
             "por_regime": regimes,
             "apoio": ap,
@@ -533,9 +592,33 @@ def main():
 
     os.makedirs(DIR_DATA, exist_ok=True)
 
+    # Empresas arrastando o fechamento por mais de uma competência. Dentro de
+    # um mês só, todas têm o mesmo prazo e "há quantos dias está parada" não
+    # separa ninguém; o que separa é quantos meses a empresa acumula em aberto.
+    arrastando = defaultdict(lambda: {"meses": [], "responsavel": "", "regime": "",
+                                      "empresa": "", "cnpj": ""})
+    # só competências que o time já deveria ter fechado: o mês corrente ainda
+    # está no prazo e contá-lo transformaria trabalho normal em "atraso".
+    for comp in [c for c in comps_fech if ordem_comp(c) <= ordem_comp(foco)]:
+        for e in fechamento[comp]["empresas"]:
+            if e["entregue"]:
+                continue
+            r = arrastando[e["cnpj"]]
+            r["empresa"], r["cnpj"] = e["empresa"], e["cnpj"]
+            r["responsavel"] = e["responsavel"] or r["responsavel"]
+            r["regime"] = e["regime"]
+            r["meses"].append(comp)
+    atrasadas_multi = sorted(
+        [dict(v, total_meses=len(v["meses"]),
+              meses=sorted(v["meses"], key=ordem_comp))
+         for v in arrastando.values() if len(v["meses"]) > 1],
+        key=lambda x: (-x["total_meses"], x["empresa"]))
+
     with open(os.path.join(DIR_DATA, "fechamento.json"), "w", encoding="utf-8") as f:
         json.dump({"meta": meta, "competencia_foco": foco,
-                   "competencias": comps_fech, "fechamento": fechamento},
+                   "competencias": comps_fech, "fechamento": fechamento,
+                   "arrastando": atrasadas_multi[:40],
+                   "arrastando_total": len(atrasadas_multi)},
                   f, ensure_ascii=False)
 
     operacional = bloco_operacional(linhas, comps, foco)
