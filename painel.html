@@ -9,15 +9,15 @@
 <link rel="stylesheet" href="larafy-tokens.css">
 <style>
 /* ============================================================
-   Fechamento contábil — painel único de controladoria.
+   Fechamento contábil — painel de parede.
 
-   Duas zonas, não uma grade: à esquerda a narrativa do fechamento
-   (situação → ritmo → curva → áreas), à direita o que precisa de
-   atuação hoje. O que separa as regiões é fio de 1px, espaço e
-   tipografia — não caixa.
+   Regra que rege esta tela: ela é lida de longe, de relance, por
+   quem não vai parar para estudar número. Por isso são poucos
+   blocos, cada um grande, e quase nada de texto corrido: o que
+   comunica é o tamanho do número, a barra e a curva.
 
-   16:9 sem rolagem, medidas em cqw para escalar de 1366×768 até
-   projeção em TV. Cores, fontes e medidas vêm de larafy-tokens.css.
+   16:9 sem rolagem, tudo em cqw para escalar do notebook à TV.
+   Cores, fontes e medidas saem de larafy-tokens.css.
    ============================================================ */
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -32,165 +32,111 @@ body {
   container-type: size; background: var(--lf-fundo);
   display:flex; flex-direction:column; overflow:hidden;
 }
-
-/* mono só em número, data e competência; texto corrido nunca */
 .d { font-family: var(--lf-f-mono); font-variant-numeric: tabular-nums; }
-.tit { font-family: var(--lf-f-titulo); letter-spacing: var(--lf-aperto-titulo); }
-
-/* título de seção: frase, sem caixa alta */
-.secao { font-size:.92cqw; font-weight:600; color: var(--lf-tinta); }
-.secao span { font-weight:400; color: var(--lf-tinta-3); }
+.rot { font-size:.82cqw; font-weight:600; color: var(--lf-tinta-2); }
+.rot span { font-weight:400; color: var(--lf-tinta-3); }
 
 /* ------------------------------------------------------- cabeçalho */
-.topo {
-  flex:none; background: var(--lf-navy); color:#fff;
-  display:flex; align-items:center; gap:1.5cqw; padding:0 1.7cqw; height:4.4cqw;
-}
-.logo { height:1.85cqw; width:auto; display:block; }
-.topo h1 { font-family: var(--lf-f-titulo); font-weight:700; font-size:1.15cqw;
+.topo { flex:none; background: var(--lf-navy); color:#fff; display:flex;
+        align-items:center; gap:1.4cqw; padding:0 1.8cqw; height:4.6cqw; }
+.logo { height:2cqw; width:auto; display:block; }
+.topo h1 { font-family: var(--lf-f-titulo); font-weight:700; font-size:1.2cqw;
            letter-spacing:-.03em; white-space:nowrap; }
 .topo h1 em { font-style:normal; font-weight:400; color:#9dbccc; }
-
-.comp-nav { display:flex; align-items:center; gap:.15cqw; }
-.comp-seta {
-  background:transparent; border:0; color:#9dbccc; cursor:pointer;
-  font-size:1cqw; line-height:1; padding:.25cqw .4cqw; border-radius: var(--lf-r1);
-}
+.comp-nav { display:flex; align-items:center; gap:.2cqw; }
+.comp-seta { background:transparent; border:0; color:#9dbccc; cursor:pointer;
+             font-size:1.05cqw; line-height:1; padding:.25cqw .45cqw; border-radius: var(--lf-r1); }
 .comp-seta:hover:not(:disabled) { color:#fff; background: rgba(255,255,255,.1); }
-.comp-seta:disabled { opacity:.28; cursor:default; }
-.comp-atual {
-  font-family: var(--lf-f-mono); font-size:.82cqw; color:#fff; min-width:4.4cqw;
-  text-align:center; border-bottom:2px solid var(--lf-cyan); padding-bottom:.15cqw;
-}
-
+.comp-seta:disabled { opacity:.25; cursor:default; }
+.comp-atual { font-family: var(--lf-f-mono); font-size:.86cqw; color:#fff; min-width:4.6cqw;
+              text-align:center; border-bottom:2px solid var(--lf-cyan); padding-bottom:.15cqw; }
 .fonte { margin-left:auto; display:flex; align-items:center; gap:.6cqw;
-         font-size:.72cqw; color:#9dbccc; white-space:nowrap; }
-.fonte .d { color:#d7e6ee; }
-.fonte .pt { width:.42cqw; height:.42cqw; border-radius:50%; background: var(--lf-cyan); flex:none; }
-.fonte.velha .pt { background: var(--lf-erro); }
-.fonte.velha { color:#ffc9c2; }
-.btn-tema {
-  background:transparent; border:1px solid rgba(255,255,255,.24); color:#9dbccc;
-  font-family: var(--lf-f-texto); font-size:.7cqw; border-radius: var(--lf-r2);
-  padding:.25cqw .6cqw; cursor:pointer;
-}
-.btn-tema:hover { color:#fff; border-color:#fff; }
+         font-size:.74cqw; color:#9dbccc; white-space:nowrap; }
+.fonte .pt { width:.44cqw; height:.44cqw; border-radius:50%; background: var(--lf-cyan); flex:none; }
+.fonte.velha { color:#ffc9c2; } .fonte.velha .pt { background: var(--lf-erro); }
+.btn-tv { background:transparent; border:1px solid rgba(255,255,255,.24); color:#9dbccc;
+          font-family: var(--lf-f-texto); font-size:.72cqw; border-radius: var(--lf-r2);
+          padding:.28cqw .65cqw; cursor:pointer; }
+.btn-tv:hover { color:#fff; border-color:#fff; }
 :focus-visible { outline:2px solid var(--lf-cyan); outline-offset:2px; }
-
-/* Em tela cheia numa TV, o ponteiro parado no meio do painel fica na frente
-   do dado o dia inteiro. Ele volta assim que alguém mexe no mouse. */
 .palco.sem-ponteiro, .palco.sem-ponteiro * { cursor:none; }
 
-/* ------------------------------------------------------------ corpo */
-.corpo { flex:1; min-height:0; display:grid; grid-template-columns: 1fr 1px 33.5cqw; }
-.divisor { background: var(--lf-fio); }
-.principal, .acao { min-height:0; display:flex; flex-direction:column; overflow:hidden; }
-.principal { padding:1.2cqw 1.7cqw .9cqw; }
-.acao { padding:1.2cqw 1.7cqw .9cqw; }
-.principal > section + section { border-top:1px solid var(--lf-fio);
-  margin-top:.95cqw; padding-top:.95cqw; }
-.acao > section + section { border-top:1px solid var(--lf-fio);
-  margin-top:.72cqw; padding-top:.72cqw; }
+/* --------------------------------------------------------- estrutura */
+.corpo { flex:1; min-height:0; display:grid; grid-template-columns:30cqw 1fr;
+         grid-template-rows:1fr auto; }
+.bloco { padding:1.5cqw 1.9cqw; min-height:0; display:flex; flex-direction:column; }
+.bl-num { border-right:1px solid var(--lf-fio); }
+.bl-curva { min-width:0; }
+.rodape-blocos { grid-column:1 / -1; border-top:1px solid var(--lf-fio);
+                 display:grid; grid-template-columns:30cqw 1fr; }
 
-/* ---------------------------------------------- situação (narrativa) */
-.situacao { display:grid; grid-template-columns:auto 1fr; gap:1.7cqw; align-items:start; }
-.pct { font-family: var(--lf-f-titulo); font-weight:800; font-size:4.4cqw;
-       line-height:.84; letter-spacing:-.045em; font-variant-numeric: tabular-nums; }
-.pct-cap { font-size:.76cqw; color: var(--lf-tinta-3); margin-top:.4cqw; max-width:9cqw; }
-.frase { font-size:1cqw; line-height:1.5; color: var(--lf-tinta-2); }
-.frase b { font-family: var(--lf-f-mono); color: var(--lf-tinta); font-weight:500; }
-.frase .risco { color: var(--lf-erro); font-weight:600; }
-.frase .bom { color: var(--lf-ok); font-weight:600; }
+/* ------------------------------------------------- o número principal */
+.gigante { font-family: var(--lf-f-titulo); font-weight:800; font-size:8.2cqw;
+           line-height:.8; letter-spacing:-.05em; font-variant-numeric: tabular-nums; }
+.sub { font-size:1.05cqw; color: var(--lf-tinta-2); margin-top:.9cqw; }
+.sub b { font-family: var(--lf-f-mono); color: var(--lf-tinta); font-weight:500; }
 
-.estados { display:flex; gap:1.6cqw; margin-top:.7cqw; }
-.estado { display:flex; align-items:baseline; gap:.35cqw; font-size:.74cqw; color: var(--lf-tinta-3); }
-.estado b { font-family: var(--lf-f-mono); font-size:1cqw; font-weight:500; }
-.e-ok b { color: var(--lf-ok); } .e-at b { color: var(--lf-atencao); }
-.e-er b { color: var(--lf-erro); } .e-of b { color: var(--lf-tinta-3); }
+.barrona { height:1.1cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r2);
+           display:flex; overflow:hidden; margin-top:1.1cqw; }
+.barrona i { display:block; height:100%; }
+.barrona i + i { border-left:2px solid var(--lf-fundo); }
 
-.progresso { height:.4cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r1);
-             display:flex; overflow:hidden; margin-top:.65cqw; }
-.progresso i { display:block; height:100%; }
-.progresso i + i { border-left:1px solid var(--lf-superficie); }
+.tres { display:grid; grid-template-columns:repeat(3,1fr); gap:1cqw; margin-top:1.5cqw; }
+.tres .v { font-family: var(--lf-f-titulo); font-weight:700; font-size:2.6cqw;
+           line-height:1; letter-spacing:-.035em; font-variant-numeric: tabular-nums; }
+.tres .k { font-size:.76cqw; color: var(--lf-tinta-3); margin-top:.35cqw; }
+.c-ok { color: var(--lf-ok); } .c-at { color: var(--lf-atencao); } .c-er { color: var(--lf-erro); }
 
-/* -------------------------------------------------- ritmo e projeção */
-.ritmo-grade { display:grid; grid-template-columns:auto auto auto auto 1fr; gap:1.8cqw;
-               align-items:end; margin-top:.6cqw; }
-.medida .n { font-family: var(--lf-f-mono); font-size:1.55cqw; font-weight:500;
-             letter-spacing:-.02em; line-height:1; }
-.medida .l { font-size:.7cqw; color: var(--lf-tinta-3); margin-top:.28cqw; line-height:1.32; }
-.medida.alvo .n { color: var(--lf-erro); }
-.medida.seta .n { color: var(--lf-tinta-3); font-size:1cqw; }
-.veredito { font-size:.78cqw; line-height:1.45; color: var(--lf-erro);
-            border-left:2px solid var(--lf-erro); padding-left:.7cqw; align-self:center; }
-.veredito.ok { color: var(--lf-ok); border-left-color: var(--lf-ok); }
-.veredito b { font-family: var(--lf-f-mono); }
+/* ritmo: duas barras comparáveis, não texto */
+.ritmo { margin-top:auto; padding-top:1.3cqw; border-top:1px solid var(--lf-fio); }
+.rit-linha { display:grid; grid-template-columns:4.6cqw 1fr; gap:.8cqw;
+             align-items:center; margin-top:.7cqw; }
+.rit-linha .n { font-family: var(--lf-f-mono); font-size:1.5cqw; font-weight:500;
+                text-align:right; line-height:1; }
+.rit-linha .bar { height:.85cqw; border-radius: var(--lf-r1); }
+.rit-linha .leg { grid-column:2; font-size:.74cqw; color: var(--lf-tinta-3); margin-top:-.15cqw; }
 
-/* ----------------------------------------------------------- gráfico */
-.grafico { flex:1; min-height:0; display:flex; flex-direction:column; }
-.grafico .tela { flex:1; min-height:0; margin-top:.45cqw; }
-.grafico svg { width:100%; height:100%; display:block; }
-.eixo { fill: var(--lf-tinta-3); font-family: var(--lf-f-mono); font-size:.62cqw; }
+/* ------------------------------------------------------------- curva */
+.curva { flex:1; min-height:0; margin-top:.7cqw; }
+.curva svg { width:100%; height:100%; display:block; }
+.eixo { fill: var(--lf-tinta-3); font-family: var(--lf-f-mono); font-size:.7cqw; }
 .malha { stroke: var(--lf-fio-suave); stroke-width:1; }
-.marca-linha { stroke: var(--lf-tinta-3); stroke-width:1; }
-.rot-curva { font-family: var(--lf-f-mono); font-size:.68cqw; }
+.marca { stroke: var(--lf-tinta-3); stroke-width:1; }
+.rot-curva { font-family: var(--lf-f-mono); font-size:.78cqw; }
 
-/* ------------------------------------------------------------- áreas */
-.areas { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5cqw; margin-top:.5cqw; }
-.area .cab { display:flex; align-items:baseline; justify-content:space-between; gap:.5cqw; }
-.area .nome { font-size:.78cqw; color: var(--lf-tinta-2); }
-.area .pc { font-family: var(--lf-f-mono); font-size:1cqw; font-weight:500; }
-.area .trilho { height:.3cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r1);
-                margin:.35cqw 0 .28cqw; overflow:hidden; }
-.area .trilho i { display:block; height:100%; background: var(--lf-ok); }
-.area .det { font-size:.68cqw; color: var(--lf-tinta-3); }
-.area .det b { font-family: var(--lf-f-mono); font-weight:400; }
-.area .det .er { color: var(--lf-erro); }
+/* -------------------------------------------- barras de quem segura */
+.pessoas { display:grid; gap:.75cqw; margin-top:.85cqw; }
+.p-linha { display:grid; grid-template-columns:8.5cqw 1fr 3.4cqw; gap:1cqw; align-items:center; }
+.p-nome { font-size:1cqw; color: var(--lf-tinta-2); white-space:nowrap;
+          overflow:hidden; text-overflow:ellipsis; }
+.p-bar { height:1.35cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r1);
+         display:flex; overflow:hidden; }
+.p-bar i { display:block; height:100%; }
+.p-bar i + i { border-left:2px solid var(--lf-fundo); }
+.p-val { font-family: var(--lf-f-mono); font-size:1.15cqw; font-weight:500;
+         text-align:right; color: var(--lf-tinta); }
 
-/* ------------------------------------------------ coluna de atuação */
-.alertas { display:grid; margin-top:.4cqw; }
-.alerta { display:grid; grid-template-columns:3.4cqw 1fr; gap:.7cqw; align-items:baseline;
-          padding:.4cqw 0; border-bottom:1px solid var(--lf-fio-suave); }
-.alerta:last-child { border-bottom:0; }
-.alerta .q { font-family: var(--lf-f-mono); font-size:1.1cqw; font-weight:500;
-             text-align:right; line-height:1.1; letter-spacing:-.02em; }
-.alerta .t { font-size:.76cqw; line-height:1.4; color: var(--lf-tinta-2); }
-.alerta .t b { color: var(--lf-tinta); font-weight:600; }
-.a-er .q { color: var(--lf-erro); } .a-at .q { color: var(--lf-atencao); }
-.a-nt .q { color: var(--lf-tinta-3); }
+/* --------------------------------------------- histórico e destaques */
+.meses { display:flex; gap:.6cqw; align-items:flex-end; height:5.4cqw; margin-top:.8cqw; }
+.mes { flex:1; display:flex; flex-direction:column; align-items:center; gap:.3cqw; }
+.mes .p { font-family: var(--lf-f-mono); font-size:.76cqw; color: var(--lf-tinta-3); }
+.mes .b { width:100%; border-radius: var(--lf-r1) var(--lf-r1) 0 0; }
+.mes .m { font-family: var(--lf-f-mono); font-size:.72cqw; color: var(--lf-tinta-3); }
+.mes.atual .p { color: var(--lf-tinta); }
 
-/* tabelas operacionais: sem zebra, número à direita, fio fino */
-table.op { width:100%; border-collapse:collapse; margin-top:.4cqw; table-layout:fixed; }
-table.op th {
-  font-size:.66cqw; font-weight:500; color: var(--lf-tinta-3); text-align:left;
-  padding:0 .3cqw .28cqw 0; border-bottom:1px solid var(--lf-fio); white-space:nowrap;
-}
-table.op th.n, table.op td.n { text-align:right; padding-right:.55cqw; }
-table.op th:last-child, table.op td:last-child { padding-right:0; }
-table.op td {
-  font-size:.74cqw; padding:.32cqw .3cqw .32cqw 0;
-  border-bottom:1px solid var(--lf-fio-suave); color: var(--lf-tinta-2);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-table.op td.n { font-family: var(--lf-f-mono); font-variant-numeric: tabular-nums; }
-table.op td.forte { color: var(--lf-tinta); }
-table.op td .er { color: var(--lf-erro); font-weight:500; }
-table.op td .at { color: var(--lf-atencao); font-weight:500; }
-table.op tr:last-child td { border-bottom:0; }
-.mini { height:.32cqw; background: var(--lf-serie-trilho); border-radius: var(--lf-r1);
-        display:flex; overflow:hidden; }
-.mini i { display:block; height:100%; }
-.mini i + i { border-left:1px solid var(--lf-superficie); }
-.legenda { font-size:.66cqw; color: var(--lf-tinta-3); display:flex; gap:.9cqw; margin-top:.3cqw; }
-.legenda i { display:inline-block; width:.5cqw; height:.5cqw; border-radius:1px;
-             margin-right:.25cqw; vertical-align:middle; }
+.destaques { display:grid; grid-template-columns:repeat(3,1fr); align-items:center; }
+.dest { padding:0 1.9cqw; border-left:1px solid var(--lf-fio); }
+.dest:first-child { border-left:0; }
+.dest .v { font-family: var(--lf-f-titulo); font-weight:800; font-size:3.1cqw;
+           line-height:1; letter-spacing:-.04em; font-variant-numeric: tabular-nums; }
+.dest .k { font-size:.82cqw; color: var(--lf-tinta-2); margin-top:.4cqw; line-height:1.35; }
+.dest .k b { color: var(--lf-tinta); font-weight:600; }
 
-.rodape { flex:none; display:flex; justify-content:space-between; align-items:center;
-          padding:.42cqw 1.7cqw; border-top:1px solid var(--lf-fio);
-          font-size:.66cqw; color: var(--lf-tinta-3); background: var(--lf-superficie); }
-.rodape a { color: var(--lf-cyan-tinta); text-decoration:none; }
-.rodape a:hover { text-decoration:underline; }
-.carregando { display:grid; place-items:center; height:100%; color: var(--lf-tinta-3); font-size:1cqw; }
+.aviso-topo { flex:none; background: var(--lf-erro-fundo); color: var(--lf-erro);
+              border-bottom:1px solid var(--lf-erro-fio); padding:.5cqw 1.9cqw;
+              font-size:.8cqw; display:flex; gap:.6cqw; align-items:center; }
+.aviso-topo b { font-family: var(--lf-f-mono); }
+.carregando { display:grid; place-items:center; height:100%; color: var(--lf-tinta-3); font-size:1.1cqw; }
 </style>
 </head>
 <body>
@@ -224,33 +170,13 @@ const dataBR = iso => {
   const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
   return m ? `${m[3]}/${m[2]}` : '—';
 };
-const nomeCurto = n => String(n || '').split(' ').slice(0, 2).join(' ');
-
-/* "mai/26 jun/26 jul/26" não cabe e trunca; "mai jun jul" cabe e diz o mesmo.
-   O ano volta quando a sequência cruza de um ano para o outro. */
-function mesesCurtos(lista) {
-  const anos = new Set(lista.map(c => c.slice(-2)));
-  return anos.size > 1 ? lista.join(' ') : lista.map(c => c.slice(0, 3)).join(' ');
+function primeiroNome(n) {
+  const t = String(n || '').trim();
+  if (!t) return '—';
+  if (/^sem respons/i.test(t)) return 'Sem responsável';
+  const [a, b] = t.split(' ');
+  return b ? `${a} ${b[0]}.` : a;
 }
-
-/* O nome da obrigação vem do Acessórias e não é alterado — só encurtado para
-   caber na coluna. Duas obrigações diferentes não podem virar o mesmo texto:
-   "DECLARAÇÃO ELETRONICA DE SERVIÇOS PRESTADOS" e "... TOMADOS" ficavam
-   idênticas ao cortar pelo fim. Por isso o que se abrevia é o começo. */
-const ABREV = {
-  'DECLARAÇÃO':'DECL.', 'ELETRONICA':'ELETR.', 'ELETRÔNICA':'ELETR.',
-  'SERVIÇOS':'SERV.', 'DEMONSTRATIVO':'DEMONST.', 'CONTRIBUIÇÕES':'CONTRIB.',
-  'APURAÇÃO':'APUR.', 'PREFEITURAS':'PREFEIT.', 'NACIONAL':'NAC.',
-  'ANTECIPAÇÃO':'ANTECIP.', 'ESCRITURAÇÃO':'ESCRIT.', 'LIBERAÇÕES':'LIBER.',
-};
-function obrigacaoCurta(nome, limite = 30) {
-  const t = String(nome || '');
-  if (t.length <= limite) return t;
-  const curto = t.split(' ').map(w => ABREV[w] || w).join(' ');
-  return curto.length <= limite ? curto : curto.slice(0, limite - 1) + '…';
-}
-const empresaCurta = n => String(n || '')
-  .replace(/\s+(LTDA|S\/A|S\.A\.?|EIRELI|ME|EPP)\b\.?/gi, '').trim();
 
 function compVizinha(c, passo) {
   const l = FECH.competencias.slice().sort((a, b) => ordemComp(a) - ordemComp(b));
@@ -258,28 +184,11 @@ function compVizinha(c, passo) {
   return (i >= 0 && i + passo >= 0 && i + passo < l.length) ? l[i + passo] : null;
 }
 
-/* Onde a competência anterior estava no MESMO ponto do ciclo. É a única
-   comparação honesta enquanto o mês corre: o resultado final do mês passado
-   não serve de alvo no dia 12. */
-function refAnterior(b) {
-  const ant = compVizinha(COMP, -1);
-  const bAnt = ant ? FECH.fechamento[ant] : null;
-  if (!bAnt || !b.abre_em || !bAnt.abre_em) return null;
-  const dia = Math.floor((Date.now() - new Date(b.abre_em + 'T00:00:00')) / 86400000);
-  if (dia < 0) return null;
-  const alvo = new Date(new Date(bAnt.abre_em + 'T00:00:00').getTime() + dia * 86400000)
-    .toISOString().slice(0, 10);
-  const ate = bAnt.curva.filter(p => p.dia <= alvo);
-  const ref = ate.length ? ate[ate.length - 1].percentual : 0;
-  return { comp: ant, percentual: ref, dif: b.percentual - ref };
-}
-
 /* --------------------------------------------------------- dados */
 const ler = () => Promise.all([
   fetch('data/fechamento.json?ts=' + Date.now()).then(r => r.json()),
   fetch('data/operacional.json?ts=' + Date.now()).then(r => r.json()),
 ]);
-
 async function carregar() {
   try { [FECH, OPER] = await ler(); }
   catch (e) {
@@ -317,34 +226,25 @@ function desenhar() {
       </div>
       <div class="fonte${idade.velho ? ' velha' : ''}">
         <span class="pt"></span>
-        <span>Acessórias · <span class="d">${nfmt(FECH.meta.total_empresas)}</span> empresas ·
-          ${idade.velho ? `sem atualizar desde <span class="d">${esc(idade.quando)}</span>`
-                        : `atualizado ${esc(idade.texto)}`}</span>
-        <button class="btn-tema" id="cheia" title="Tecla F">${
+        <span>Acessórias · ${nfmt(FECH.meta.total_empresas)} empresas ·
+          ${idade.velho ? 'sem atualizar desde ' + esc(idade.quando) : 'atualizado ' + esc(idade.texto)}</span>
+        <button class="btn-tv" id="cheia" title="Tecla F">${
           document.fullscreenElement ? 'Sair' : 'Tela cheia'}</button>
       </div>
     </header>
+    ${idade.velho ? `<div class="aviso-topo">
+      Os números são de <b>${esc(idade.quando)}</b> — a atualização automática não rodou desde então.
+    </div>` : ''}
 
     <div class="corpo">
-      <main class="principal">
-        ${secaoSituacao(b)}
-        ${secaoRitmo(b)}
-        ${secaoGrafico()}
-        ${secaoAreas()}
-      </main>
-      <div class="divisor"></div>
-      <aside class="acao">
-        ${secaoAtencao(b, idade)}
-        ${secaoObrigacoes()}
-        ${secaoPessoas(b)}
-        ${secaoEmpresas()}
-      </aside>
-    </div>
-
-    <div class="rodape">
-      <span>Leitura direta da API do Acessórias</span>
-      <span><a href="index.html">Fechamento empresa a empresa</a> ·
-        <a href="operacional.html">Todas as obrigações do escritório</a></span>
+      <div class="bloco bl-num">${blocoNumero(b)}</div>
+      <div class="bloco bl-curva">${blocoCurva()}</div>
+      <div class="rodape-blocos">
+        <div class="bloco" style="border-right:1px solid var(--lf-fio);padding-top:1.2cqw">
+          ${blocoMeses()}
+        </div>
+        <div class="bloco" style="padding:1.2cqw 0">${blocoDestaques(b)}</div>
+      </div>
     </div>`;
 
   $('#ant').onclick = () => { const c = compVizinha(COMP, -1); if (c) { COMP = c; desenhar(); } };
@@ -353,32 +253,249 @@ function desenhar() {
   desenharCurva(b);
 }
 
-/* ---------------------------------------------------------- tela cheia
-   Para deixar o painel numa TV sem a barra do navegador em volta. O Esc
-   devolve, como em qualquer página; o rótulo do botão acompanha o estado
-   real, inclusive quando a saída não vem do botão. */
+/* Coluna da esquerda: o número, os três estados e o ritmo em barras. */
+function blocoNumero(b) {
+  const r = b.ritmo || {};
+  const falta = b.total - b.concluidas;
+  const w = n => b.total ? (n / b.total) * 100 : 0;
+  const cor = r.prazo_vencido
+    ? (b.percentual >= 95 ? 'var(--lf-ok)' : b.percentual >= 80 ? 'var(--lf-atencao)' : 'var(--lf-erro)')
+    : 'var(--lf-serie-1)';
+
+  // as duas barras do ritmo dividem a mesma escala: dá para ver o tamanho da diferença
+  const maxRitmo = Math.max(r.por_dia || 0, r.por_dia_necessario || 0, 1);
+  const prazoTxt = r.prazo_vencido
+    ? `prazo venceu em ${dataBR(b.prazo_legal)}`
+    : `prazo em ${r.dias_uteis_restantes} dia${r.dias_uteis_restantes === 1 ? '' : 's'} úteis`;
+
+  return `
+    <div class="gigante" style="color:${cor}">${pct(b.percentual)}</div>
+    <div class="sub"><b>${nfmt(b.concluidas)}</b> de <b>${nfmt(b.total)}</b> empresas fechadas</div>
+    <div class="barrona">
+      ${b.concluidas ? `<i style="width:${w(b.concluidas)}%;background:${cor}"></i>` : ''}
+      ${b.atrasadas ? `<i style="width:${w(b.atrasadas)}%;background:var(--lf-erro)"></i>` : ''}
+      ${b.pendentes ? `<i style="width:${w(b.pendentes)}%;background:var(--lf-atencao)"></i>` : ''}
+    </div>
+    <div class="tres">
+      <div><div class="v c-ok">${nfmt(b.concluidas)}</div><div class="k">fechadas</div></div>
+      <div><div class="v c-at">${nfmt(falta)}</div><div class="k">faltam</div></div>
+      <div><div class="v c-er">${nfmt(b.atrasadas)}</div><div class="k">atrasadas</div></div>
+    </div>
+    ${blocoRegime(b)}
+    <div class="ritmo">
+      <div class="rot">Ritmo por dia útil <span>· ${prazoTxt}</span></div>
+      <div class="rit-linha">
+        <span class="n">${dec(r.por_dia)}</span>
+        <span class="bar" style="width:${((r.por_dia || 0) / maxRitmo) * 100}%;
+              background:var(--lf-serie-1)"></span>
+        <span class="leg">fechando hoje</span>
+      </div>
+      <div class="rit-linha">
+        <span class="n" style="color:var(--lf-erro)">${
+          r.por_dia_necessario === null ? '—' : dec(r.por_dia_necessario)}</span>
+        <span class="bar" style="width:${((r.por_dia_necessario || 0) / maxRitmo) * 100}%;
+              background:var(--lf-erro)"></span>
+        <span class="leg">precisaria fechar</span>
+      </div>
+    </div>`;
+}
+
+/* Por regime: três barras curtas, para ver de relance qual carteira anda. */
+function blocoRegime(b) {
+  const lista = (b.por_regime || []).filter(r => r.total >= 5).slice(0, 4);
+  if (!lista.length) return '';
+  return `
+    <div style="margin-top:1.6cqw;padding-top:1.3cqw;border-top:1px solid var(--lf-fio)">
+      <div class="rot">Por regime</div>
+      <div class="pessoas" style="gap:.6cqw;margin-top:.7cqw">
+        ${lista.map(r => `<div class="p-linha" style="grid-template-columns:7.6cqw 1fr 3.2cqw">
+          <span class="p-nome" style="font-size:.86cqw">${esc(r.regime)}</span>
+          <span class="p-bar" style="height:1cqw">
+            <i style="width:${r.percentual}%;background:var(--lf-ok)"></i>
+          </span>
+          <span class="p-val" style="font-size:.95cqw">${dec(r.percentual, 0)}%</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* Coluna da direita: a curva em cima, quem está segurando embaixo. */
+function blocoCurva() {
+  return `
+    <div class="rot">Empresas fechadas ao longo do ciclo <span id="sub-curva"></span></div>
+    <div class="curva"><svg id="curva" preserveAspectRatio="none"></svg></div>
+    <div id="quem"></div>`;
+}
+
+function blocoQuem(b) {
+  const lista = (b.por_responsavel || [])
+    .filter(x => x.pendentes + x.atrasadas > 0)
+    .sort((a, c) => (c.pendentes + c.atrasadas) - (a.pendentes + a.atrasadas))
+    .slice(0, 5);
+  if (!lista.length) return '';
+  const max = Math.max(...lista.map(x => x.pendentes + x.atrasadas));
+  return `
+    <div class="rot" style="margin-top:1.2cqw;padding-top:1.2cqw;
+         border-top:1px solid var(--lf-fio)">Quem está com mais fechamento em aberto</div>
+    <div class="pessoas">
+      ${lista.map(x => {
+        const ab = x.pendentes + x.atrasadas, larg = (ab / max) * 100;
+        const pAtr = ab ? (x.atrasadas / ab) * larg : 0;
+        return `<div class="p-linha">
+          <span class="p-nome">${esc(primeiroNome(x.nome))}</span>
+          <span class="p-bar">
+            ${x.atrasadas ? `<i style="width:${pAtr}%;background:var(--lf-erro)"></i>` : ''}
+            ${x.pendentes ? `<i style="width:${larg - pAtr}%;background:var(--lf-atencao)"></i>` : ''}
+          </span>
+          <span class="p-val">${nfmt(ab)}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+/* Faixa de baixo, esquerda: onde cada mês terminou. */
+function blocoMeses() {
+  const comps = FECH.competencias
+    .filter(c => ordemComp(c) <= ordemComp(FECH.competencia_foco))
+    .slice(0, 6).reverse();
+  if (comps.length < 2) return '';
+  return `
+    <div class="rot">Onde cada mês terminou</div>
+    <div class="meses">
+      ${comps.map(c => {
+        const x = FECH.fechamento[c], atual = c === COMP;
+        return `<div class="mes${atual ? ' atual' : ''}">
+          <span class="p">${dec(x.percentual, 0)}%</span>
+          <span class="b" style="height:${Math.max(3, (x.percentual / 100) * 68)}px;
+            background:${atual ? 'var(--lf-serie-1)' : 'var(--lf-serie-outros)'}"></span>
+          <span class="m">${esc(c.slice(0, 3))}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+/* Faixa de baixo, direita: os três números que mandam agir. */
+function blocoDestaques(b) {
+  const tres = (FECH.arrastando || []).filter(x => x.total_meses >= 3).length;
+  const p = OPER ? OPER.passivo : null;
+  const o = OPER ? OPER.por_competencia[OPER.competencia_foco] : null;
+  const pior = o && (o.obrigacoes || []).filter(x => x.atrasadas > 0)
+    .sort((a, c) => c.atrasadas - a.atrasadas)[0];
+
+  const itens = [];
+  itens.push({ v: nfmt(FECH.arrastando_total || 0), cor: 'var(--lf-erro)',
+    k: `empresas com o fechamento em aberto há <b>mais de um mês</b>${
+        tres ? ` — ${nfmt(tres)} delas há três` : ''}` });
+  if (pior) itens.push({ v: nfmt(pior.atrasadas), cor: 'var(--lf-erro)',
+    k: `empresas com <b>${esc(pior.obrigacao)}</b> atrasada` });
+  if (p) itens.push({ v: nfmt(p.total), cor: 'var(--lf-atencao)',
+    k: `obrigações do escritório venceram e <b>seguem sem entrega</b>` });
+
+  return `<div class="destaques">
+    ${itens.slice(0, 3).map(i => `<div class="dest">
+      <div class="v" style="color:${i.cor}">${i.v}</div>
+      <div class="k">${i.k}</div></div>`).join('')}
+  </div>`;
+}
+
+/* ---------------------------------------------------------- curva */
+function desenharCurva(b) {
+  const alvo = document.getElementById('quem');
+  if (alvo) alvo.innerHTML = blocoQuem(b);
+
+  const svg = document.getElementById('curva');
+  if (!svg) return;
+  const caixa = svg.parentElement.getBoundingClientRect();
+  const W = Math.max(320, caixa.width), H = Math.max(90, caixa.height);
+  const M = { t: 18, r: 26, b: 22, l: 38 };
+
+  const serie = bloco => {
+    if (!bloco || !bloco.curva || !bloco.curva.length) return [];
+    const t0 = new Date((bloco.abre_em || bloco.curva[0].dia) + 'T00:00:00');
+    return bloco.curva.map(p => ({
+      x: Math.round((new Date(p.dia + 'T00:00:00') - t0) / 86400000), y: p.percentual }));
+  };
+  const ant = compVizinha(COMP, -1);
+  const sA = serie(b), sB = serie(ant ? FECH.fechamento[ant] : null);
+  const sub = document.getElementById('sub-curva');
+  if (sub) sub.textContent = ant ? `· ${COMP} contra ${ant}, dia a dia` : `· ${COMP}`;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  if (!sA.length && !sB.length) {
+    svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" class="eixo">
+      Nenhuma empresa fechada até agora</text>`;
+    return;
+  }
+
+  const diaHoje = b.abre_em
+    ? Math.floor((Date.now() - new Date(b.abre_em + 'T00:00:00')) / 86400000) : null;
+  const diaPrazo = (b.abre_em && b.prazo_legal)
+    ? Math.round((new Date(b.prazo_legal + 'T00:00:00') - new Date(b.abre_em + 'T00:00:00')) / 86400000)
+    : null;
+  const maxX = Math.max(1, ...sA.map(p => p.x), ...sB.map(p => p.x),
+                        diaPrazo || 0, diaHoje == null ? 0 : diaHoje);
+  const minX = Math.min(0, ...sA.map(p => p.x), ...sB.map(p => p.x));
+  const maxY = Math.max(20, Math.ceil(Math.max(...sA.map(p => p.y), ...sB.map(p => p.y), 0) / 20) * 20);
+  const px = x => M.l + ((x - minX) / (maxX - minX)) * (W - M.l - M.r);
+  const py = y => H - M.b - (y / maxY) * (H - M.t - M.b);
+  const dl = s => s.map((p, i) => (i ? 'L' : 'M') + px(p.x).toFixed(1) + ' ' + py(p.y).toFixed(1)).join(' ');
+  const area = s => s.length
+    ? `${dl(s)} L ${px(s[s.length - 1].x).toFixed(1)} ${py(0)} L ${px(s[0].x).toFixed(1)} ${py(0)} Z` : '';
+
+  const rot = (s, cor, nome) => {
+    if (!s.length) return '';
+    const u = s[s.length - 1];
+    const txt = `${nome} ${pct(u.y)}`;
+    const cabe = px(u.x) + 8 + txt.length * (H * 0.062) <= W - 2;
+    return `<circle cx="${px(u.x)}" cy="${py(u.y)}" r="3.6" fill="${cor}"/>
+      <text x="${px(u.x) + (cabe ? 8 : -8)}" y="${py(u.y) - 8}" class="rot-curva"
+        text-anchor="${cabe ? 'start' : 'end'}" fill="${cor}">${esc(txt)}</text>`;
+  };
+
+  svg.innerHTML = `
+    <defs><linearGradient id="sob" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--lf-serie-1)" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="var(--lf-serie-1)" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${[0, maxY / 2, maxY].map(v => `
+      <line class="malha" x1="${M.l}" x2="${W - M.r}" y1="${py(v)}" y2="${py(v)}"/>
+      <text class="eixo" x="${M.l - 7}" y="${py(v) + 4}" text-anchor="end">${v}%</text>`).join('')}
+    <text class="eixo" x="${px(0)}" y="${H - M.b + 15}" text-anchor="middle">abertura</text>
+    ${diaPrazo != null && diaPrazo <= maxX ? `
+      <line x1="${px(diaPrazo)}" x2="${px(diaPrazo)}" y1="${M.t}" y2="${H - M.b}"
+            stroke="var(--lf-erro)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".7"/>
+      <text class="eixo" x="${px(diaPrazo)}" y="${H - M.b + 15}" text-anchor="middle"
+            fill="var(--lf-erro)">prazo</text>` : ''}
+    ${diaHoje != null && diaHoje >= 0 && diaHoje <= maxX ? `
+      <line class="marca" x1="${px(diaHoje)}" x2="${px(diaHoje)}" y1="${M.t}" y2="${H - M.b}"/>
+      <text class="eixo" x="${px(diaHoje)}" y="${M.t - 5}" text-anchor="middle">hoje</text>` : ''}
+    ${sB.length ? `<path d="${dl(sB)}" fill="none" stroke="var(--lf-serie-outros)"
+        stroke-width="2" stroke-dasharray="6 5"/>` : ''}
+    ${sA.length ? `<path d="${area(sA)}" fill="url(#sob)" stroke="none"/>` : ''}
+    ${sA.length ? `<path d="${dl(sA)}" fill="none" stroke="var(--lf-serie-1)" stroke-width="3.2"
+        stroke-linejoin="round"/>` : ''}
+    ${rot(sB, 'var(--lf-serie-outros)', ant)}
+    ${rot(sA, 'var(--lf-serie-1)', COMP)}`;
+}
+
+/* ------------------------------------------------------ tela cheia */
 async function alternarTelaCheia() {
   try {
     if (document.fullscreenElement) await document.exitFullscreen();
     else await document.documentElement.requestFullscreen();
   } catch (e) {
-    // alguns navegadores recusam sem gesto direto ou em iframe; não quebra a tela
     console.warn('Tela cheia indisponível neste navegador:', e.message);
   }
 }
-
 document.addEventListener('fullscreenchange', () => {
   const b = document.getElementById('cheia');
   if (b) b.textContent = document.fullscreenElement ? 'Sair' : 'Tela cheia';
   if (!document.fullscreenElement) {
     clearTimeout(tempoPonteiro);
     document.querySelector('.palco')?.classList.remove('sem-ponteiro');
-  } else {
-    esconderPonteiroDepois();
-  }
-  if (FECH) desenharCurva(FECH.fechamento[COMP]);   // a caixa do gráfico mudou de tamanho
+  } else esconderPonteiroDepois();
+  if (FECH) desenharCurva(FECH.fechamento[COMP]);
 });
-
 let tempoPonteiro;
 function esconderPonteiroDepois() {
   clearTimeout(tempoPonteiro);
@@ -389,368 +506,12 @@ function esconderPonteiroDepois() {
   tempoPonteiro = setTimeout(() => palco.classList.add('sem-ponteiro'), 3000);
 }
 document.addEventListener('mousemove', esconderPonteiroDepois);
-
 document.addEventListener('keydown', ev => {
-  if (ev.target.tagName === 'INPUT' || ev.ctrlKey || ev.altKey || ev.metaKey) return;
-  const t = ev.key.toLowerCase();
-  if (t === 'f') { ev.preventDefault(); alternarTelaCheia(); }
+  if (ev.ctrlKey || ev.altKey || ev.metaKey) return;
+  if (ev.key.toLowerCase() === 'f') { ev.preventDefault(); alternarTelaCheia(); }
   else if (ev.key === 'ArrowLeft') { const c = compVizinha(COMP, -1); if (c) { COMP = c; desenhar(); } }
   else if (ev.key === 'ArrowRight') { const c = compVizinha(COMP, 1); if (c) { COMP = c; desenhar(); } }
 });
-
-/* 1 — situação: o percentual junto do que o explica, numa leitura só */
-function secaoSituacao(b) {
-  const r = b.ritmo || {};
-  const falta = b.total - b.concluidas;
-  const w = n => b.total ? (n / b.total) * 100 : 0;
-  const cor = r.prazo_vencido
-    ? (b.percentual >= 95 ? 'var(--lf-ok)' : b.percentual >= 80 ? 'var(--lf-atencao)' : 'var(--lf-erro)')
-    : 'var(--lf-serie-1)';
-
-  const prazo = !b.prazo_legal ? ''
-    : r.prazo_vencido
-      ? `<span class="risco">Prazo venceu em ${dataBR(b.prazo_legal)}.</span>`
-      : `Prazo em <b>${r.dias_uteis_restantes}</b> dia${r.dias_uteis_restantes === 1 ? '' : 's'} úteis
-         (${dataBR(b.prazo_legal)}).`;
-  const proj = (r.projecao_no_prazo === null || r.projecao_no_prazo === undefined) ? ''
-    : `Projeção no ritmo atual: <b class="${r.projecao_no_prazo >= 95 ? 'bom' : 'risco'}">${
-        pct(r.projecao_no_prazo)}</b>.`;
-
-  return `
-  <section class="situacao">
-    <div>
-      <div class="pct tit" style="color:${cor}">${pct(b.percentual)}</div>
-      <div class="pct-cap">do fechamento concluído</div>
-    </div>
-    <div>
-      <p class="frase"><b>${nfmt(b.concluidas)}</b> de <b>${nfmt(b.total)}</b> empresas fechadas.
-        Faltam <b>${nfmt(falta)}</b>. ${prazo} ${proj}</p>
-      <div class="progresso">
-        ${b.concluidas ? `<i style="width:${w(b.concluidas)}%;background:${cor}"></i>` : ''}
-        ${b.atrasadas ? `<i style="width:${w(b.atrasadas)}%;background:var(--lf-erro)"></i>` : ''}
-        ${b.pendentes ? `<i style="width:${w(b.pendentes)}%;background:var(--lf-atencao)"></i>` : ''}
-      </div>
-      <div class="estados">
-        <span class="estado e-ok"><b>${nfmt(b.concluidas)}</b> concluídas</span>
-        <span class="estado e-at"><b>${nfmt(b.pendentes)}</b> pendentes</span>
-        <span class="estado e-er"><b>${nfmt(b.atrasadas)}</b> atrasadas</span>
-        <span class="estado e-of"><b>${nfmt(b.dispensadas)}</b> dispensadas</span>
-      </div>
-    </div>
-  </section>`;
-}
-
-/* 2 — ritmo: atual e necessário lado a lado, com o veredito em números */
-function secaoRitmo(b) {
-  const r = b.ritmo;
-  if (!r) return '';
-  const ref = refAnterior(b);
-  const falta = b.total - b.concluidas;
-  const insuf = r.por_dia_necessario !== null && r.por_dia_necessario > r.por_dia;
-
-  // competência fechada vence qualquer outra leitura: sem ela, um mês 100%
-  // concluído aparecia como "o prazo terminou com 0 empresas em aberto".
-  const veredito = falta === 0
-    ? `<div class="veredito ok">As <b>${nfmt(b.total)}</b> empresas desta competência
-        estão fechadas.</div>`
-    : r.prazo_vencido
-      ? `<div class="veredito">O prazo terminou em <b>${dataBR(b.prazo_legal)}</b> com
-          <b>${nfmt(falta)}</b> empresas em aberto.</div>`
-      : insuf
-        ? `<div class="veredito">No ritmo atual, seriam necessários <b>${nfmt(r.dias_uteis_no_ritmo)}</b>
-            dias úteis para concluir as <b>${nfmt(falta)}</b> empresas restantes.
-            O prazo termina em <b>${r.dias_uteis_restantes}</b>.</div>`
-        : `<div class="veredito ok">O ritmo atual conclui as <b>${nfmt(falta)}</b> empresas
-            restantes dentro dos <b>${r.dias_uteis_restantes}</b> dias úteis que faltam.</div>`;
-
-  return `
-  <section>
-    <div class="secao">Ritmo e projeção</div>
-    <div class="ritmo-grade">
-      <div class="medida">
-        <div class="n">${dec(r.por_dia)}</div>
-        <div class="l">por dia útil hoje<br>em ${r.dias_uteis_corridos} dias de ciclo</div>
-      </div>
-      <div class="medida seta"><div class="n">→</div><div class="l">&nbsp;</div></div>
-      <div class="medida alvo">
-        <div class="n">${r.por_dia_necessario === null ? '—' : dec(r.por_dia_necessario)}</div>
-        <div class="l">necessárias por dia<br>nos ${r.dias_uteis_restantes} dias que restam</div>
-      </div>
-      ${ref ? `<div class="medida">
-        <div class="n" style="color:${ref.dif >= 0 ? 'var(--lf-ok)' : 'var(--lf-erro)'}">${
-          (ref.dif >= 0 ? '+' : '−') + dec(Math.abs(ref.dif))}</div>
-        <div class="l">${ref.dif >= 0 ? 'à frente' : 'atrás'} de ${esc(ref.comp)}<br>
-          que tinha ${pct(ref.percentual)} aqui</div>
-      </div>` : '<div></div>'}
-      ${veredito}
-    </div>
-  </section>`;
-}
-
-/* 3 — a curva: o gráfico principal, rotulado direto na linha */
-function secaoGrafico() {
-  return `
-  <section class="grafico">
-    <div class="secao">Evolução no ciclo <span id="sub-grafico"></span></div>
-    <div class="tela"><svg id="curva" preserveAspectRatio="none"></svg></div>
-  </section>`;
-}
-
-/* 4 — as áreas do escritório, na mesma escala */
-function secaoAreas() {
-  if (!OPER) return '';
-  const o = OPER.por_competencia[OPER.competencia_foco];
-  if (!o) return '';
-  return `
-  <section>
-    <div class="secao">Escritório em ${esc(OPER.competencia_foco)}
-      <span>· ${nfmt(o.geral.total)} obrigações no mês</span></div>
-    <div class="areas">
-      ${OPER.times.filter(t => o.times[t].total).map(t => {
-        const k = o.times[t], aberto = k.pendentes + k.atrasadas;
-        return `<div class="area">
-          <div class="cab"><span class="nome">${esc(OPER.nome_time[t] || t)}</span>
-            <span class="pc">${pct(k.percentual_entregues)}</span></div>
-          <div class="trilho"><i style="width:${k.percentual_entregues}%"></i></div>
-          <div class="det"><b>${nfmt(k.total)}</b> obrigações ·
-            <b>${nfmt(aberto)}</b> em aberto${k.atrasadas
-              ? ` · <span class="er"><b>${nfmt(k.atrasadas)}</b> atrasadas</span>` : ''}</div>
-        </div>`;
-      }).join('')}
-    </div>
-  </section>`;
-}
-
-/* 5 — atenção agora: só o que sai dos dados, ordenado por impacto */
-function secaoAtencao(b, idade) {
-  const r = b.ritmo || {};
-  const itens = [];
-
-  if (idade.velho) {
-    itens.push({ cls: 'a-er', q: idade.texto.replace('há ', ''),
-      t: `sem atualizar. Os números são de <b>${esc(idade.quando)}</b>.` });
-  }
-  if (r.prazo_vencido && b.total - b.concluidas > 0) {
-    itens.push({ cls: 'a-er', q: nfmt(b.total - b.concluidas),
-      t: `empresas seguem <b>sem fechamento</b> depois do prazo de ${dataBR(b.prazo_legal)}.` });
-  } else if (r.por_dia_necessario !== null && r.por_dia > 0 && r.por_dia_necessario > r.por_dia) {
-    const vezes = r.por_dia_necessario / r.por_dia;
-    itens.push({ cls: 'a-er', q: (vezes >= 10 ? Math.round(vezes) : dec(vezes)) + '×',
-      t: `o ritmo de hoje seria preciso para fechar no prazo:
-          <b>${dec(r.por_dia_necessario)}</b> por dia contra <b>${dec(r.por_dia)}</b>.` });
-  }
-
-  if (OPER) {
-    const o = OPER.por_competencia[OPER.competencia_foco];
-    const pior = o && (o.obrigacoes || []).filter(x => x.atrasadas > 0)
-      .sort((a, c) => c.atrasadas - a.atrasadas)[0];
-    if (pior) itens.push({ cls: 'a-er', q: nfmt(pior.atrasadas),
-      t: `empresas com <b>${esc(pior.obrigacao)}</b> atrasada, o maior atraso do mês.` });
-  }
-
-  const pessoa = (b.por_responsavel || []).filter(x => x.nome !== 'Sem responsável')
-    .sort((a, c) => (c.pendentes + c.atrasadas) - (a.pendentes + a.atrasadas))[0];
-  if (pessoa && pessoa.pendentes + pessoa.atrasadas > 0) {
-    itens.push({ cls: 'a-at', q: nfmt(pessoa.pendentes + pessoa.atrasadas),
-      t: `fechamentos em aberto com <b>${esc(nomeCurto(pessoa.nome))}</b>,
-          de ${nfmt(pessoa.total)} sob responsabilidade.` });
-  }
-
-  const tres = (FECH.arrastando || []).filter(x => x.total_meses >= 3).length;
-  if (tres) itens.push({ cls: 'a-er', q: nfmt(tres),
-    t: `empresas acumulam <b>três competências vencidas</b> sem fechamento.` });
-
-  const semResp = (b.por_responsavel || []).find(x => x.nome === 'Sem responsável');
-  if (semResp && semResp.pendentes + semResp.atrasadas > 0) {
-    itens.push({ cls: 'a-at', q: nfmt(semResp.pendentes + semResp.atrasadas),
-      t: `fechamentos em aberto <b>sem responsável</b> definido no Acessórias.` });
-  }
-  if (b.sem_tarefa) itens.push({ cls: 'a-nt', q: nfmt(b.sem_tarefa),
-    t: `empresas ativas <b>não têm a tarefa</b> nesta competência e ficam fora da conta.` });
-
-  return `
-  <section>
-    <div class="secao">Atenção agora</div>
-    <div class="alertas">
-      ${itens.slice(0, 5).map(i => `<div class="alerta ${i.cls}">
-        <span class="q">${i.q}</span><span class="t">${i.t}</span></div>`).join('')
-        || `<div class="alerta a-nt"><span class="q">—</span>
-             <span class="t">Nada em aberto nesta competência.</span></div>`}
-    </div>
-  </section>`;
-}
-
-/* 6 — obrigações que travam o mês, com escala comparável entre linhas */
-function secaoObrigacoes() {
-  if (!OPER) return '';
-  const o = OPER.por_competencia[OPER.competencia_foco];
-  if (!o) return '';
-  const lista = (o.obrigacoes || []).filter(x => x.atrasadas + x.pendentes > 0).slice(0, 4);
-  if (!lista.length) return '';
-  const max = Math.max(...lista.map(x => x.atrasadas + x.pendentes));
-  const totalAberto = (o.obrigacoes || []).reduce((s, x) => s + x.atrasadas + x.pendentes, 0);
-
-  return `
-  <section>
-    <div class="secao">Obrigações que travam ${esc(OPER.competencia_foco)}</div>
-    <table class="op">
-      <colgroup><col style="width:38%"><col style="width:11%"><col style="width:11%">
-        <col style="width:24%"><col style="width:16%"></colgroup>
-      <thead><tr><th>Obrigação</th><th class="n">Pend.</th><th class="n">Atras.</th>
-        <th></th><th class="n">do aberto</th></tr></thead>
-      <tbody>
-        ${lista.map(x => {
-          const ab = x.atrasadas + x.pendentes, larg = (ab / max) * 100;
-          const pAtr = ab ? (x.atrasadas / ab) * larg : 0;
-          return `<tr>
-            <td class="forte" title="${esc(x.obrigacao)}">${esc(obrigacaoCurta(x.obrigacao))}</td>
-            <td class="n">${x.pendentes ? `<span class="at">${nfmt(x.pendentes)}</span>` : '—'}</td>
-            <td class="n">${x.atrasadas ? `<span class="er">${nfmt(x.atrasadas)}</span>` : '—'}</td>
-            <td><span class="mini">
-              ${x.atrasadas ? `<i style="width:${pAtr}%;background:var(--lf-erro)"></i>` : ''}
-              ${x.pendentes ? `<i style="width:${larg - pAtr}%;background:var(--lf-atencao)"></i>` : ''}
-            </span></td>
-            <td class="n">${totalAberto ? dec((ab / totalAberto) * 100) + '%' : '—'}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>
-    <div class="legenda">
-      <span><i style="background:var(--lf-atencao)"></i>pendente</span>
-      <span><i style="background:var(--lf-erro)"></i>atrasada</span>
-    </div>
-  </section>`;
-}
-
-/* 7 — pessoas: tabela, ordenada por impacto operacional */
-function secaoPessoas(b) {
-  const lista = (b.por_responsavel || [])
-    .filter(x => x.pendentes + x.atrasadas > 0)
-    .sort((a, c) => (c.atrasadas - a.atrasadas)
-                 || ((c.pendentes + c.atrasadas) - (a.pendentes + a.atrasadas)))
-    .slice(0, 5);
-  if (!lista.length) return '';
-  return `
-  <section>
-    <div class="secao">Quem está com trabalho em aberto</div>
-    <table class="op">
-      <colgroup><col style="width:34%"><col style="width:17%"><col style="width:18%">
-        <col style="width:15%"><col style="width:16%"></colgroup>
-      <thead><tr><th>Responsável</th><th class="n">Sob resp.</th><th class="n">Em aberto</th>
-        <th class="n">Atras.</th><th class="n">Concl.</th></tr></thead>
-      <tbody>
-        ${lista.map(x => `<tr>
-          <td class="forte" title="${esc(x.nome)}">${esc(nomeCurto(x.nome))}</td>
-          <td class="n">${nfmt(x.total)}</td>
-          <td class="n"><span class="at">${nfmt(x.pendentes + x.atrasadas)}</span></td>
-          <td class="n">${x.atrasadas ? `<span class="er">${nfmt(x.atrasadas)}</span>` : '—'}</td>
-          <td class="n">${pct(x.percentual)}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-  </section>`;
-}
-
-/* 8 — empresas acumulando competências vencidas */
-function secaoEmpresas() {
-  const lista = (FECH.arrastando || []).slice(0, 4);
-  if (!lista.length) return '';
-  return `
-  <section>
-    <div class="secao">Empresas acumulando competências
-      <span>· ${nfmt(FECH.arrastando_total)} no total</span></div>
-    <table class="op">
-      <colgroup><col style="width:36%"><col style="width:24%"><col style="width:29%">
-        <col style="width:11%"></colgroup>
-      <thead><tr><th>Empresa</th><th>Responsável</th><th>Competências</th>
-        <th class="n">Meses</th></tr></thead>
-      <tbody>
-        ${lista.map(x => `<tr>
-          <td class="forte" title="${esc(x.empresa)}">${esc(empresaCurta(x.empresa))}</td>
-          <td title="${esc(x.responsavel)}">${esc(nomeCurto(x.responsavel) || '—')}</td>
-          <td class="n" style="text-align:left"
-              title="${esc(x.meses.join(', '))}">${esc(mesesCurtos(x.meses))}</td>
-          <td class="n">${x.total_meses >= 3
-            ? `<span class="er">${x.total_meses}</span>` : x.total_meses}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-  </section>`;
-}
-
-/* ---------------------------------------------------------- curva */
-function desenharCurva(b) {
-  const svg = document.getElementById('curva');
-  if (!svg) return;
-  const caixa = svg.parentElement.getBoundingClientRect();
-  const W = Math.max(320, caixa.width), H = Math.max(100, caixa.height);
-  const M = { t: 16, r: 26, b: 20, l: 34 };
-
-  const serie = bloco => {
-    if (!bloco || !bloco.curva || !bloco.curva.length) return [];
-    const t0 = new Date((bloco.abre_em || bloco.curva[0].dia) + 'T00:00:00');
-    return bloco.curva.map(p => ({
-      x: Math.round((new Date(p.dia + 'T00:00:00') - t0) / 86400000), y: p.percentual }));
-  };
-  const ant = compVizinha(COMP, -1);
-  const sA = serie(b), sB = serie(ant ? FECH.fechamento[ant] : null);
-  const sub = document.getElementById('sub-grafico');
-  if (sub) sub.textContent = ant
-    ? `· linha cheia ${COMP}, tracejada ${ant}, contadas desde a abertura de cada ciclo`
-    : `· ${COMP}, contado desde a abertura do ciclo`;
-
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  if (!sA.length && !sB.length) {
-    svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" class="eixo">
-      Nenhuma empresa fechada até agora nesta competência</text>`;
-    return;
-  }
-
-  const diaHoje = b.abre_em
-    ? Math.floor((Date.now() - new Date(b.abre_em + 'T00:00:00')) / 86400000) : null;
-  const diaPrazo = (b.abre_em && b.prazo_legal)
-    ? Math.round((new Date(b.prazo_legal + 'T00:00:00') - new Date(b.abre_em + 'T00:00:00')) / 86400000)
-    : null;
-
-  const maxX = Math.max(1, ...sA.map(p => p.x), ...sB.map(p => p.x),
-                        diaPrazo || 0, diaHoje == null ? 0 : diaHoje);
-  const minX = Math.min(0, ...sA.map(p => p.x), ...sB.map(p => p.x));
-  const maxY = Math.max(20, Math.ceil(Math.max(...sA.map(p => p.y), ...sB.map(p => p.y), 0) / 20) * 20);
-  const px = x => M.l + ((x - minX) / (maxX - minX)) * (W - M.l - M.r);
-  const py = y => H - M.b - (y / maxY) * (H - M.t - M.b);
-  const dl = s => s.map((p, i) => (i ? 'L' : 'M') + px(p.x).toFixed(1) + ' ' + py(p.y).toFixed(1)).join(' ');
-
-  // o rótulo vai depois do ponto; se não couber até a borda, vira para antes
-  const rot = (s, cor, nome) => {
-    if (!s.length) return '';
-    const u = s[s.length - 1];
-    const txt = `${nome} ${pct(u.y)}`;
-    const largura = txt.length * (H * 0.055);          // mono: ~0,55 em por caractere
-    const cabe = px(u.x) + 7 + largura <= W - 2;
-    return `<circle cx="${px(u.x)}" cy="${py(u.y)}" r="3.2" fill="${cor}"/>
-      <text x="${px(u.x) + (cabe ? 7 : -9)}" y="${py(u.y) + 3.5}" class="rot-curva"
-        text-anchor="${cabe ? 'start' : 'end'}" fill="${cor}">${esc(txt)}</text>`;
-  };
-
-  svg.innerHTML = `
-    ${[0, maxY / 2, maxY].map(v => `
-      <line class="malha" x1="${M.l}" x2="${W - M.r}" y1="${py(v)}" y2="${py(v)}"/>
-      <text class="eixo" x="${M.l - 6}" y="${py(v) + 3.5}" text-anchor="end">${v}%</text>`).join('')}
-    <text class="eixo" x="${px(0)}" y="${H - M.b + 13}" text-anchor="middle">abertura</text>
-    ${diaPrazo != null && diaPrazo <= maxX ? `
-      <line x1="${px(diaPrazo)}" x2="${px(diaPrazo)}" y1="${M.t}" y2="${H - M.b}"
-            stroke="var(--lf-erro)" stroke-width="1" stroke-dasharray="3 3" opacity=".65"/>
-      <text class="eixo" x="${px(diaPrazo)}" y="${H - M.b + 13}" text-anchor="middle"
-            fill="var(--lf-erro)">prazo</text>` : ''}
-    ${diaHoje != null && diaHoje >= 0 && diaHoje <= maxX ? `
-      <line class="marca-linha" x1="${px(diaHoje)}" x2="${px(diaHoje)}" y1="${M.t}" y2="${H - M.b}"/>
-      <text class="eixo" x="${px(diaHoje)}" y="${M.t - 4}" text-anchor="middle">hoje</text>` : ''}
-    ${sB.length ? `<path d="${dl(sB)}" fill="none" stroke="var(--lf-serie-outros)"
-        stroke-width="1.8" stroke-dasharray="5 4"/>` : ''}
-    ${sA.length ? `<path d="${dl(sA)}" fill="none" stroke="var(--lf-serie-1)" stroke-width="2.6"/>` : ''}
-    ${rot(sB, 'var(--lf-serie-outros)', ant)}
-    ${rot(sA, 'var(--lf-serie-1)', COMP)}`;
-}
 
 let t;
 window.addEventListener('resize', () => {
