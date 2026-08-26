@@ -80,7 +80,7 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 /* --------------------------------------------------------- arranjo */
 .corpo { flex:1; min-height:0; display:flex; flex-direction:column; padding:0 30px; }
 
-.abre { display:flex; align-items:flex-end; gap:26px; padding:24px 0 20px; }
+.abre { display:flex; align-items:flex-end; gap:26px; padding:20px 0 16px; }
 .abre .pc {
   font-family:var(--fd); font-weight:800; font-size:92px; line-height:.82;
   letter-spacing:-.045em; font-variant-numeric:tabular-nums;
@@ -91,9 +91,17 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .abre .txt .l2 { color:var(--tin2); font-size:14.5px; margin-top:5px; }
 .abre .marcas { margin-left:auto; display:flex; gap:8px; padding-bottom:8px; }
 
+.comp-total { padding:0 0 14px; }
+.comp-rot { font-family:var(--fm); font-size:10px; letter-spacing:.13em;
+            text-transform:uppercase; color:var(--fr); margin-bottom:7px; }
+.comp-rot b { color:var(--tin2); font-weight:500; }
+.comp-total .pilha { height:14px; }
+.comp-total .legenda { margin-top:8px; gap:5px 20px; font-size:12px; }
+
 .meio { flex:1; min-height:0; display:grid; grid-template-columns:1fr 470px; gap:38px;
         padding:22px 0 0; border-top:1px solid var(--fio); }
-.meio > div { min-width:0; display:flex; flex-direction:column; }
+.meio > div { min-width:0; min-height:0; display:flex; flex-direction:column;
+              overflow:hidden; }
 
 .tit-graf { display:flex; align-items:baseline; justify-content:space-between; gap:14px; }
 .linha-svg { flex:1; min-height:0; margin-top:10px; }
@@ -231,11 +239,14 @@ function desenhar() {
       <div class="abre">
         <span class="pc" style="color:${corDo(b)}">${pct(b.percentual)}</span>
         <span class="txt">
-          <span class="l1"><u>${nfmt(b.concluidas)}</u> de <u>${nfmt(b.total)}</u> empresas fechadas</span>
-          <span class="l2">faltam ${nfmt(falta)} para o mês fechar${explicaTotal(b)}</span>
+          <span class="l1"><u>${nfmt(b.concluidas)}</u> de <u>${nfmt(b.total)}</u> empresas
+            que fecham contabilidade</span>
+          <span class="l2">faltam ${nfmt(falta)} para o mês fechar</span>
         </span>
         <span class="marcas">${estado}</span>
       </div>
+
+      ${composicao(b)}
 
       ${faixaNumeros(b)}
 
@@ -247,7 +258,7 @@ function desenhar() {
           </div>
           <div class="linha-svg"><svg id="curva" preserveAspectRatio="none"></svg></div>
         </div>
-        <div>${colunaDireita(b)}${avisoFinal(b)}</div>
+        <div>${colunaDireita(b)}</div>
       </div>
 
       <div class="fecha">
@@ -255,7 +266,7 @@ function desenhar() {
           <p class="marca">Onde cada mês terminou</p>
           ${grafMeses()}
         </div>
-        <div>${numerosFinais()}</div>
+        <div>${avisoFinal(b)}</div>
       </div>
     </div>`;
 
@@ -279,6 +290,35 @@ function explicaTotal(b) {
     .filter(k => m[k]).map(k => `${nfmt(m[k])} ${nomes[k]}`);
   return ` · as outras ${nfmt(c.empresas_no_escritorio - c.nesta_conta)} de ${
     nfmt(c.empresas_no_escritorio)}: ${partes.join(', ')}`;
+}
+
+/* De onde vêm as empresas do escritório. Sem isto, "233" ao lado de "409"
+   parece que sumiu metade da carteira — e o que sumiu tem nome: filial fecha
+   na matriz, SCP fecha na sócia ostensiva, MEI não faz contabilidade. */
+function composicao(b) {
+  const c = b.cobertura;
+  if (!c || !c.por_motivo || c.empresas_no_escritorio <= c.nesta_conta) return '';
+  const m = c.por_motivo, T = c.empresas_no_escritorio;
+  const itens = [
+    { n: c.nesta_conta, cor: 'var(--s1)', txt: 'fecham contabilidade' },
+    { n: m.filial_matriz || 0, cor: 'var(--s3)', txt: 'filiais · fecham na matriz' },
+    { n: m.scp || 0, cor: 'var(--s5)', txt: 'SCP · fecham na sócia ostensiva' },
+    { n: m.mei || 0, cor: 'var(--sOut)', txt: 'MEI · sem contabilidade' },
+    { n: (m.dispensada || 0) + (m.sem_tarefa || 0), cor: 'var(--mal)',
+      txt: 'dispensadas ou sem a tarefa' },
+  ].filter(x => x.n > 0);
+  return `
+    <div class="comp-total">
+      <div class="comp-rot">As <b>${nfmt(T)}</b> empresas do escritório</div>
+      <div class="pilha">
+        ${itens.map(i => `<i style="width:${(i.n / T) * 100}%;background:${i.cor}"
+             title="${nfmt(i.n)} ${esc(i.txt)}"></i>`).join('')}
+      </div>
+      <div class="legenda">
+        ${itens.map(i => `<span><u style="background:${i.cor}"></u>
+          <b>${nfmt(i.n)}</b> ${esc(i.txt)}</span>`).join('')}
+      </div>
+    </div>`;
 }
 
 function corDo(b) {
@@ -330,7 +370,7 @@ function colunaDireita(b) {
   const lista = (b.por_responsavel || [])
     .filter(x => x.pendentes + x.atrasadas > 0)
     .sort((a, c) => (c.pendentes + c.atrasadas) - (a.pendentes + a.atrasadas))
-    .slice(0, 6);
+    .slice(0, 4);
   const max = Math.max(1, ...lista.map(x => x.pendentes + x.atrasadas));
   const r = b.ritmo || {};
   const falta = b.total - b.concluidas;
@@ -395,6 +435,10 @@ function avisoFinal(b) {
   const pior = o && (o.obrigacoes || []).filter(x => x.atrasadas > 0)
     .sort((a, c) => c.atrasadas - a.atrasadas)[0];
   const partes = [];
+  const p = OPER ? OPER.passivo : null;
+  if (p) partes.push(
+    `<b>${nfmt(p.total)} obrigações</b> de todas as áreas venceram e seguem sem entrega,
+     <b>${nfmt(p.com_multa)}</b> com multa prevista.`);
   if (FECH.arrastando_total) partes.push(
     `<b>${nfmt(FECH.arrastando_total)} empresas</b> estão com o fechamento em aberto há mais de um mês${
       tres ? `, ${nfmt(tres)} delas há três` : ''}.`);
@@ -403,10 +447,10 @@ function avisoFinal(b) {
   const conf = (b.fora_da_conta || []).filter(x => x.suspeita);
   if (conf.length) partes.push(
     `<b>${nfmt(conf.length)} ${conf.length === 1 ? 'empresa faz' : 'empresas fazem'} balancete
-     mas não ${conf.length === 1 ? 'tem' : 'têm'} fechamento</b>: ${
-       conf.slice(0, 2).map(x => esc(x.empresa)).join(', ')}.`);
+     mas não ${conf.length === 1 ? 'aparece' : 'aparecem'} no fechamento</b> — veja em
+     "A conferir" no detalhe empresa a empresa.`);
   if (!partes.length) return '';
-  return `<div class="aviso" style="margin-top:auto">${partes.join(' ')}</div>`;
+  return `<div class="aviso">${partes.join(' ')}</div>`;
 }
 
 /* Peça do kit: faixa de números, para o que vale do escritório inteiro. */
@@ -414,7 +458,7 @@ function numerosFinais() {
   const p = OPER ? OPER.passivo : null;
   if (!p) return '';
   const maior = Object.entries(p.por_time).sort((a, b) => b[1] - a[1])[0];
-  return `<div class="faixa-num" style="grid-template-columns:1fr 1fr">
+  return `<div class="faixa-num" style="grid-template-columns:1fr 1fr;margin-top:auto">
     <div><div class="r">Passivo do escritório</div>
       <div class="v mal">${nfmt(p.total)}</div>
       <div class="d">venceram e seguem sem entrega</div></div>
