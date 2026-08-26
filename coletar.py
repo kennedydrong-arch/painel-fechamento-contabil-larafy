@@ -72,6 +72,10 @@ def main():
         base = dt.datetime.fromisoformat(anterior["coletado_em"]) - dt.timedelta(days=2)
         dt_last = base.strftime("%Y-%m-%d %H:%M:%S")
 
+    # a pasta precisa existir ANTES do primeiro salvamento de progresso,
+    # que acontece a cada 25 empresas - nao so no fim
+    os.makedirs(os.path.dirname(SAIDA), exist_ok=True)
+
     t0 = time.time()
     api = Acessorias()
     print(f"Coletando entregas com prazo entre {dt_ini} e {dt_fim}")
