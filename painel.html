@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="pt-BR">
+<!-- O painel vive numa TV: tema escuro fixo, sem alternancia. -->
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -300,7 +301,6 @@ async function carregar() {
 /* -------------------------------------------------------- desenho */
 function desenhar() {
   const b = FECH.fechamento[COMP];
-  const escuro = document.documentElement.getAttribute('data-theme') === 'dark';
   const idade = idadeDosDados(FECH.meta);
   const antes = compVizinha(COMP, -1), depois = compVizinha(COMP, 1);
 
@@ -320,7 +320,6 @@ function desenhar() {
         <span>Acessórias · <span class="d">${nfmt(FECH.meta.total_empresas)}</span> empresas ·
           ${idade.velho ? `sem atualizar desde <span class="d">${esc(idade.quando)}</span>`
                         : `atualizado ${esc(idade.texto)}`}</span>
-        <button class="btn-tema" id="tema">${escuro ? 'Claro' : 'Escuro'}</button>
         <button class="btn-tema" id="cheia" title="Tecla F">${
           document.fullscreenElement ? 'Sair' : 'Tela cheia'}</button>
       </div>
@@ -350,10 +349,6 @@ function desenhar() {
 
   $('#ant').onclick = () => { const c = compVizinha(COMP, -1); if (c) { COMP = c; desenhar(); } };
   $('#prox').onclick = () => { const c = compVizinha(COMP, 1); if (c) { COMP = c; desenhar(); } };
-  $('#tema').onclick = () => {
-    document.documentElement.setAttribute('data-theme', escuro ? 'light' : 'dark');
-    desenhar();
-  };
   $('#cheia').onclick = alternarTelaCheia;
   desenharCurva(b);
 }

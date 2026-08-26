@@ -35,7 +35,10 @@ As três têm as mesmas abas no topo para trocar entre elas.
 
 ### Deixar numa TV
 
-No `painel.html`, o botão **Tela cheia** (ou a tecla **F**) tira a barra do
+O `painel.html` é sempre escuro — é onde ele vai ficar: numa TV, ligado o dia
+todo. Não tem botão de tema.
+
+O botão **Tela cheia** (ou a tecla **F**) tira a barra do
 navegador e o painel ocupa a tela inteira. `Esc` volta. Depois de 3 segundos
 parado, o ponteiro do mouse some sozinho — ele ficava na frente do número o dia
 inteiro. As setas **←** e **→** trocam a competência sem precisar do mouse.
