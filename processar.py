@@ -2,9 +2,9 @@
 """Le dados/bruto.json (o que veio da API) e gera os arquivos do painel.
 
 Saidas:
-    data/fechamento.json  - painel de fechamento contabil (o pedido da Juliane)
-    data/data.json        - painel operacional completo (fiscal + contabil)
-    data/historico.json   - uma linha por rodada, para auditar o avanco
+    data/fechamento.json   - painel de fechamento contabil (o pedido da Juliane)
+    data/operacional.json  - painel operacional: todas as obrigacoes, por area
+    data/historico.json    - uma linha por rodada, para auditar o avanco
 
 Regra do fechamento (definida com o Kennedy em 26/08/2026):
     uma empresa esta FECHADA quando a tarefa "FECHAMENTO CONTABIL" dela
@@ -311,12 +311,20 @@ def bloco_fechamento(linhas, competencias, empresas_ativas=None):
 
 # ---------------------------------------------------------------- painel geral
 
-TIME = {"Contabil": "Contabil", "Compartilhadas Contabil Fiscal": "Contabil",
-        "Fiscal": "Fiscal", "Retidos e Simples Nacional": "Fiscal"}
+# Chaves ja normalizadas (sem acento, minusculas). Comparar com .title() quebra
+# em "Retidos e Simples Nacional", que vira "Retidos E Simples Nacional" e nao
+# bate - o departamento inteiro caia fora do painel sem ninguem perceber.
+TIME = {
+    "contabil": "Contabil",
+    "compartilhadas contabil fiscal": "Contabil",
+    "fiscal": "Fiscal",
+    "retidos e simples nacional": "Fiscal",
+}
+NOME_TIME = {"Fiscal": "Fiscal", "Contabil": "Contábil", "Outras": "Outras áreas"}
 
 
 def time_de(departamento):
-    return TIME.get(sem_acento(departamento).title(), "Outras")
+    return TIME.get(sem_acento(departamento), "Outras")
 
 
 def kpi(conj):
@@ -331,6 +339,110 @@ def kpi(conj):
             "percentual_no_prazo": pct(g, total),
             "percentual_atrasadas": pct(r, total),
             "percentual_pendentes": pct(am, total)}
+
+
+def bloco_operacional(linhas, comps, foco):
+    """Painel do dia a dia: como estao TODAS as obrigacoes, nao so o fechamento.
+
+    Aqui o recorte e por time (Fiscal / Contabil / Outras areas), e o que
+    interessa e o que esta em aberto - inclusive o passivo de meses ja
+    vencidos, que some quando se olha so a competencia do mes.
+    """
+    vivas = [a for a in linhas if a["status_semaforo"] != "gray"]
+    times = ["Fiscal", "Contabil", "Outras"]
+    for a in vivas:
+        a["time"] = time_de(a["departamento"])
+
+    por_competencia = {}
+    for comp in comps:
+        do_mes = [a for a in vivas if a["competencia"] == comp]
+        if not do_mes:
+            continue
+
+        # obrigacoes que mais seguram o mes
+        obrig = defaultdict(lambda: {"total": 0, "entregues": 0,
+                                     "pendentes": 0, "atrasadas": 0, "time": ""})
+        for a in do_mes:
+            o = obrig[a["obrigacao"]]
+            o["total"] += 1
+            o["time"] = o["time"] or NOME_TIME.get(a["time"], a["time"])
+            if a["entregue"]:
+                o["entregues"] += 1
+            elif a["status_semaforo"] == "red":
+                o["atrasadas"] += 1
+            else:
+                o["pendentes"] += 1
+
+        por_competencia[comp] = {
+            "geral": kpi(do_mes),
+            "times": {t: kpi([a for a in do_mes if a["time"] == t]) for t in times},
+            "ranking": {t: ranking_de([a for a in do_mes if a["time"] == t]) for t in times},
+            "obrigacoes": sorted(
+                [dict(obrigacao=k, percentual=pct(v["entregues"], v["total"]), **v)
+                 for k, v in obrig.items()],
+                key=lambda x: (-x["atrasadas"], -x["pendentes"], -x["total"]))[:40],
+        }
+
+    # A linha vai so ate a competencia em foco: o mes corrente ainda esta sendo
+    # trabalhado e entraria com ~1% entregue, dando impressao de despencada.
+    tendencia = []
+    for comp in sorted(por_competencia, key=ordem_comp):
+        if ordem_comp(comp) > ordem_comp(foco):
+            continue
+        b = por_competencia[comp]
+        tendencia.append({
+            "competencia": comp,
+            "total": b["geral"]["total"],
+            "geral": b["geral"]["percentual_entregues"],
+            "fiscal": b["times"]["Fiscal"]["percentual_entregues"],
+            "contabil": b["times"]["Contabil"]["percentual_entregues"],
+        })
+
+    # Passivo: atrasada e ainda NAO entregue, de qualquer competencia. E o que
+    # nao aparece quando se olha so o mes corrente - e o que mais cobra multa.
+    atrasadas = [a for a in vivas if a["status_semaforo"] == "red"]
+    passivo_comp = defaultdict(int)
+    passivo_time = defaultdict(int)
+    for a in atrasadas:
+        passivo_comp[a["competencia"]] += 1
+        passivo_time[NOME_TIME.get(a["time"], a["time"])] += 1
+
+    def enxuto(a):
+        return {"empresa": a["empresa"], "cnpj": a["cnpj"], "uf": a["uf"],
+                "obrigacao": a["obrigacao"], "competencia": a["competencia"],
+                "time": NOME_TIME.get(a["time"], a["time"]),
+                "departamento": a["departamento"], "responsavel": a["responsavel"],
+                "status": a["status_original"], "semaforo": a["status_semaforo"],
+                "prazo": a["prazo_legal"] or a["prazo_tecnico"],
+                "dias_atraso": a["dias_atraso"], "multa": a["multa"]}
+
+    # detalhe do que esta em aberto: tudo que nao foi entregue ate a competencia
+    # em foco. O mes corrente fica de fora da lista (ainda nem comecou) mas
+    # continua nos indicadores.
+    limite = ordem_comp(foco)
+    aberto = [enxuto(a) for a in vivas
+              if not a["entregue"] and ordem_comp(a["competencia"]) <= limite]
+    aberto.sort(key=lambda x: (-x["dias_atraso"], x["empresa"]))
+
+    return {
+        "competencias": comps,
+        "competencia_foco": foco,
+        "times": times,
+        "nome_time": NOME_TIME,
+        "por_competencia": por_competencia,
+        "tendencia": tendencia,
+        "passivo": {
+            "total": len(atrasadas),
+            "com_multa": len([a for a in atrasadas if a["multa"]]),
+            "por_time": dict(passivo_time),
+            "por_competencia": sorted(
+                [{"competencia": c, "total": n} for c, n in passivo_comp.items()],
+                key=lambda x: ordem_comp(x["competencia"]), reverse=True),
+            "mais_antigos": [enxuto(a) for a in
+                             sorted(atrasadas, key=lambda a: -a["dias_atraso"])[:60]],
+        },
+        "aberto": aberto,
+    }
 
 
 def ranking_de(conj):
@@ -367,6 +479,18 @@ def main():
     limite = competencia_label(hoje)                       # nao mostra competencia futura
     comps = sorted({a["competencia"] for a in linhas}, key=ordem_comp, reverse=True)
     comps = [c for c in comps if ordem_comp(c) <= ordem_comp(limite)]
+
+    # Competencia truncada nao entra. A coleta filtra pelo PRAZO, entao de uma
+    # competencia velha so chega o pedaco cujo prazo caiu dentro do periodo -
+    # ela apareceria com 40 tarefas em vez de 6.000 e distorceria o grafico.
+    volume = {c: len([a for a in linhas if a["competencia"] == c]) for c in comps}
+    ordenados = sorted(volume.values())
+    mediana = ordenados[len(ordenados) // 2] if ordenados else 0
+    parciais = [c for c in comps if volume[c] < mediana * 0.4]
+    if parciais:
+        print("Competencias incompletas, fora do painel: %s"
+              % ", ".join("%s (%d tarefas)" % (c, volume[c]) for c in parciais))
+    comps = [c for c in comps if c not in parciais]
     linhas = [a for a in linhas if a["competencia"] in comps]
 
     # cadastro das empresas ativas, para saber quem ficou de fora do painel
@@ -396,9 +520,6 @@ def main():
     foco = em_trabalho[0] if em_trabalho else (comps_fech[0] if comps_fech else
                                                (comps[0] if comps else ""))
 
-    contabil = [a for a in linhas if time_de(a["departamento"]) == "Contabil"]
-    fiscal = [a for a in linhas if time_de(a["departamento"]) == "Fiscal"]
-
     agora = dt.datetime.now().astimezone()
     meta = {
         "atualizado_em": agora.isoformat(timespec="seconds"),
@@ -417,25 +538,10 @@ def main():
                    "competencias": comps_fech, "fechamento": fechamento},
                   f, ensure_ascii=False)
 
-    def por_comp(conj, fn):
-        return {c: fn([a for a in conj if a["competencia"] == c
-                       and a["status_semaforo"] != "gray"]) for c in comps}
-
-    geral = {
-        "meta": meta,
-        "competencias": comps,
-        "competencia_foco": foco,
-        "fiscal": {"kpis": por_comp(fiscal, kpi), "ranking": por_comp(fiscal, ranking_de)},
-        "contabil": {"kpis": por_comp(contabil, kpi), "ranking": por_comp(contabil, ranking_de)},
-        "atrasos_criticos": sorted([a for a in linhas if a["status_semaforo"] == "red"],
-                                   key=lambda a: -a["dias_atraso"])[:50],
-        # so o detalhe do que ainda esta em jogo: com o ano inteiro o arquivo
-        # passa de 40 MB e o navegador engasga ao abrir o painel.
-        "entregas": [a for a in linhas if a["competencia"] in comps[:3]],
-        "competencias_com_detalhe": comps[:3],
-    }
-    with open(os.path.join(DIR_DATA, "data.json"), "w", encoding="utf-8") as f:
-        json.dump(geral, f, ensure_ascii=False)
+    operacional = bloco_operacional(linhas, comps, foco)
+    operacional["meta"] = meta
+    with open(os.path.join(DIR_DATA, "operacional.json"), "w", encoding="utf-8") as f:
+        json.dump(operacional, f, ensure_ascii=False)
 
     # historico: uma linha por rodada, para conferir se o painel avanca
     hist_path = os.path.join(DIR_DATA, "historico.json")
@@ -466,7 +572,7 @@ def main():
               % (c, b["concluidas"], b["total"], b["percentual"],
                  b["pendentes"], b["atrasadas"], b["dispensadas"]))
     print()
-    for nome, arq in (("fechamento", "fechamento.json"), ("operacional", "data.json")):
+    for nome, arq in (("fechamento", "fechamento.json"), ("operacional", "operacional.json")):
         p = os.path.join(DIR_DATA, arq)
         print("  %-12s -> %s (%.1f MB)" % (nome, arq, os.path.getsize(p) / 1024 / 1024))
     return 0

@@ -39,6 +39,26 @@ O botão **Imprimir / PDF** gera a versão de apresentação, sem os filtros.
 
 ---
 
+## A segunda página: Painel Operacional
+
+No topo há duas abas: **Fechamento contábil** e **Operacional**.
+
+O operacional mostra **todas as obrigações**, não só o fechamento — é o painel do
+dia a dia do time:
+
+| Bloco | O que responde |
+|---|---|
+| Três cartões no topo | % entregue de **Fiscal**, **Contábil** e **Outras áreas** no mês |
+| **Passivo em aberto** | quanta coisa já venceu e **ainda não foi entregue**, somando todos os meses. Este número some quando se olha só a competência do mês — e é o que gera multa |
+| Entregas mês a mês | a linha de cada área ao longo do ano, para ver se está melhorando ou piorando |
+| O que está segurando o mês | quais obrigações têm mais coisa em aberto; clicar filtra a tabela |
+| Por responsável | por área, quem tem mais coisa em aberto primeiro |
+| Tabela | tudo que não foi entregue, com filtro por área, por mês, só com multa, busca e Excel |
+
+Clicar num mês do **Passivo** filtra a tabela por aquele mês.
+
+---
+
 ## A regra do que conta como "fechado"
 
 Uma empresa entra como **concluída** quando a tarefa `FECHAMENTO CONTÁBIL`

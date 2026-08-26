@@ -18,9 +18,12 @@ api.acessorias.com  ──coletar.py──▶  dados/bruto.json  ──processar
 |---|---|
 | `acessorias.py` | Cliente da API: token, ritmo (85 req/min, teto é 100), retry, recuo no 429 |
 | `coletar.py` | Baixa empresas ativas + entregas de cada uma. `--rapido` traz só o que mudou |
-| `processar.py` | Aplica as regras e gera `data/fechamento.json`, `data/data.json`, `data/historico.json` |
+| `processar.py` | Aplica as regras e gera `data/fechamento.json`, `data/operacional.json`, `data/historico.json` |
 | `classificador.py` | Texto do status → semáforo (green/amber/red/red_done/gray) |
-| `index.html` | O painel |
+| `index.html` | Painel de fechamento contábil |
+| `operacional.html` | Painel operacional: todas as obrigações, por área |
+| `estilo.css` | Estilo comum das duas páginas |
+| `conferir.py` | Reconta os números por um caminho independente e compara |
 | `servir.py` | Servidor local (o painel usa `fetch`, não abre por `file://`) |
 
 `dados/bruto.json` é a resposta crua da API. Mudou uma regra? `py processar.py`
@@ -40,7 +43,7 @@ Endpoints que este projeto usa:
 | Endpoint | Detalhe importante |
 |---|---|
 | `GET /companies/ListAll?ativa=S&registrationData&Pagina=N` | 20 por página. `registrationData` traz **Regime** e **GrupoDeEmpresas** |
-| `GET /deliveries/{cnpj}?DtInitial&DtFinal&config&Pagina=N` | 50 por página. **`ListAll` NÃO funciona aqui** — é sempre por empresa, por isso a coleta completa leva ~25 min |
+| `GET /deliveries/{cnpj}?DtInitial&DtFinal&config&Pagina=N` | 50 por página. **`ListAll` NÃO funciona aqui** — é sempre por empresa, por isso a coleta completa leva ~50 min (medido: 409 empresas, 1.932 chamadas) |
 | `GET /departments/ListAll` | Contábil, Fiscal, Retidos e Simples Nacional, Gerência… |
 
 `DtInitial`/`DtFinal` filtram pelo **prazo**, não pela competência. Por isso a
@@ -89,6 +92,20 @@ atraso existir.
 não serve de alvo se aquilo foi o resultado do mês inteiro. O eixo do gráfico é
 "dias desde a abertura da competência", não data de calendário.
 
+**Departamento é comparado sem acento e em minúsculas.** Comparar com `.title()`
+quebra em "Retidos e Simples Nacional" — vira "Retidos **E** Simples Nacional" e
+não bate com a chave. Esse departamento sozinho tem 24 mil tarefas: ele sumia do
+painel operacional inteiro sem nenhum erro aparecer.
+
+**Competência truncada não entra.** A coleta filtra pelo **prazo**, então de uma
+competência antiga chega só o pedaço cujo prazo caiu dentro do período pedido.
+O `processar.py` descarta competências com menos de 40% da mediana de volume e
+imprime quais foram — senão o gráfico mostra out/25 com 4 tarefas como se fosse
+um mês real.
+
+**A linha do gráfico não inclui o mês corrente.** Ele mal começou e entraria com
+~1% entregue, dando impressão de despencada.
+
 **Uma empresa = uma linha.** Hoje o Acessórias só deixa uma tarefa de fechamento
 ativa por empresa/competência (as outras ficam dispensadas), mas o código está
 preparado para duas: nesse caso a empresa só conta como fechada quando as duas
@@ -120,9 +137,14 @@ encanamento frágil não.
 
 - **`.env` nunca vai para o Git.** O `.gitignore` cobre, mas confira antes de
   qualquer commit.
-- **Não publicar dados em repositório público.** É a carteira de clientes do
-  escritório.
+- **O repositório é público por decisão do Kennedy (26/08/2026)**, com nomes de
+  clientes, CNPJ e desempenho por pessoa acessíveis por link. Eu recomendei
+  publicar só os agregados; ele optou por publicar tudo. Mitigação no ar:
+  `robots.txt` + `<meta name="robots" content="noindex">`. **Não desfazer isso.**
 - Windows/PowerShell 5.1: sem `&&`. Todo script força `utf-8` no stdout — sem
   isso o acento estoura o cp1252 e o script parece ter falhado sem ter falhado.
-- A coleta completa demora ~25 min por limite da API, não por lentidão do código.
-  Se cair no meio, rodar de novo retoma de onde parou.
+- A coleta completa demora ~50 min por limite da API, não por lentidão do código.
+  Se cair no meio, rodar de novo retoma de onde parou. O `--rapido` existe para
+  o dia a dia.
+- A pasta `dados/` precisa existir antes do primeiro salvamento de progresso
+  (a cada 25 empresas). Já quebrou uma vez em máquina limpa por isso.

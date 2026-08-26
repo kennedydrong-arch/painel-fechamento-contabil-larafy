@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Painel Operacional · LaraFy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="brand-name">LaraFy</span>
+    <span class="brand-sep">·</span>
+    <span class="brand-ctx">Painel Operacional</span>
+    <nav class="nav">
+      <a href="index.html">Fechamento contábil</a>
+      <a href="operacional.html" class="on">Operacional</a>
+    </nav>
+  </div>
+  <div class="head-right">
+    <div class="pill"><span class="pill-lbl">Empresas</span><span class="pill-val" id="pill-emp">--</span></div>
+    <div class="pill"><span class="pill-lbl">Atualizado</span><span class="pill-val" id="pill-upd">--</span></div>
+    <button class="btn-print" onclick="window.print()">Imprimir / PDF</button>
+  </div>
+</header>
+
+<div class="filters">
+  <span class="filter-label">Competência</span>
+  <div class="comp-list" id="comps"></div>
+</div>
+
+<main id="app">
+  <div class="loading">Carregando dados do Acessórias…</div>
+</main>
+
+<footer>LaraFy · dados lidos direto do Acessórias pela API oficial</footer>
+<div class="tip" id="tip"></div>
+
+<script>
+const COR = { ok:'#1baf7a', wait:'#eda100', late:'#d93a63', off:'#94a3b8',
+              // séries da tendência: slots 1 e 2 da paleta da marca
+              fiscal:'#0090b3', contabil:'#eb6834', geral:'#002e43' };
+const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril',
+                      mai:'maio', jun:'junho', jul:'julho', ago:'agosto',
+                      set:'setembro', out:'outubro', nov:'novembro', dez:'dezembro' };
+
+let DADOS = null, COMP = null;
+let abaRanking = 'Fiscal';
+let fTime = 'todos', fComp = 'todas', fMulta = false, busca = '';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c =>
+  ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const nfmt = n => Number(n || 0).toLocaleString('pt-BR');
+const pctTxt = n => Number(n || 0).toLocaleString('pt-BR',
+  { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+const semAcento = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+function dataBR(iso) {
+  const m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : '—';
+}
+function COMP_ULTIMA() {
+  const t = DADOS.tendencia;
+  return t.length ? t[t.length - 1].competencia : '';
+}
+function compLongo(c) {
+  const m = String(c || '').match(/([a-z]{3})\/(\d{2})/);
+  return m ? `${MESES_LONGO[m[1]]} de 20${m[2]}` : c;
+}
+function ordemComp(c) {
+  const m = String(c || '').match(/([a-z]{3})\/(\d{2})/);
+  return m ? parseInt(m[2]) * 100 + MESES.indexOf(m[1]) + 1 : 0;
+}
+function cnpjFmt(c) {
+  const d = String(c || '').padStart(14, '0');
+  return d.length === 14
+    ? `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}` : c;
+}
+function mostrarTip(ev, html) {
+  const t = $('tip'); t.innerHTML = html; t.style.opacity = '1';
+  t.style.left = ev.pageX + 'px'; t.style.top = (ev.pageY - 12) + 'px';
+}
+const esconderTip = () => $('tip').style.opacity = '0';
+
+/* ------------------------------------------------------------ carregamento */
+async function carregar() {
+  try {
+    const r = await fetch('data/operacional.json?ts=' + Date.now());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    DADOS = await r.json();
+  } catch (e) {
+    $('app').innerHTML = `<div class="erro"><b>Não consegui ler os dados.</b><br>
+      Rode <code>py coletar.py</code> e <code>py processar.py</code>, e abra o painel
+      pelo atalho (não direto pelo arquivo).<br>
+      <span class="muted">Detalhe técnico: ${esc(e.message)}</span></div>`;
+    return;
+  }
+  COMP = DADOS.competencia_foco;
+  $('pill-emp').textContent = nfmt(DADOS.meta.total_empresas);
+  $('pill-upd').textContent = new Date(DADOS.meta.atualizado_em)
+    .toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  montarCompetencias();
+  render();
+}
+
+function montarCompetencias() {
+  const lista = DADOS.competencias.filter(c => DADOS.por_competencia[c]).slice(0, 10);
+  $('comps').innerHTML = lista.map(c =>
+    `<button class="comp${c === COMP ? ' on' : ''}" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+  $('comps').querySelectorAll('.comp').forEach(b => b.onclick = () => {
+    COMP = b.dataset.c; montarCompetencias(); render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/* --------------------------------------------------------------- render */
+function render() {
+  const b = DADOS.por_competencia[COMP];
+  if (!b) { $('app').innerHTML = '<div class="loading">Sem dados nesta competência.</div>'; return; }
+
+  $('app').innerHTML = `
+    <section class="times">${timesHTML(b)}</section>
+    ${passivoHTML()}
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Entregas no prazo, mês a mês</div>
+          <div class="card-sub">% das obrigações entregues em cada competência.
+            O mês corrente fica de fora (mal começou, entraria distorcido) e
+            <b>${esc(COMP_ULTIMA())} ainda está aberto</b> — o número dele ainda vai subir.</div>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch" style="background:${COR.geral}"></span>Geral</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:${COR.fiscal}"></span>Fiscal</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:${COR.contabil}"></span>Contábil</span>
+        </div>
+      </div>
+      <div class="card-body"><div class="chart-wrap" id="chart-tend"></div></div>
+    </section>
+
+    <section class="split-2">
+      <div class="card">
+        <div class="card-head"><div>
+          <div class="card-title">O que está segurando ${esc(compLongo(COMP))}</div>
+          <div class="card-sub">Obrigações com mais coisa em aberto. Clique para ver as empresas.</div>
+        </div></div>
+        <div class="card-body"><div class="bars" id="bars-obrig"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Por responsável</div>
+            <div class="card-sub">Quem tem mais coisa em aberto aparece primeiro.</div>
+          </div>
+          <div class="abas" id="abas-rank"></div>
+        </div>
+        <div class="card-body"><div class="bars" id="bars-rank"></div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <div class="card-title">Tudo que está em aberto</div>
+          <div class="card-sub" id="tbl-conta"></div>
+        </div>
+        <div class="tbl-tools">
+          <input class="inp" id="busca" placeholder="Buscar empresa, obrigação ou responsável…" value="${esc(busca)}">
+          <div class="chips" id="chips-time"></div>
+          <button class="chip${fMulta ? ' on' : ''}" id="chip-multa">Só com multa</button>
+          <button class="chip" id="btn-csv">Baixar Excel</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding-top:0">
+        <div class="tbl-scroll"><table>
+          <thead><tr>
+            <th>Empresa</th><th>Obrigação</th><th>Comp.</th><th>Área</th>
+            <th>Responsável</th><th>Status</th><th class="num">Prazo</th><th class="num">Atraso</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table></div>
+      </div>
+    </section>
+  `;
+
+  desenharTendencia();
+  desenharObrigacoes(b);
+  montarRanking(b);
+  montarTabela();
+}
+
+/* ------------------------------------------------------------- por time */
+function timesHTML(b) {
+  return DADOS.times.map(t => {
+    const k = b.times[t];
+    if (!k.total) return '';
+    const w = n => (n / k.total) * 100;
+    const entregues = k.entregues + k.entregues_atrasados;
+    return `
+    <div class="card time-card">
+      <div class="time-nome">${esc(DADOS.nome_time[t] || t)}</div>
+      <div class="time-pct">${pctTxt(k.percentual_entregues)}</div>
+      <div class="time-sub">${nfmt(entregues)} de ${nfmt(k.total)} obrigações entregues</div>
+      <div class="empilhada">
+        ${entregues ? `<i style="width:${w(entregues)}%;background:${COR.ok}"></i>` : ''}
+        ${k.pendentes ? `<i style="width:${w(k.pendentes)}%;background:${COR.wait}"></i>` : ''}
+        ${k.atrasadas ? `<i style="width:${w(k.atrasadas)}%;background:${COR.late}"></i>` : ''}
+      </div>
+      <div class="empilhada-leg">
+        <span><span class="dot" style="background:${COR.ok}"></span>Entregues <b>${nfmt(entregues)}</b></span>
+        <span><span class="dot" style="background:${COR.wait}"></span>Pendentes <b>${nfmt(k.pendentes)}</b></span>
+        <span><span class="dot" style="background:${COR.late}"></span>Atrasadas <b>${nfmt(k.atrasadas)}</b></span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* -------------------------------------------------------------- passivo */
+function passivoHTML() {
+  const p = DADOS.passivo;
+  if (!p.total) return '';
+  const maiores = p.por_competencia.filter(x => x.total).slice(0, 7);
+  const max = Math.max(...maiores.map(x => x.total), 1);
+  const times = Object.entries(p.por_time).sort((a, b) => b[1] - a[1]);
+  return `
+  <section class="card passivo">
+    <div class="card-head"><div>
+      <div class="card-title">Passivo em aberto</div>
+      <div class="card-sub">Obrigações que já passaram do prazo e <b>ainda não foram entregues</b>,
+        somando todas as competências. Este número não aparece quando se olha só o mês.</div>
+    </div></div>
+    <div class="card-body">
+      <div class="passivo-grid">
+        <div>
+          <div class="passivo-num">${nfmt(p.total)}</div>
+          <div class="time-sub" style="margin-top:6px">
+            ${p.com_multa ? `<b style="color:var(--late)">${nfmt(p.com_multa)}</b> com multa prevista` : 'sem multa prevista'}
+          </div>
+          <div class="empilhada-leg" style="margin-top:12px;flex-direction:column;gap:5px">
+            ${times.map(([t, n]) => `<span><span class="dot" style="background:${COR.late}"></span>
+              ${esc(t)} <b>${nfmt(n)}</b></span>`).join('')}
+          </div>
+        </div>
+        <div>
+          <div class="time-nome" style="margin-bottom:11px">Por competência</div>
+          <div class="mini">
+            ${maiores.map(x => `
+              <div class="mini-row" data-comp="${esc(x.competencia)}" style="cursor:pointer">
+                <span>${esc(x.competencia)}</span>
+                <div class="mini-track"><i style="width:${(x.total / max) * 100}%"></i></div>
+                <span class="mini-val">${nfmt(x.total)}</span>
+              </div>`).join('')}
+          </div>
+          <div class="card-sub" style="margin-top:11px">
+            Mais antigo: <b>${nfmt(p.mais_antigos[0].dias_atraso)} dias</b> —
+            ${esc(p.mais_antigos[0].obrigacao)} · ${esc(p.mais_antigos[0].empresa)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
+
+/* ------------------------------------------------------------ tendência */
+function desenharTendencia() {
+  const box = $('chart-tend');
+  const t = DADOS.tendencia.filter(x => x.total > 0).slice(-12);
+  if (t.length < 2) { box.innerHTML = '<div class="loading">Poucos meses para traçar a linha.</div>'; return; }
+
+  const W = box.clientWidth || 900, H = 280;
+  const M = { t: 16, r: 52, b: 30, l: 40 };
+  const px = i => M.l + (i / Math.max(1, t.length - 1)) * (W - M.l - M.r);
+  const py = v => H - M.b - (v / 100) * (H - M.t - M.b);
+  const linha = campo => t.map((p, i) =>
+    (i ? 'L' : 'M') + px(i).toFixed(1) + ' ' + py(p[campo]).toFixed(1)).join(' ');
+  const ponta = (campo, cor) => {
+    const u = t[t.length - 1];
+    return `<circle cx="${px(t.length - 1)}" cy="${py(u[campo])}" r="4" fill="${cor}"
+              stroke="#fff" stroke-width="2"/>
+            <text x="${px(t.length - 1) + 8}" y="${py(u[campo]) + 4}" class="axis-txt b"
+              fill="${cor}">${pctTxt(u[campo])}</text>`;
+  };
+
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="height:${H}px" id="svg-t">
+    ${[0, 25, 50, 75, 100].map(v => `
+      <line class="grid-line" x1="${M.l}" x2="${W - M.r}" y1="${py(v)}" y2="${py(v)}"/>
+      <text class="axis-txt" x="${M.l - 8}" y="${py(v) + 4}" text-anchor="end">${v}%</text>`).join('')}
+    ${t.map((p, i) => `<text class="axis-txt" x="${px(i)}" y="${H - M.b + 17}"
+        text-anchor="middle">${esc(p.competencia)}</text>`).join('')}
+    <path d="${linha('fiscal')}" fill="none" stroke="${COR.fiscal}" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${linha('contabil')}" fill="none" stroke="${COR.contabil}" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${linha('geral')}" fill="none" stroke="${COR.geral}" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    ${ponta('geral', COR.geral)}
+    <line id="cross" x1="0" x2="0" y1="${M.t}" y2="${H - M.b}" stroke="${COR.geral}"
+          stroke-width="1" opacity="0"/>
+    <rect id="hit" x="${M.l}" y="${M.t}" width="${W - M.l - M.r}" height="${H - M.t - M.b}" fill="transparent"/>
+  </svg>`;
+
+  const svg = $('svg-t'), cross = $('cross');
+  $('hit').addEventListener('mousemove', ev => {
+    const r = svg.getBoundingClientRect();
+    const x = (ev.clientX - r.left) * (W / r.width);
+    let i = Math.round(((x - M.l) / (W - M.l - M.r)) * (t.length - 1));
+    i = Math.max(0, Math.min(t.length - 1, i));
+    const p = t[i];
+    cross.setAttribute('x1', px(i)); cross.setAttribute('x2', px(i)); cross.setAttribute('opacity', '.3');
+    mostrarTip(ev, `<div class="tip-ttl">${esc(compLongo(p.competencia))} · ${nfmt(p.total)} obrigações</div>
+      <div class="tip-row"><span class="dot" style="background:${COR.geral}"></span>Geral: <b>${pctTxt(p.geral)}</b></div>
+      <div class="tip-row"><span class="dot" style="background:${COR.fiscal}"></span>Fiscal: <b>${pctTxt(p.fiscal)}</b></div>
+      <div class="tip-row"><span class="dot" style="background:${COR.contabil}"></span>Contábil: <b>${pctTxt(p.contabil)}</b></div>`);
+  });
+  $('hit').addEventListener('mouseleave', () => { cross.setAttribute('opacity', '0'); esconderTip(); });
+}
+
+/* ----------------------------------------------------------- obrigações */
+function desenharObrigacoes(b) {
+  const lista = b.obrigacoes.filter(o => o.atrasadas + o.pendentes > 0).slice(0, 14);
+  if (!lista.length) {
+    $('bars-obrig').innerHTML = '<div class="loading">Nada em aberto nesta competência.</div>';
+    return;
+  }
+  const max = Math.max(...lista.map(o => o.atrasadas + o.pendentes), 1);
+  $('bars-obrig').innerHTML = lista.map(o => `
+    <div class="bar-row" data-o="${esc(o.obrigacao)}" style="grid-template-columns:200px 1fr 96px;cursor:pointer">
+      <div class="bar-name" title="${esc(o.obrigacao)}">${esc(o.obrigacao)}</div>
+      <div class="bar-track">
+        ${o.atrasadas ? `<i style="width:${(o.atrasadas / max) * 100}%;background:${COR.late}"></i>` : ''}
+        ${o.pendentes ? `<i style="width:${(o.pendentes / max) * 100}%;background:${COR.wait}"></i>` : ''}
+      </div>
+      <div class="bar-val">${o.atrasadas ? `<b style="color:${COR.late}">${nfmt(o.atrasadas)}</b> atras.` : ''}
+        ${o.pendentes ? `<b>${nfmt(o.pendentes)}</b> pend.` : ''}</div>
+    </div>`).join('');
+
+  $('bars-obrig').querySelectorAll('.bar-row').forEach(row => {
+    const o = lista.find(x => x.obrigacao === row.dataset.o);
+    row.addEventListener('mousemove', ev => mostrarTip(ev,
+      `<div class="tip-ttl">${esc(o.obrigacao)}</div>
+       <div class="tip-row">${esc(o.time)} · ${nfmt(o.total)} no mês · ${pctTxt(o.percentual)} entregue</div>
+       <div class="tip-row"><span class="dot" style="background:${COR.late}"></span>Atrasadas: <b>${nfmt(o.atrasadas)}</b></div>
+       <div class="tip-row"><span class="dot" style="background:${COR.wait}"></span>Pendentes: <b>${nfmt(o.pendentes)}</b></div>`));
+    row.addEventListener('mouseleave', esconderTip);
+    row.addEventListener('click', () => {
+      busca = o.obrigacao; fComp = COMP; $('busca').value = o.obrigacao;
+      montarTabela();
+      document.querySelector('.tbl-scroll').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+}
+
+/* ------------------------------------------------------------- ranking */
+function montarRanking(b) {
+  const comTime = DADOS.times.filter(t => (b.ranking[t] || []).length);
+  if (!comTime.includes(abaRanking)) abaRanking = comTime[0];
+  $('abas-rank').innerHTML = comTime.map(t =>
+    `<button class="aba${t === abaRanking ? ' on' : ''}" data-t="${t}">${esc(DADOS.nome_time[t] || t)}</button>`).join('');
+  $('abas-rank').querySelectorAll('.aba').forEach(a => a.onclick = () => {
+    abaRanking = a.dataset.t; montarRanking(b);
+  });
+
+  const lista = (b.ranking[abaRanking] || [])
+    .slice().sort((x, y) => (y.pendentes + y.atrasadas) - (x.pendentes + x.atrasadas)
+                            || y.total - x.total).slice(0, 14);
+  $('bars-rank').innerHTML = lista.map(r => {
+    const ent = r.entregues + r.entregues_atrasados, w = n => (n / r.total) * 100;
+    return `<div class="bar-row" data-n="${esc(r.nome)}" style="cursor:pointer">
+      <div class="bar-name" title="${esc(r.nome)}">${esc(r.nome)}</div>
+      <div class="bar-track">
+        ${ent ? `<i style="width:${w(ent)}%;background:${COR.ok}"></i>` : ''}
+        ${r.pendentes ? `<i style="width:${w(r.pendentes)}%;background:${COR.wait}"></i>` : ''}
+        ${r.atrasadas ? `<i style="width:${w(r.atrasadas)}%;background:${COR.late}"></i>` : ''}
+      </div>
+      <div class="bar-val"><b>${pctTxt(r.percentual)}</b> · ${nfmt(r.total)}</div>
+    </div>`;
+  }).join('') || '<div class="loading">Sem dados nesta área.</div>';
+
+  $('bars-rank').querySelectorAll('.bar-row').forEach(row => {
+    const r = lista.find(x => x.nome === row.dataset.n);
+    row.addEventListener('mousemove', ev => mostrarTip(ev, `<div class="tip-ttl">${esc(r.nome)}</div>
+      <div class="tip-row"><span class="dot" style="background:${COR.ok}"></span>Entregues: <b>${nfmt(r.entregues + r.entregues_atrasados)}</b></div>
+      <div class="tip-row"><span class="dot" style="background:${COR.wait}"></span>Pendentes: <b>${nfmt(r.pendentes)}</b></div>
+      <div class="tip-row"><span class="dot" style="background:${COR.late}"></span>Atrasadas: <b>${nfmt(r.atrasadas)}</b></div>`));
+    row.addEventListener('mouseleave', esconderTip);
+    row.addEventListener('click', () => {
+      busca = r.nome; $('busca').value = r.nome; montarTabela();
+      document.querySelector('.tbl-scroll').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+}
+
+/* -------------------------------------------------------------- tabela */
+function montarTabela() {
+  const times = [['todos', 'Todas as áreas']].concat(
+    DADOS.times.map(t => [t, DADOS.nome_time[t] || t]));
+  $('chips-time').innerHTML = times.map(([k, l]) =>
+    `<button class="chip${fTime === k ? ' on' : ''}" data-k="${k}">${esc(l)}</button>`).join('');
+  $('chips-time').querySelectorAll('.chip').forEach(c => c.onclick = () => {
+    fTime = c.dataset.k; montarTabela();
+  });
+  $('chip-multa').onclick = () => { fMulta = !fMulta; montarTabela(); };
+  $('chip-multa').className = 'chip' + (fMulta ? ' on' : '');
+  $('busca').oninput = e => { busca = e.target.value; montarTabela(); };
+  $('btn-csv').onclick = () => baixarCSV(filtrar());
+
+  const linhas = filtrar();
+  $('tbl-conta').innerHTML = `<b>${nfmt(linhas.length)}</b> obrigações não entregues
+    ${fComp !== 'todas' ? 'em ' + esc(fComp) : 'de todas as competências até ' + esc(DADOS.competencia_foco)}
+    ${linhas.length > 400 ? ' · mostrando as 400 com mais atraso' : ''}`;
+
+  $('tbody').innerHTML = linhas.slice(0, 400).map(e => `
+    <tr>
+      <td><b>${esc(e.empresa)}</b><br><span class="muted" style="font-size:11.5px">${esc(cnpjFmt(e.cnpj))} · ${esc(e.uf || '—')}</span></td>
+      <td>${esc(e.obrigacao)}</td>
+      <td class="muted">${esc(e.competencia)}</td>
+      <td class="muted">${esc(e.time)}</td>
+      <td>${esc(e.responsavel || '—')}</td>
+      <td><span class="tag ${e.semaforo === 'red' ? 'late' : 'wait'}">${esc(e.status || '—')}</span>
+          ${e.multa ? '<span class="tag multa" style="margin-left:4px">multa</span>' : ''}</td>
+      <td class="num muted">${dataBR(e.prazo)}</td>
+      <td class="num">${e.dias_atraso ? `<b style="color:${COR.late}">${nfmt(e.dias_atraso)}d</b>` : '<span class="muted">no prazo</span>'}</td>
+    </tr>`).join('') ||
+    '<tr><td colspan="8" class="muted" style="padding:26px;text-align:center">Nada encontrado.</td></tr>';
+}
+
+function filtrar() {
+  const q = semAcento(busca.trim());
+  return DADOS.aberto.filter(e => {
+    if (fTime !== 'todos' && (DADOS.nome_time[fTime] || fTime) !== e.time) return false;
+    if (fComp !== 'todas' && e.competencia !== fComp) return false;
+    if (fMulta && !e.multa) return false;
+    if (!q) return true;
+    return semAcento(e.empresa + ' ' + e.obrigacao + ' ' + e.responsavel + ' ' + e.cnpj).includes(q);
+  });
+}
+
+function baixarCSV(linhas) {
+  const cab = ['Empresa','CNPJ','UF','Obrigacao','Competencia','Area','Departamento',
+               'Responsavel','Status','Prazo','DiasAtraso','Multa'];
+  const corpo = linhas.map(e => [e.empresa, cnpjFmt(e.cnpj), e.uf, e.obrigacao, e.competencia,
+    e.time, e.departamento, e.responsavel, e.status, dataBR(e.prazo), e.dias_atraso,
+    e.multa ? 'Sim' : 'Nao']);
+  const csv = '﻿' + [cab, ...corpo]
+    .map(l => l.map(c => `"${String(c == null ? '' : c).replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'obrigacoes-em-aberto.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// clique numa competência do passivo filtra a tabela por ela
+document.addEventListener('click', ev => {
+  const row = ev.target.closest('.mini-row');
+  if (!row || !DADOS) return;
+  fComp = (fComp === row.dataset.comp) ? 'todas' : row.dataset.comp;
+  montarTabela();
+  document.querySelector('.tbl-scroll').scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+window.addEventListener('resize', () => { if (DADOS) desenharTendencia(); });
+carregar();
+</script>
+</body>
+</html>
