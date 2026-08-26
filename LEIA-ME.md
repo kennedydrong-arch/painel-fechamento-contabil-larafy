@@ -1,0 +1,98 @@
+# Painel de Fechamento Contábil · LaraFy
+
+Painel que mostra, em percentual, quanto do fechamento contábil do mês já está
+concluído — para acompanhar o time e apresentar à gestão.
+
+Os dados vêm **direto do Acessórias**, pela API oficial. Ninguém exporta planilha,
+ninguém digita nada.
+
+---
+
+## Como rodar (o dia a dia)
+
+Duplo clique em **`ATUALIZAR E ABRIR.bat`**.
+
+Ele faz três coisas, nesta ordem:
+
+1. baixa do Acessórias tudo que mudou (leva ~15 minutos, é a parte lenta);
+2. calcula os indicadores;
+3. abre o painel no navegador.
+
+Se quiser só **abrir o painel** com os dados da última vez, duplo clique em
+`ABRIR PAINEL.bat` — abre na hora.
+
+---
+
+## O que o painel mostra
+
+| Bloco | O que responde |
+|---|---|
+| Anel grande | **% de empresas com o fechamento concluído** na competência |
+| Cartões | Concluídas (no prazo / em atraso), pendentes, atrasadas, quanto falta |
+| Evolução do fechamento | Como o mês foi andando, dia a dia — com o mês anterior no fundo, para comparar ritmo |
+| Por responsável | Quanto cada pessoa já fechou; clicar filtra a tabela |
+| Por regime | % concluído em Lucro Presumido, Simples, Lucro Real… |
+| Etapas de apoio | Balancete mensal e checklist contábil da mesma competência |
+| Tabela | Empresa por empresa, com busca, filtro e botão de baixar Excel |
+
+O botão **Imprimir / PDF** gera a versão de apresentação, sem os filtros.
+
+---
+
+## A regra do que conta como "fechado"
+
+Uma empresa entra como **concluída** quando a tarefa `FECHAMENTO CONTÁBIL`
+daquela competência está entregue no Acessórias — no prazo ou em atraso, tanto faz
+(o painel separa as duas coisas nos cartões, mas as duas contam como fechada).
+
+Tarefa **dispensada** sai da conta: não conta a favor nem contra, e o painel mostra
+quantas foram, para o número não parecer maquiado.
+
+Quem muda essa régua é o Acessórias, não o painel: se a tarefa for marcada lá,
+aparece aqui na próxima atualização.
+
+---
+
+## Os arquivos
+
+| Arquivo | Para que serve |
+|---|---|
+| `coletar.py` | Fala com a API do Acessórias e grava `dados/bruto.json` |
+| `processar.py` | Lê o bruto, aplica as regras e gera `data/fechamento.json` |
+| `classificador.py` | Traduz o texto do status ("Ent. PzTéc", "Atrasada!") em concluído/pendente/atrasado |
+| `acessorias.py` | O cliente da API: token, ritmo de chamadas, tentativas |
+| `index.html` | O painel |
+| `servir.py` | Sobe o painel no navegador |
+| `.env` | **O token do Acessórias. Não vai para o Git, não vai para lugar nenhum.** |
+
+`dados/bruto.json` é o que a API respondeu, sem interpretação. Se a regra mudar,
+dá para recalcular tudo sem baixar de novo: `py processar.py`.
+
+---
+
+## Se der problema
+
+**"Não consegui ler os dados" no navegador**
+O painel precisa ser aberto pelo `.bat` (ou por `py servir.py`). Abrir o
+`index.html` com duplo clique não funciona — o navegador bloqueia a leitura do
+arquivo de dados.
+
+**"Token do Acessorias recusado (401)"**
+O token foi apagado ou trocado no Acessórias. Gere outro em
+**engrenagem (canto superior direito) → API Token** e cole no arquivo `.env`,
+na linha `ACESSORIAS_TOKEN=`.
+
+**A coleta parou no meio**
+Rode de novo. Ela retoma de onde parou — não recomeça do zero.
+
+**O número não bate com o Acessórias**
+Confira a competência selecionada no topo. O painel usa a **competência** da
+tarefa (o mês de referência), não o mês do prazo — julho fecha em agosto.
+
+---
+
+## Limite da API
+
+O Acessórias permite 100 chamadas por minuto. O coletor anda de propósito abaixo
+disso (~85/min) e recua sozinho se levar bloqueio. Por isso a coleta completa leva
+uns 15 minutos: são 409 empresas, e a API não deixa pedir todas de uma vez.

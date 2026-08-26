@@ -1,0 +1,55 @@
+name: Atualizar painel
+
+on:
+  schedule:
+    # 10:00 UTC = 07:00 em Brasilia, de segunda a sexta
+    - cron: '0 10 * * 1-5'
+  workflow_dispatch:        # permite rodar na mao pelo botao do GitHub
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atualizar-painel
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # guarda a resposta crua da API entre as rodadas: e o que permite baixar
+      # so o que mudou (5 min) em vez do ano inteiro (60 min)
+      - name: Recuperar coleta anterior
+        uses: actions/cache@v4
+        with:
+          path: dados
+          key: acessorias-bruto-${{ github.run_id }}
+          restore-keys: acessorias-bruto-
+
+      - name: Baixar do Acessorias
+        env:
+          ACESSORIAS_TOKEN: ${{ secrets.ACESSORIAS_TOKEN }}
+        run: python coletar.py --rapido
+
+      - name: Calcular indicadores
+        run: python processar.py
+
+      - name: Publicar
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --staged --quiet; then
+            echo "Nada mudou no Acessorias desde a ultima rodada."
+          else
+            git commit -m "Atualizacao automatica do painel"
+            git push
+          fi

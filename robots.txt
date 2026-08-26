@@ -1,0 +1,3 @@
+# Painel interno da LaraFy. Nao indexar em buscador.
+User-agent: *
+Disallow: /

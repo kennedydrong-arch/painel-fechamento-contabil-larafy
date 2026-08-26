@@ -1,0 +1,10 @@
+.env
+dados/
+__pycache__/
+*.pyc
+_shot_*.png
+
+# O painel publicado usa so o fechamento.json (leve).
+# O data.json operacional passa de 7 MB e incharia o repositorio a cada
+# atualizacao diaria - ele continua sendo gerado, so nao vai para o Git.
+data/data.json
