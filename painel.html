@@ -65,6 +65,9 @@ body {
 .vivo { display:flex; align-items:center; gap:.45cqw; font-family: var(--lf-f-mono);
         font-size:.66cqw; letter-spacing:.13em; text-transform:uppercase; color:#8fb3c4; }
 .vivo i { width:.5cqw; height:.5cqw; border-radius:50%; background: var(--lf-cyan); }
+.vivo-velho { color:#ffd9d4; }
+.vivo-velho i { background: var(--lf-erro); }
+.topo.velho { background:#5b1f18; }
 .relogio { font-family: var(--lf-f-mono); font-size:1.5cqw; letter-spacing:-.02em;
            line-height:1; text-align:right; }
 .relogio small { display:block; font-size:.62cqw; color:#8fb3c4; margin-top:.15cqw; }
@@ -178,6 +181,7 @@ body {
 <div class="palco" id="palco"><div class="carregando">Lendo o Acessórias…</div></div>
 
 <script src="logos.js"></script>
+<script src="comum.js"></script>
 <script>
 const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril', mai:'maio',
@@ -242,9 +246,10 @@ function desenhar() {
   const b = FECH.fechamento[COMP];
   const escuro = document.documentElement.getAttribute('data-theme') === 'dark';
   const comps = FECH.competencias.slice(0, 5);
+  const velhice = idadeDosDados(FECH.meta);
 
   $('#palco').innerHTML = `
-    <div class="topo">
+    <div class="topo${velhice.velho ? ' velho' : ''}">
       <img class="logo" src="${LOGOS.larafy_branca}" alt="LaraFy">
       <div class="fio-v"></div>
       <div class="chapeu">Fechamento contábil<small>${esc(compLongo(COMP))}</small></div>
@@ -252,7 +257,10 @@ function desenhar() {
         ${comps.map(c => `<button class="fbtn${c === COMP ? ' ativo' : ''}" data-c="${esc(c)}">${esc(c)}</button>`).join('')}
       </div>
       <div class="topo-d">
-        <span class="vivo"><i></i>Acessórias · ${nfmt(FECH.meta.total_empresas)} empresas</span>
+        ${velhice.velho
+          ? `<span class="vivo vivo-velho" title="${esc(frateDadosVelhos(FECH.meta))}">
+               <i></i>Dados de ${esc(velhice.quando)} · ${esc(velhice.texto)}</span>`
+          : `<span class="vivo"><i></i>Acessórias · ${nfmt(FECH.meta.total_empresas)} empresas</span>`}
         <button class="btn-tema" id="btn-tema">${escuro ? 'Claro' : 'Escuro'}</button>
         <div class="relogio"><span id="hora">--:--</span><small id="hoje">—</small></div>
       </div>

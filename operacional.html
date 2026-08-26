@@ -38,6 +38,7 @@
 <footer>LaraFy · dados lidos direto do Acessórias pela API oficial</footer>
 <div class="tip" id="tip"></div>
 
+<script src="comum.js"></script>
 <script>
 // Semáforo e séries vêm dos tokens do pacote visual. As três linhas da
 // tendência usam os slots 1 e 2 da paleta (ordem fixa) e o navy da marca.
@@ -126,7 +127,10 @@ function render() {
   const b = DADOS.por_competencia[COMP];
   if (!b) { $('app').innerHTML = '<div class="loading">Sem dados nesta competência.</div>'; return; }
 
+  const velho = frateDadosVelhos(DADOS.meta);
   $('app').innerHTML = `
+    ${velho ? `<div class="aviso"><span class="aviso-icone">atenção</span>
+      <div class="aviso-linha"><b>${esc(velho)}</b></div></div>` : ''}
     <section class="times">${timesHTML(b)}</section>
     ${passivoHTML()}
 

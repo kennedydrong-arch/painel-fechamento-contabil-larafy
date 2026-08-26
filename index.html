@@ -39,6 +39,7 @@
 
 <div class="tip" id="tip"></div>
 
+<script src="comum.js"></script>
 <script>
 // Slots da paleta da marca, ja validados para daltonismo e contraste.
 // A serie usa o azul-petroleo #0090B3, nao o cyan da marca: o cyan e
@@ -224,6 +225,8 @@ function render() {
    empresa ativa sem a tarefa cadastrada (o painel não enxerga). */
 function avisosHTML(b) {
   const linhas = [];
+  const velho = frateDadosVelhos(DADOS.meta);
+  if (velho) linhas.push(`<div class="aviso-linha"><b>${esc(velho)}</b></div>`);
   const foco = DADOS.fechamento[DADOS.competencia_foco];
   if (foco && b.total < foco.total * 0.75) {
     linhas.push(`<div class="aviso-linha">Nesta competência apenas
