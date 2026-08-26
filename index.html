@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Fechamento Contábil · LaraFy</title>
-<link rel="stylesheet" href="larafy-tokens.css">
+<link rel="stylesheet" href="kit.css">
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
@@ -49,9 +49,9 @@
 // junto na tela, nunca só a cor.
 const css = getComputedStyle(document.documentElement);
 const tk = n => css.getPropertyValue(n).trim();
-const COR = { ok: tk('--lf-ok'), wait: tk('--lf-atencao'), late: tk('--lf-erro'),
-              off: tk('--lf-serie-outros'), atual: tk('--lf-serie-1'),
-              ant: tk('--lf-serie-outros') };
+const COR = { ok: tk('--ok'), wait: tk('--al'), late: tk('--mal'),
+              off: tk('--sOut'), atual: tk('--s1'),
+              ant: tk('--sOut') };
 const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril',
                       mai:'maio', jun:'junho', jul:'julho', ago:'agosto',
@@ -252,8 +252,8 @@ function heroHTML(b) {
   const hoje = new Date().toISOString().slice(0, 10);
   const venceu = b.prazo_legal && b.prazo_legal < hoje;
   const p = Math.max(0, Math.min(100, b.percentual));
-  const cor = !venceu ? 'var(--lf-serie-1)'
-            : p >= 95 ? 'var(--lf-ok)' : p >= 80 ? 'var(--lf-atencao)' : 'var(--lf-erro)';
+  const cor = !venceu ? 'var(--s1)'
+            : p >= 95 ? 'var(--ok)' : p >= 80 ? 'var(--al)' : 'var(--mal)';
   const w = n => b.total ? (n / b.total) * 100 : 0;
   return `
   <div class="card hero">
@@ -261,8 +261,8 @@ function heroHTML(b) {
     <div class="hero-num" style="color:${cor}">${pctTxt(b.percentual)}</div>
     <div class="hero-barra">
       ${b.concluidas ? `<i style="width:${w(b.concluidas)}%;background:${cor}"></i>` : ''}
-      ${b.atrasadas ? `<i style="width:${w(b.atrasadas)}%;background:var(--lf-erro)"></i>` : ''}
-      ${b.pendentes ? `<i style="width:${w(b.pendentes)}%;background:var(--lf-atencao)"></i>` : ''}
+      ${b.atrasadas ? `<i style="width:${w(b.atrasadas)}%;background:var(--mal)"></i>` : ''}
+      ${b.pendentes ? `<i style="width:${w(b.pendentes)}%;background:var(--al)"></i>` : ''}
     </div>
     <div class="hero-count"><b>${nfmt(b.concluidas)}</b> de <b>${nfmt(b.total)}</b> empresas fechadas</div>
     <div class="hero-prazo">
@@ -286,7 +286,7 @@ function comparativoHTML(b) {
   const ate = bAnt.curva.filter(p => p.dia <= alvoDia);
   const ref = ate.length ? ate[ate.length - 1].percentual : 0;
   const dif = b.percentual - ref;
-  const cor = dif >= 0 ? 'var(--lf-ok)' : 'var(--lf-erro)';
+  const cor = dif >= 0 ? 'var(--ok)' : 'var(--mal)';
   const seta = dif >= 0 ? '▲' : '▼';
   return `<div class="hero-prazo" style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border)">
     No mesmo ponto do mês, ${esc(anterior)} tinha <b>${pctTxt(ref)}</b><br>
@@ -401,7 +401,7 @@ function desenharEvolucao(b) {
             fill="${COR.late}" font-weight="600">prazo</text>` : ''}
     ${diaHoje != null && diaHoje >= 0 && diaHoje <= maxX ? `
       <line x1="${px(diaHoje)}" x2="${px(diaHoje)}" y1="${M.t}" y2="${H - M.b}"
-            stroke="var(--navy)" stroke-width="1.5" opacity=".35"/>
+            stroke="var(--tin)" stroke-width="1.5" opacity=".35"/>
       <text class="axis-txt b" x="${px(diaHoje)}" y="${M.t - 3}" text-anchor="middle">hoje</text>` : ''}
     ${sB.length ? `<path d="${linha(sB)}" fill="none" stroke="${COR.ant}" stroke-width="2"
         stroke-dasharray="5 4" stroke-linecap="round" stroke-linejoin="round"/>` : ''}

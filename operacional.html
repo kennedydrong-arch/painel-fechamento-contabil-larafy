@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Painel Operacional · LaraFy</title>
-<link rel="stylesheet" href="larafy-tokens.css">
+<link rel="stylesheet" href="kit.css">
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
@@ -44,9 +44,9 @@
 // tendência usam os slots 1 e 2 da paleta (ordem fixa) e o navy da marca.
 const css = getComputedStyle(document.documentElement);
 const tk = n => css.getPropertyValue(n).trim();
-const COR = { ok: tk('--lf-ok'), wait: tk('--lf-atencao'), late: tk('--lf-erro'),
-              off: tk('--lf-serie-outros'), fiscal: tk('--lf-serie-1'),
-              contabil: tk('--lf-serie-2'), geral: tk('--lf-tinta') };
+const COR = { ok: tk('--ok'), wait: tk('--al'), late: tk('--mal'),
+              off: tk('--sOut'), fiscal: tk('--s1'),
+              contabil: tk('--s2'), geral: tk('--tin') };
 const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril',
                       mai:'maio', jun:'junho', jul:'julho', ago:'agosto',

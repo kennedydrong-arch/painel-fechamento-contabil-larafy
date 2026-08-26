@@ -24,8 +24,7 @@ api.acessorias.com  ──coletar.py──▶  dados/bruto.json  ──processar
 | `index.html` | Fechamento empresa a empresa |
 | `operacional.html` | Painel operacional: todas as obrigações, por área |
 | `estilo.css` | Estilo das duas páginas de trabalho |
-| `larafy-tokens.css` | **Pacote visual da LaraFy** — cores, fontes e medidas. Copiado de `Desktop/design_pack_larafy`, não editar aqui |
-| `larafy-ui.css` | Peças prontas do pacote visual |
+| `kit.css` | **O enxoval da LaraFy**, cópia fiel do artifact "Kit de Peças LaraFy v1". Traz os tokens e as peças: `faixa-num`, `deitadas`, `colunas`, `destaque`, `aviso`, `mrc`, `painel`, tabela. **Não editar aqui** — se a peça mudar no enxoval, copiar de lá de novo |
 | `logos.js` | Logos da marca em base64, os mesmos do painel comercial |
 | `conferir.py` | Reconta os números por um caminho independente e compara |
 | `servir.py` | Servidor local (o painel usa `fetch`, não abre por `file://`) |
@@ -137,7 +136,16 @@ marca-texto**: no máximo 3 lugares por tela (aqui: o "y" da marca, a aba ativa 
 o foco do campo de busca), nunca em texto. O **semáforo é separado da paleta de
 gráfico** e vem sempre com a palavra junto.
 
-Antes de mexer no visual, leia `Desktop/design_pack_larafy/PROMPT-PARA-IA.md`.
+Antes de mexer no visual: **use as peças de `kit.css`**, não invente componente.
+Foi o erro que custou três refações — o kit já tem faixa de números, barra
+deitada, gráfico de colunas, destaque, aviso e marca de estado prontos.
+
+Uma exceção deliberada: no tema escuro a série principal usa o cyan `#00c4e5`,
+que é o que o site da LaraTAX aplica de verdade (94 ocorrências no CSS dele).
+O azul `#2196BA` do modo escuro do kit deixa a tela sem vida numa TV. O
+`#07e0ff` segue reservado ao acento.
+
+Leia também `Desktop/design_pack_larafy/PROMPT-PARA-IA.md`.
 
 ---
 
