@@ -232,8 +232,7 @@ function desenhar() {
         <span class="pc" style="color:${corDo(b)}">${pct(b.percentual)}</span>
         <span class="txt">
           <span class="l1"><u>${nfmt(b.concluidas)}</u> de <u>${nfmt(b.total)}</u> empresas fechadas</span>
-          <span class="l2">faltam ${nfmt(falta)} para o mês fechar${
-            b.dispensadas ? ` · ${nfmt(b.dispensadas)} dispensadas ficam fora da conta` : ''}</span>
+          <span class="l2">faltam ${nfmt(falta)} para o mês fechar${explicaTotal(b)}</span>
         </span>
         <span class="marcas">${estado}</span>
       </div>
@@ -264,6 +263,20 @@ function desenhar() {
   $('#prox').onclick = () => { const c = compVizinha(COMP, 1); if (c) { COMP = c; desenhar(); } };
   $('#cheia').onclick = alternarTelaCheia;
   desenharCurva(b);
+}
+
+/* De onde vem a diferença entre o total de empresas do escritório e as que
+   entram nesta conta. Sem essa linha, "233" ao lado de "409 empresas" parece
+   que está faltando gente. */
+function explicaTotal(b) {
+  const c = b.cobertura;
+  if (!c || c.empresas_no_escritorio <= c.nesta_conta) return '';
+  const partes = [];
+  if (c.filial_que_fecha_na_matriz)
+    partes.push(`${nfmt(c.filial_que_fecha_na_matriz)} filiais fecham junto com a matriz`);
+  if (c.dispensadas_ou_sem_tarefa)
+    partes.push(`${nfmt(c.dispensadas_ou_sem_tarefa)} estão dispensadas ou sem a tarefa`);
+  return ` · das ${nfmt(c.empresas_no_escritorio)} do escritório, ${partes.join(' e ')}`;
 }
 
 function corDo(b) {

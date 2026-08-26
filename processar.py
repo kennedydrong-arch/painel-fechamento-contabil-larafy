@@ -331,6 +331,24 @@ def bloco_fechamento(linhas, competencias, empresas_ativas=None):
              for c, d in empresas_ativas.items() if c not in com_tarefa),
             key=lambda x: x["empresa"])
 
+        # De onde vem a diferença entre o total de empresas do escritório e as
+        # que entram nesta conta. Sem isso o painel mostra "233" ao lado de
+        # "409 empresas" e parece que está faltando gente.
+        cnpjs_alvo = {a["cnpj"] for a in alvo}
+        fora = [c for c in empresas_ativas if c not in cnpjs_alvo]
+        # filial cuja matriz (mesma raiz de CNPJ) fecha: a contabilidade dela
+        # é fechada junto com a matriz, não separado. Não é falha.
+        raizes_que_fecham = {c[:8] for c in cnpjs_alvo}
+        filial_da_matriz = [c for c in fora
+                            if c[8:12] != "0001" and c[:8] in raizes_que_fecham]
+        resto = [c for c in fora if c not in set(filial_da_matriz)]
+        cobertura = {
+            "empresas_no_escritorio": len(empresas_ativas),
+            "nesta_conta": len(cnpjs_alvo),
+            "filial_que_fecha_na_matriz": len(filial_da_matriz),
+            "dispensadas_ou_sem_tarefa": len(resto),
+        }
+
         prazos = [a["prazo_legal"] for a in alvo if a["prazo_legal"]]
         tecnicos = [a["prazo_tecnico"] for a in alvo if a["prazo_tecnico"]]
         por_comp[comp] = {
@@ -344,6 +362,7 @@ def bloco_fechamento(linhas, competencias, empresas_ativas=None):
             "atrasadas": len(atrasadas),
             "dispensadas": dispensadas,
             "sem_tarefa": len(sem_tarefa),
+            "cobertura": cobertura,
             "sem_tarefa_lista": sem_tarefa,
             "percentual": pct(len(concluidas), total),
             "percentual_pendentes": pct(len(pendentes), total),
