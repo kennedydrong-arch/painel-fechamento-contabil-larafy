@@ -76,6 +76,10 @@ body {
 .btn-tema:hover { color:#fff; border-color:#fff; }
 :focus-visible { outline:2px solid var(--lf-cyan); outline-offset:2px; }
 
+/* Em tela cheia numa TV, o ponteiro parado no meio do painel fica na frente
+   do dado o dia inteiro. Ele volta assim que alguém mexe no mouse. */
+.palco.sem-ponteiro, .palco.sem-ponteiro * { cursor:none; }
+
 /* ------------------------------------------------------------ corpo */
 .corpo { flex:1; min-height:0; display:grid; grid-template-columns: 1fr 1px 33.5cqw; }
 .divisor { background: var(--lf-fio); }
@@ -317,6 +321,8 @@ function desenhar() {
           ${idade.velho ? `sem atualizar desde <span class="d">${esc(idade.quando)}</span>`
                         : `atualizado ${esc(idade.texto)}`}</span>
         <button class="btn-tema" id="tema">${escuro ? 'Claro' : 'Escuro'}</button>
+        <button class="btn-tema" id="cheia" title="Tecla F">${
+          document.fullscreenElement ? 'Sair' : 'Tela cheia'}</button>
       </div>
     </header>
 
@@ -348,8 +354,54 @@ function desenhar() {
     document.documentElement.setAttribute('data-theme', escuro ? 'light' : 'dark');
     desenhar();
   };
+  $('#cheia').onclick = alternarTelaCheia;
   desenharCurva(b);
 }
+
+/* ---------------------------------------------------------- tela cheia
+   Para deixar o painel numa TV sem a barra do navegador em volta. O Esc
+   devolve, como em qualquer página; o rótulo do botão acompanha o estado
+   real, inclusive quando a saída não vem do botão. */
+async function alternarTelaCheia() {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch (e) {
+    // alguns navegadores recusam sem gesto direto ou em iframe; não quebra a tela
+    console.warn('Tela cheia indisponível neste navegador:', e.message);
+  }
+}
+
+document.addEventListener('fullscreenchange', () => {
+  const b = document.getElementById('cheia');
+  if (b) b.textContent = document.fullscreenElement ? 'Sair' : 'Tela cheia';
+  if (!document.fullscreenElement) {
+    clearTimeout(tempoPonteiro);
+    document.querySelector('.palco')?.classList.remove('sem-ponteiro');
+  } else {
+    esconderPonteiroDepois();
+  }
+  if (FECH) desenharCurva(FECH.fechamento[COMP]);   // a caixa do gráfico mudou de tamanho
+});
+
+let tempoPonteiro;
+function esconderPonteiroDepois() {
+  clearTimeout(tempoPonteiro);
+  const palco = document.querySelector('.palco');
+  if (!palco) return;
+  palco.classList.remove('sem-ponteiro');
+  if (!document.fullscreenElement) return;
+  tempoPonteiro = setTimeout(() => palco.classList.add('sem-ponteiro'), 3000);
+}
+document.addEventListener('mousemove', esconderPonteiroDepois);
+
+document.addEventListener('keydown', ev => {
+  if (ev.target.tagName === 'INPUT' || ev.ctrlKey || ev.altKey || ev.metaKey) return;
+  const t = ev.key.toLowerCase();
+  if (t === 'f') { ev.preventDefault(); alternarTelaCheia(); }
+  else if (ev.key === 'ArrowLeft') { const c = compVizinha(COMP, -1); if (c) { COMP = c; desenhar(); } }
+  else if (ev.key === 'ArrowRight') { const c = compVizinha(COMP, 1); if (c) { COMP = c; desenhar(); } }
+});
 
 /* 1 — situação: o percentual junto do que o explica, numa leitura só */
 function secaoSituacao(b) {

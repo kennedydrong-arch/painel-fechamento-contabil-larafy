@@ -33,6 +33,16 @@ Se quiser só **abrir o painel** com os dados da última vez, duplo clique em
 
 As três têm as mesmas abas no topo para trocar entre elas.
 
+### Deixar numa TV
+
+No `painel.html`, o botão **Tela cheia** (ou a tecla **F**) tira a barra do
+navegador e o painel ocupa a tela inteira. `Esc` volta. Depois de 3 segundos
+parado, o ponteiro do mouse some sozinho — ele ficava na frente do número o dia
+inteiro. As setas **←** e **→** trocam a competência sem precisar do mouse.
+
+Os dados se atualizam sozinhos a cada 5 minutos, então a tela pode ficar ligada
+sem ninguém mexer.
+
 ### O que cabe na tela do `painel.html`
 
 | Bloco | Responde |
