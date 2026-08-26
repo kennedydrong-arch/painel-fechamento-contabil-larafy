@@ -1,0 +1,178 @@
+/* ============================================================
+   LaraFy — peças de interface
+   Depende de larafy-tokens.css (carregue ele antes).
+   Nada aqui usa sombra, gradiente, emoji ou canto grande.
+   ============================================================ */
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--lf-fundo);
+  color:var(--lf-tinta);
+  font-family:var(--lf-f-texto);
+  font-size:14.5px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+a{color:var(--lf-cyan-tinta); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* O foco é a única coisa que pode brilhar. */
+:focus-visible{outline:2px solid var(--lf-cyan); outline-offset:2px}
+
+img,canvas,video,table{max-width:100%}
+
+/* ---------- título ----------
+   Montserrat só no título, sempre apertada. O h2 não é um título
+   menor: é um rótulo de seção, em mono maiúsculo. */
+h1,h2,h3{margin:0}
+h1{
+  font-family:var(--lf-f-titulo); font-weight:700; font-size:27px;
+  letter-spacing:var(--lf-aperto-titulo); line-height:1.15; color:var(--lf-tinta);
+  text-wrap:balance;
+}
+h3{font-family:var(--lf-f-titulo); font-weight:700; font-size:16px;
+   letter-spacing:-.02em; color:var(--lf-tinta)}
+h2, .lf-rotulo{
+  font-family:var(--lf-f-mono); font-weight:500; font-size:11px;
+  letter-spacing:var(--lf-solto-rotulo); text-transform:uppercase;
+  color:var(--lf-tinta-3);
+}
+.lf-sub{color:var(--lf-tinta-2); font-size:14px; margin:6px 0 0; max-width:64ch}
+
+/* ---------- números ----------
+   Em coluna, dígitos da mesma largura. Nunca abreviar (2.4M esconde). */
+.lf-num{font-variant-numeric:tabular-nums}
+.lf-mono{font-family:var(--lf-f-mono); font-variant-numeric:tabular-nums}
+
+/* ---------- painel (o "card" sem cara de card) ---------- */
+.lf-painel{
+  background:var(--lf-superficie); border:1px solid var(--lf-fio);
+  border-radius:var(--lf-r3); padding:var(--lf-e5); box-shadow:var(--lf-sombra);
+}
+.lf-painel + .lf-painel{margin-top:var(--lf-e4)}
+
+/* ---------- indicador ----------
+   Sem caixa, sem sombra, sem ícone. Um fio separa um do outro. */
+.lf-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  border-top:1px solid var(--lf-fio); border-bottom:1px solid var(--lf-fio)}
+.lf-kpi{padding:var(--lf-e4) var(--lf-e4) var(--lf-e3); border-right:1px solid var(--lf-fio)}
+.lf-kpi:last-child{border-right:0}
+.lf-kpi .v{
+  font-size:27px; font-weight:600; letter-spacing:-.025em; line-height:1.2;
+  margin:5px 0 3px; white-space:nowrap; font-variant-numeric:tabular-nums;
+}
+.lf-kpi .d{font-family:var(--lf-f-mono); font-size:11.5px; color:var(--lf-tinta-3)}
+.lf-kpi .d.sobe{color:var(--lf-ok)}
+.lf-kpi .d.cai{color:var(--lf-erro)}
+
+/* ---------- botão ----------
+   Diz o que acontece ao clicar ("Baixar XML"), não "Começar agora".
+   Sem gradiente, sem brilho, sem pular no hover. */
+.lf-btn{
+  display:inline-flex; align-items:center; gap:var(--lf-e2);
+  background:var(--lf-navy); color:#fff; border:1px solid var(--lf-navy);
+  padding:8px 15px; border-radius:var(--lf-r2);
+  font-family:var(--lf-f-texto); font-size:13.5px; font-weight:500;
+  cursor:pointer; transition:background .12s;
+}
+.lf-btn:hover{background:var(--lf-navy-esc); text-decoration:none}
+.lf-btn svg{width:15px; height:15px}
+.lf-btn.sec{background:var(--lf-superficie); color:var(--lf-tinta); border-color:var(--lf-fio)}
+.lf-btn.sec:hover{background:var(--lf-rebaixo)}
+.lf-btn.perigo{background:var(--lf-erro); border-color:var(--lf-erro)}
+.lf-btn:disabled{opacity:.45; cursor:not-allowed}
+
+/* ---------- campo ---------- */
+label{display:block; font-size:12px; color:var(--lf-tinta-3); margin:0 0 4px}
+input[type=text],input[type=password],input[type=email],input[type=date],
+input[type=number],select,textarea{
+  width:100%; padding:8px 11px; border:1px solid var(--lf-fio);
+  border-radius:var(--lf-r2); font-size:14px; font-family:inherit;
+  background:var(--lf-superficie); color:var(--lf-tinta);
+}
+input::placeholder,textarea::placeholder{color:var(--lf-tinta-3)}
+input:focus,select:focus,textarea:focus{
+  outline:none; border-color:var(--lf-cyan-tinta);
+  box-shadow:0 0 0 2px rgba(0,115,143,.15);
+}
+
+/* ---------- tabela ----------
+   Sem zebra: o fio já separa. Número à direita, em coluna. */
+.lf-tabela{width:100%; border-collapse:collapse; font-size:13.5px}
+.lf-tabela th{
+  text-align:left; padding:0 12px 8px 0; border-bottom:1px solid var(--lf-fio);
+  font-family:var(--lf-f-mono); font-weight:500; font-size:10.5px;
+  letter-spacing:var(--lf-solto-rotulo); text-transform:uppercase; color:var(--lf-tinta-3);
+}
+.lf-tabela td{padding:9px 12px 9px 0; border-bottom:1px solid var(--lf-fio-suave); color:var(--lf-tinta-2)}
+.lf-tabela td:first-child{color:var(--lf-tinta)}
+.lf-tabela .n, .lf-tabela th.n{text-align:right; font-variant-numeric:tabular-nums; font-family:var(--lf-f-mono)}
+.lf-tabela tbody tr:hover td{background:var(--lf-rebaixo)}
+
+/* ---------- marca de estado ----------
+   Canto pequeno, não pílula. Cor NUNCA sozinha: sempre com palavra. */
+.lf-marca{
+  display:inline-flex; align-items:center; gap:5px;
+  border-radius:var(--lf-r1); padding:2px 7px; font-size:11.5px; font-weight:500;
+  border:1px solid; white-space:nowrap;
+}
+.lf-marca.ok     {background:var(--lf-ok-fundo);      color:var(--lf-ok);      border-color:var(--lf-ok-fio)}
+.lf-marca.atencao{background:var(--lf-atencao-fundo); color:var(--lf-atencao); border-color:var(--lf-atencao-fio)}
+.lf-marca.erro   {background:var(--lf-erro-fundo);    color:var(--lf-erro);    border-color:var(--lf-erro-fio)}
+.lf-marca.neutro {background:var(--lf-rebaixo);       color:var(--lf-tinta-2); border-color:var(--lf-fio)}
+.lf-marca svg{width:11px; height:11px}
+
+/* ---------- barra de gráfico ---------- */
+.lf-barras{display:grid; gap:9px; font-variant-numeric:tabular-nums}
+.lf-barra-cab{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:3px}
+.lf-barra-cab .v{font-family:var(--lf-f-mono); color:var(--lf-tinta-2)}
+.lf-trilho{height:7px; background:var(--lf-serie-trilho); border-radius:var(--lf-r1)}
+.lf-trilho > span{display:block; height:7px; background:var(--lf-serie-1); border-radius:var(--lf-r1)}
+.lf-trilho.outros > span{background:var(--lf-serie-outros)}
+
+/* ---------- barra de navegação ----------
+   Navy chapado. O cyan aparece uma vez: no item ativo. */
+.lf-topo{
+  background:var(--lf-navy); color:#fff;
+  display:flex; align-items:center; gap:var(--lf-e5);
+  padding:0 var(--lf-e4); height:46px;
+}
+.lf-topo .marca{font-family:var(--lf-f-titulo); font-weight:800; font-size:16px; letter-spacing:-.03em}
+.lf-topo .marca i{color:var(--lf-cyan); font-style:normal}
+.lf-topo nav{display:flex; gap:17px; font-size:13px; align-self:stretch; align-items:center}
+.lf-topo nav a{color:#9fc7d4}
+.lf-topo nav a:hover{color:#fff; text-decoration:none}
+.lf-topo nav a.ativo{color:#fff; box-shadow:inset 0 -2px 0 var(--lf-cyan); padding:14px 0}
+.lf-ponto-vivo{width:6px; height:6px; border-radius:99px; background:var(--lf-cyan); display:block}
+
+/* ---------- aviso ---------- */
+.lf-aviso{
+  border:1px solid var(--lf-atencao-fio); background:var(--lf-atencao-fundo);
+  color:#7a4b06; padding:11px 14px; border-radius:var(--lf-r2); font-size:13.5px;
+}
+.lf-aviso.erro{border-color:var(--lf-erro-fio); background:var(--lf-erro-fundo); color:var(--lf-erro)}
+.lf-aviso.ok{border-color:var(--lf-ok-fio); background:var(--lf-ok-fundo); color:var(--lf-ok)}
+
+/* ---------- tela vazia ----------
+   Alinhada à esquerda. Diz o que rodou, o que voltou e o que fazer.
+   Nada de "Ops!", nada de ilustração redonda no meio. */
+.lf-vazio{
+  border:1px solid var(--lf-fio); background:var(--lf-superficie);
+  border-radius:var(--lf-r3); padding:22px 20px;
+}
+.lf-vazio h3{margin:0 0 6px}
+.lf-vazio p{margin:0; color:var(--lf-tinta-2); font-size:13.5px; max-width:52ch}
+.lf-vazio .acoes{margin-top:14px; display:flex; gap:8px; flex-wrap:wrap}
+.lf-vazio .tec{
+  font-family:var(--lf-f-mono); font-size:11px; color:var(--lf-tinta-3);
+  margin-top:13px; border-top:1px solid var(--lf-fio-suave); padding-top:9px;
+}
+
+/* ---------- movimento ----------
+   Animação só onde algo muda de estado. Nada de fade-in ao rolar. */
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+}

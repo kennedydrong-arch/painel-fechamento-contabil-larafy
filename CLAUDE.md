@@ -20,9 +20,13 @@ api.acessorias.com  ──coletar.py──▶  dados/bruto.json  ──processar
 | `coletar.py` | Baixa empresas ativas + entregas de cada uma. `--rapido` traz só o que mudou |
 | `processar.py` | Aplica as regras e gera `data/fechamento.json`, `data/operacional.json`, `data/historico.json` |
 | `classificador.py` | Texto do status → semáforo (green/amber/red/red_done/gray) |
-| `index.html` | Painel de fechamento contábil |
+| `painel.html` | Tela de apresentação (16:9, sem rolagem, claro/escuro) — a que vai para a gestão |
+| `index.html` | Fechamento empresa a empresa |
 | `operacional.html` | Painel operacional: todas as obrigações, por área |
-| `estilo.css` | Estilo comum das duas páginas |
+| `estilo.css` | Estilo das duas páginas de trabalho |
+| `larafy-tokens.css` | **Pacote visual da LaraFy** — cores, fontes e medidas. Copiado de `Desktop/design_pack_larafy`, não editar aqui |
+| `larafy-ui.css` | Peças prontas do pacote visual |
+| `logos.js` | Logos da marca em base64, os mesmos do painel comercial |
 | `conferir.py` | Reconta os números por um caminho independente e compara |
 | `servir.py` | Servidor local (o painel usa `fetch`, não abre por `file://`) |
 
@@ -110,6 +114,30 @@ um mês real.
 ativa por empresa/competência (as outras ficam dispensadas), mas o código está
 preparado para duas: nesse caso a empresa só conta como fechada quando as duas
 estiverem entregues.
+
+---
+
+## O visual não é escolha livre
+
+O projeto segue o **pacote visual da LaraFy** (`Desktop/design_pack_larafy`), que
+existe para as telas não terem "cara de IA". O que ele proíbe, e que já foi
+corrigido aqui uma vez:
+
+- **fonte Inter** (é a fonte padrão de IA), Fraunces, Poppins, Space Grotesk
+- canto maior que 6px, sombra em conteúdo, gradiente, vidro fosco, pílula
+  `border-radius:999px`, barra colorida na lateral de cartão
+- **rosca/pizza** — o anel de progresso da primeira versão foi trocado por
+  número grande + barra reta
+- quatro cartões iguais em grade; número grande dentro de caixa
+- emoji na interface; frase sem número, data ou nome próprio; "Saiba mais"
+
+E manda: Montserrat só em título e sempre apertada (`-.025em`), IBM Plex Sans no
+texto, IBM Plex Mono em número/data/CNPJ/rótulo. O **cyan `#07e0ff` é caneta
+marca-texto**: no máximo 3 lugares por tela (aqui: o "y" da marca, a aba ativa e
+o foco do campo de busca), nunca em texto. O **semáforo é separado da paleta de
+gráfico** e vem sempre com a palavra junto.
+
+Antes de mexer no visual, leia `Desktop/design_pack_larafy/PROMPT-PARA-IA.md`.
 
 ---
 

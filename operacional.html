@@ -5,21 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Painel Operacional · LaraFy</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="larafy-tokens.css">
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
 
 <header>
   <div class="brand">
-    <span class="brand-name">LaraFy</span>
-    <span class="brand-sep">·</span>
-    <span class="brand-ctx">Painel Operacional</span>
+    <span class="brand-name">Lara<i>Fy</i></span>
     <nav class="nav">
+      <a href="painel.html">Painel</a>
       <a href="index.html">Fechamento contábil</a>
-      <a href="operacional.html" class="on">Operacional</a>
+      <a href="operacional.html" class="on">Todas as obrigações</a>
     </nav>
   </div>
   <div class="head-right">
@@ -42,9 +39,13 @@
 <div class="tip" id="tip"></div>
 
 <script>
-const COR = { ok:'#1baf7a', wait:'#eda100', late:'#d93a63', off:'#94a3b8',
-              // séries da tendência: slots 1 e 2 da paleta da marca
-              fiscal:'#0090b3', contabil:'#eb6834', geral:'#002e43' };
+// Semáforo e séries vêm dos tokens do pacote visual. As três linhas da
+// tendência usam os slots 1 e 2 da paleta (ordem fixa) e o navy da marca.
+const css = getComputedStyle(document.documentElement);
+const tk = n => css.getPropertyValue(n).trim();
+const COR = { ok: tk('--lf-ok'), wait: tk('--lf-atencao'), late: tk('--lf-erro'),
+              off: tk('--lf-serie-outros'), fiscal: tk('--lf-serie-1'),
+              contabil: tk('--lf-serie-2'), geral: tk('--lf-tinta') };
 const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril',
                       mai:'maio', jun:'junho', jul:'julho', ago:'agosto',

@@ -23,6 +23,18 @@ Se quiser só **abrir o painel** com os dados da última vez, duplo clique em
 
 ---
 
+## As três telas
+
+| Tela | Para quê |
+|---|---|
+| **`painel.html`** | **A tela de apresentação.** Ocupa a tela inteira, não rola, tem relógio e troca claro/escuro. É a que se projeta numa reunião ou deixa numa TV. **É esta que você manda para a Juliane.** |
+| `index.html` | Fechamento empresa a empresa: tabela, busca, filtro, Excel |
+| `operacional.html` | Todas as obrigações do escritório, por área, com o passivo em aberto |
+
+As três têm as mesmas abas no topo para trocar entre elas.
+
+---
+
 ## O que o painel mostra
 
 | Bloco | O que responde |

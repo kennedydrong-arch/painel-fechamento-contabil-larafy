@@ -229,7 +229,7 @@ def bloco_fechamento(linhas, competencias, empresas_ativas=None):
         # ritmo por pessoa
         resp = defaultdict(lambda: {"total": 0, "concluidas": 0, "atrasadas": 0, "pendentes": 0})
         for a in alvo:
-            r = resp[a["responsavel"] or "Sem responsavel"]
+            r = resp[a["responsavel"] or "Sem responsável"]
             r["total"] += 1
             if a["entregue"]:
                 r["concluidas"] += 1
@@ -449,7 +449,7 @@ def ranking_de(conj):
     d = defaultdict(lambda: {"total": 0, "entregues": 0, "atrasadas": 0,
                              "pendentes": 0, "entregues_atrasados": 0})
     for a in conj:
-        x = d[a["responsavel"] or "Sem responsavel"]
+        x = d[a["responsavel"] or "Sem responsável"]
         x["total"] += 1
         if a["status_semaforo"] == "green":
             x["entregues"] += 1

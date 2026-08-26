@@ -5,21 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Fechamento Contábil · LaraFy</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="larafy-tokens.css">
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
 
 <header>
   <div class="brand">
-    <span class="brand-name">LaraFy</span>
-    <span class="brand-sep">·</span>
-    <span class="brand-ctx">Fechamento Contábil</span>
+    <span class="brand-name">Lara<i>Fy</i></span>
     <nav class="nav">
+      <a href="painel.html">Painel</a>
       <a href="index.html" class="on">Fechamento contábil</a>
-      <a href="operacional.html">Operacional</a>
+      <a href="operacional.html">Todas as obrigações</a>
     </nav>
   </div>
   <div class="head-right">
@@ -46,8 +43,14 @@
 // Slots da paleta da marca, ja validados para daltonismo e contraste.
 // A serie usa o azul-petroleo #0090B3, nao o cyan da marca: o cyan e
 // marca-texto, some numa linha de 2px.
-const COR = { ok:'#1baf7a', wait:'#eda100', late:'#d93a63', off:'#94a3b8',
-              atual:'#0090b3', ant:'#94a3b8' };
+// Semáforo e séries saem dos tokens do pacote visual: o semáforo é
+// separado da paleta de gráfico de propósito, e vem sempre com a palavra
+// junto na tela, nunca só a cor.
+const css = getComputedStyle(document.documentElement);
+const tk = n => css.getPropertyValue(n).trim();
+const COR = { ok: tk('--lf-ok'), wait: tk('--lf-atencao'), late: tk('--lf-erro'),
+              off: tk('--lf-serie-outros'), atual: tk('--lf-serie-1'),
+              ant: tk('--lf-serie-outros') };
 const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril',
                       mai:'maio', jun:'junho', jul:'julho', ago:'agosto',
@@ -240,30 +243,28 @@ function avisosHTML(b) {
 
 /* ----------------------------------------------------------------- hero */
 function heroHTML(b) {
-  const R = 78, C = 2 * Math.PI * R, p = Math.max(0, Math.min(100, b.percentual));
-  // A cor julga o resultado, e so da para julgar depois do prazo. Enquanto a
-  // competencia esta correndo, o anel fica na cor da marca - senao um mes que
-  // acabou de abrir apareceria vermelho sem estar atrasado.
+  // Sem rosca: um número grande e uma barra reta dizem o mesmo sem obrigar
+  // ninguém a comparar ângulos. A cor só julga depois que o prazo vence —
+  // antes disso, um mês recém-aberto apareceria vermelho sem estar atrasado.
   const hoje = new Date().toISOString().slice(0, 10);
   const venceu = b.prazo_legal && b.prazo_legal < hoje;
-  const cor = !venceu ? COR.atual
-            : p >= 95 ? COR.ok : p >= 80 ? COR.wait : COR.late;
+  const p = Math.max(0, Math.min(100, b.percentual));
+  const cor = !venceu ? 'var(--lf-serie-1)'
+            : p >= 95 ? 'var(--lf-ok)' : p >= 80 ? 'var(--lf-atencao)' : 'var(--lf-erro)';
+  const w = n => b.total ? (n / b.total) * 100 : 0;
   return `
   <div class="card hero">
-    <div class="hero-ring">
-      <svg viewBox="0 0 190 190" style="height:190px">
-        <circle cx="95" cy="95" r="${R}" fill="none" stroke="#eef1f4" stroke-width="15"/>
-        <circle cx="95" cy="95" r="${R}" fill="none" stroke="${cor}" stroke-width="15"
-                stroke-linecap="round" stroke-dasharray="${C}"
-                stroke-dashoffset="${C * (1 - p / 100)}"
-                transform="rotate(-90 95 95)"/>
-      </svg>
-      <div class="hero-pct"><b>${pctTxt(b.percentual)}</b><span>concluído</span></div>
+    <div class="hero-cap">Fechamento concluído</div>
+    <div class="hero-num" style="color:${cor}">${pctTxt(b.percentual)}</div>
+    <div class="hero-barra">
+      ${b.concluidas ? `<i style="width:${w(b.concluidas)}%;background:${cor}"></i>` : ''}
+      ${b.atrasadas ? `<i style="width:${w(b.atrasadas)}%;background:var(--lf-erro)"></i>` : ''}
+      ${b.pendentes ? `<i style="width:${w(b.pendentes)}%;background:var(--lf-atencao)"></i>` : ''}
     </div>
     <div class="hero-count"><b>${nfmt(b.concluidas)}</b> de <b>${nfmt(b.total)}</b> empresas fechadas</div>
     <div class="hero-prazo">
       ${b.prazo_legal ? (venceu ? 'Prazo venceu em ' : 'Prazo: ') + dataBRcompleta(b.prazo_legal) : ''}
-      ${b.dispensadas ? ' · ' + nfmt(b.dispensadas) + ' dispensada(s), fora do total' : ''}
+      ${b.dispensadas ? ' · ' + nfmt(b.dispensadas) + ' dispensadas, fora do total' : ''}
     </div>
     ${comparativoHTML(b)}
   </div>`;
@@ -282,7 +283,7 @@ function comparativoHTML(b) {
   const ate = bAnt.curva.filter(p => p.dia <= alvoDia);
   const ref = ate.length ? ate[ate.length - 1].percentual : 0;
   const dif = b.percentual - ref;
-  const cor = dif >= 0 ? '#0a6a48' : '#a32043';
+  const cor = dif >= 0 ? 'var(--lf-ok)' : 'var(--lf-erro)';
   const seta = dif >= 0 ? '▲' : '▼';
   return `<div class="hero-prazo" style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border)">
     No mesmo ponto do mês, ${esc(anterior)} tinha <b>${pctTxt(ref)}</b><br>
