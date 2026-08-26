@@ -49,7 +49,31 @@ jobs:
           git add data/
           if git diff --staged --quiet; then
             echo "Nada mudou no Acessorias desde a ultima rodada."
-          else
-            git commit -m "Atualizacao automatica do painel"
-            git push
+            exit 0
           fi
+          git commit -m "Atualizacao automatica do painel"
+
+          # Se alguem publicou no repositorio enquanto a coleta rodava (leva
+          # de 8 a 50 minutos), o push e recusado e a rodada inteira se perde.
+          # Nesse caso: joga fora este commit de dados, pega o codigo novo e
+          # RECALCULA por cima dele. Os arquivos de data/ sao 100% derivados de
+          # dados/bruto.json, que continua no disco do runner - nada se perde,
+          # e o resultado passa a valer para a versao mais nova do codigo.
+          for tentativa in 1 2 3; do
+            if git push; then
+              echo "Publicado na tentativa $tentativa."
+              exit 0
+            fi
+            echo "Push recusado: o repositorio andou. Recalculando por cima."
+            git fetch origin main
+            git reset --hard origin/main
+            python processar.py
+            git add data/
+            if git diff --staged --quiet; then
+              echo "Depois de recalcular, os dados ja estavam publicados."
+              exit 0
+            fi
+            git commit -m "Atualizacao automatica do painel"
+          done
+          echo "Nao consegui publicar depois de 3 tentativas."
+          exit 1
