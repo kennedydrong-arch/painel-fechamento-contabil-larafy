@@ -46,6 +46,24 @@ inteiro. As setas **←** e **→** trocam a competência sem precisar do mouse.
 Os dados se atualizam sozinhos a cada 5 minutos, então a tela pode ficar ligada
 sem ninguém mexer.
 
+---
+
+## A atualização automática
+
+O robô do GitHub busca os dados novos **duas vezes por dia útil**: 07:17 e
+13:17. São dois horários de propósito — se o da manhã falhar, o da tarde
+atualiza mesmo assim.
+
+O painel aberto relê o arquivo a cada 5 minutos, então a TV pega a atualização
+sozinha, sem precisar dar F5.
+
+**Se os dados ficarem mais de 36 horas sem atualizar**, as três telas avisam:
+no painel, a barra do topo fica vermelha com a data real dos números. Nenhuma
+tela fica velha em silêncio.
+
+Para forçar na hora: GitHub → aba **Actions** → **Atualizar painel** → **Run
+workflow**. Leva uns 8 minutos.
+
 ### O que cabe na tela do `painel.html`
 
 | Bloco | Responde |

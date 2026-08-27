@@ -1,6 +1,7 @@
 <!doctype html>
-<!-- O painel vive numa TV: tema escuro fixo. -->
-<html lang="pt-BR" data-theme="dark">
+<!-- Tema claro fixo: é o padrão do kit LaraFy. Fixo, e não "automático",
+     para não virar escuro na máquina de quem abrir com o sistema em dark. -->
+<html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -22,23 +23,13 @@
    sem deformar peça nenhuma, do notebook à TV.
    ============================================================ */
 
-/* A cor do dado vem do site da LaraTAX (#00c4e5), não do azul apagado que o
-   modo escuro do kit usa. É a mesma cor que a marca aplica de verdade, e no
-   fundo escuro ela aparece; o #07e0ff continua reservado ao acento. */
-:root[data-theme="dark"] {
-  --s1: #00c4e5;
-  --trilho: #142832;
-  --fio: #1E333F;
-  --fio2: #17272F;
-}
-
 html, body { height:100%; overflow:hidden; }
 body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 
 .moldura { width:100vw; height:100vh; display:grid; place-items:center; overflow:hidden; }
 .palco {
   width:1600px; height:900px; flex:none;
-  background:var(--fundo); color:var(--tin);
+  background:var(--pap); color:var(--tin);
   display:flex; flex-direction:column;
   transform:scale(var(--esc, 1)); transform-origin:center;
 }
@@ -49,7 +40,6 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
   flex:none; height:62px; background:#002E43; color:#fff;
   display:flex; align-items:center; gap:22px; padding:0 30px;
 }
-:root[data-theme="dark"] .topo { background:#02202F; }
 .topo img { height:26px; width:auto; display:block; }
 .topo h1 { font-family:var(--fd); font-weight:800; font-size:19px;
            letter-spacing:-.035em; margin:0; white-space:nowrap; }
@@ -116,7 +106,7 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .graf-col { height:90px; position:relative; max-width:430px; }
 .graf-col .colunas { gap:10px; }
 .graf-col .colunas b { opacity:.5; }
-.graf-col .colunas b.hoje { opacity:1; background:var(--s1); }
+.graf-col .colunas b.hoje { opacity:1; }
 .graf-col .colunas b { border-radius:3px 3px 0 0; }
 .meses-r { display:flex; gap:10px; margin:6px 0 0 46px; max-width:384px; }
 .meses-r span { flex:1; text-align:center; font-family:var(--fm); font-size:11px; color:var(--fr); }

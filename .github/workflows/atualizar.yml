@@ -2,8 +2,12 @@ name: Atualizar painel
 
 on:
   schedule:
-    # 10:00 UTC = 07:00 em Brasilia, de segunda a sexta
-    - cron: '0 10 * * 1-5'
+    # Dois disparos por dia util, em minuto quebrado de proposito: o GitHub
+    # enfileira os agendamentos e atrasa (as vezes horas) os que caem no
+    # minuto zero, que e quando todo mundo agenda. O segundo horario e rede
+    # de seguranca - se o da manha nao rodar, o da tarde atualiza o painel.
+    - cron: '17 10 * * 1-5'   # 07:17 em Brasilia
+    - cron: '17 16 * * 1-5'   # 13:17 em Brasilia
   workflow_dispatch:        # permite rodar na mao pelo botao do GitHub
 
 permissions:
