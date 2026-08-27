@@ -153,7 +153,7 @@ const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov'
 const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril', mai:'maio',
                       jun:'junho', jul:'julho', ago:'agosto', set:'setembro',
                       out:'outubro', nov:'novembro', dez:'dezembro' };
-let FECH = null, OPER = null, COMP = null;
+let FECH = null, OPER = null, PULSO = null, COMP = null;
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c =>
@@ -193,9 +193,12 @@ const marca = (cls, icone, txt) =>
 const ler = () => Promise.all([
   fetch('data/fechamento.json?ts=' + Date.now()).then(r => r.json()),
   fetch('data/operacional.json?ts=' + Date.now()).then(r => r.json()),
+  // o pulso diz quando o robô verificou pela última vez, mesmo nas rodadas
+  // em que nada mudou. Se faltar, o painel segue com o meta dos dados.
+  fetch('data/pulso.json?ts=' + Date.now()).then(r => r.ok ? r.json() : null).catch(() => null),
 ]);
 async function carregar() {
-  try { [FECH, OPER] = await ler(); }
+  try { [FECH, OPER, PULSO] = await ler(); }
   catch (e) {
     $('#palco').innerHTML = `<div class="carregando">Não consegui ler os dados do Acessórias.
       Abra o painel pelo atalho, não pelo arquivo. (${esc(e.message)})</div>`;
@@ -205,9 +208,11 @@ async function carregar() {
   desenhar();
   setInterval(async () => {
     try {
-      const [a, o] = await ler();
-      if (a.meta.atualizado_em === FECH.meta.atualizado_em) return;
-      FECH = a; OPER = o; desenhar();
+      const [a, o, p] = await ler();
+      const igual = p && PULSO ? p.verificado_em === PULSO.verificado_em
+                               : a.meta.atualizado_em === FECH.meta.atualizado_em;
+      if (igual) return;
+      FECH = a; OPER = o; PULSO = p; desenhar();
     } catch (e) { /* rede caiu: segue mostrando o último número lido */ }
   }, 5 * 60 * 1000);
 }
@@ -215,7 +220,7 @@ async function carregar() {
 /* ---------------------------------------------------------- desenho */
 function desenhar() {
   const b = FECH.fechamento[COMP];
-  const idade = idadeDosDados(FECH.meta);
+  const idade = idadeDosDados(FECH.meta, PULSO);
   const antes = compVizinha(COMP, -1), depois = compVizinha(COMP, 1);
   const r = b.ritmo || {};
   const falta = b.total - b.concluidas;
@@ -240,7 +245,9 @@ function desenhar() {
         <span class="pt"></span>
         <span>Acessórias · ${nfmt(FECH.meta.total_empresas)} empresas ·
           ${idade.velho ? 'sem atualizar desde ' + esc(idade.quando)
-                        : 'atualizado ' + esc(idade.texto)}</span>
+            : idade.horasDados > 1.5
+              ? `verificado ${esc(idade.texto)} · números de ${esc(idade.dadosDe)}`
+              : 'atualizado ' + esc(idade.texto)}</span>
         <button class="btn-tv" id="cheia" title="Tecla F">${
           document.fullscreenElement ? 'Sair' : 'Tela cheia'}</button>
       </div>

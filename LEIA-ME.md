@@ -53,9 +53,13 @@ sem ninguém mexer.
 
 ## A atualização automática
 
-O robô do GitHub busca os dados novos **duas vezes por dia útil**: 07:17 e
-13:17. São dois horários de propósito — se o da manhã falhar, o da tarde
-atualiza mesmo assim.
+O robô do GitHub busca os dados **de hora em hora, das 7h às 20h**, de segunda
+a sexta. Fora desse horário ninguém entrega nada no Acessórias e ninguém olha
+o painel.
+
+Quase toda rodada encontra os mesmos números — e isso não é falha. Nesses
+casos o painel mostra **"verificado há 10 min · números de ontem 18h"**: dá
+para ver que o robô está vivo sem fingir que houve novidade.
 
 O painel aberto relê o arquivo a cada 5 minutos, então a TV pega a atualização
 sozinha, sem precisar dar F5.

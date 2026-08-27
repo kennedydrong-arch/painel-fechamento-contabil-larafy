@@ -12,6 +12,7 @@ Regra do fechamento (definida com o Kennedy em 26/08/2026):
     Tarefa dispensada/inativa sai do total (nao conta contra nem a favor).
 """
 import datetime as dt
+import hashlib
 import json
 import os
 import re
@@ -702,6 +703,33 @@ def main():
     hist.sort(key=lambda h: h["dia"])
     with open(hist_path, "w", encoding="utf-8") as f:
         json.dump(hist, f, ensure_ascii=False, indent=1)
+
+    # Pulso: um arquivo pequeno com a hora da última verificação e uma
+    # impressão digital dos números. O painel usa isso para dizer "o robô
+    # está vivo" mesmo num dia em que nada mudou no Acessórias — sem ele,
+    # rodar de hora em hora exigiria commitar 1,7 MB a cada rodada.
+    digital = hashlib.sha1(json.dumps(
+        {c: {k: v for k, v in fechamento[c].items() if k != "curva"} for c in comps_fech},
+        sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:12]
+
+    # "dados_de" só anda quando os números mudam de verdade. Assim o painel
+    # sabe dizer "verificado há 10 min, números de ontem 18h" em vez de fingir
+    # que houve novidade a cada rodada.
+    pulso_path = os.path.join(DIR_DATA, "pulso.json")
+    dados_de = meta["atualizado_em"]
+    if os.path.exists(pulso_path):
+        try:
+            with open(pulso_path, encoding="utf-8") as f:
+                anterior = json.load(f)
+            if anterior.get("digital") == digital and anterior.get("dados_de"):
+                dados_de = anterior["dados_de"]
+        except (json.JSONDecodeError, OSError):
+            pass
+    mudou = dados_de == meta["atualizado_em"]
+    with open(pulso_path, "w", encoding="utf-8") as f:
+        json.dump({"verificado_em": meta["atualizado_em"], "dados_de": dados_de,
+                   "digital": digital}, f, ensure_ascii=False, indent=1)
+    print("Pulso: %s (numeros %s)" % (digital, "mudaram" if mudou else "iguais aos da rodada anterior"))
 
     print("Empresas: %d | entregas: %d" % (meta["total_empresas"], meta["total_entregas"]))
     print("Competencias: %s" % ", ".join(comps))

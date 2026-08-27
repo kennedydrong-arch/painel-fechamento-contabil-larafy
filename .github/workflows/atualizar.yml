@@ -2,12 +2,11 @@ name: Atualizar painel
 
 on:
   schedule:
-    # Dois disparos por dia util, em minuto quebrado de proposito: o GitHub
-    # enfileira os agendamentos e atrasa (as vezes horas) os que caem no
-    # minuto zero, que e quando todo mundo agenda. O segundo horario e rede
-    # de seguranca - se o da manha nao rodar, o da tarde atualiza o painel.
-    - cron: '17 10 * * 1-5'   # 07:17 em Brasilia
-    - cron: '17 16 * * 1-5'   # 13:17 em Brasilia
+    # De hora em hora das 7h as 20h (Brasilia), de segunda a sexta. Fora
+    # disso ninguem entrega nada no Acessorias e ninguem olha o painel.
+    # Minuto 17 de proposito: o GitHub enfileira e atrasa os agendamentos
+    # que caem no minuto zero, que e quando todo mundo agenda.
+    - cron: '17 10-23 * * 1-5'
   workflow_dispatch:        # permite rodar na mao pelo botao do GitHub
 
 permissions:
@@ -50,12 +49,27 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
-          if git diff --staged --quiet; then
-            echo "Nada mudou no Acessorias desde a ultima rodada."
+
+          # Rodando de hora em hora, quase toda rodada encontra os mesmos
+          # numeros. Nesse caso publica so o pulso (200 bytes) e devolve os
+          # arquivos grandes ao que estavam: sem isso seriam 14 commits de
+          # 1,7 MB por dia so para mudar o horario dentro do arquivo.
+          if git diff --quiet -- data/pulso.json; then
+            echo "Nem o pulso mudou (rodada repetida). Nada a publicar."
             exit 0
           fi
-          git commit -m "Atualizacao automatica do painel"
+          NOVA=$(python -c "import json;print(json.load(open('data/pulso.json'))['digital'])")
+          VELHA=$(git show HEAD:data/pulso.json 2>/dev/null | python -c "import json,sys;print(json.load(sys.stdin)['digital'])" 2>/dev/null || echo "sem")
+          if [ "$NOVA" = "$VELHA" ]; then
+            echo "Os numeros nao mudaram ($NOVA). Publicando so o pulso."
+            git checkout -- data/fechamento.json data/operacional.json data/historico.json 2>/dev/null || true
+            git add data/pulso.json
+            git commit -m "Verificado no Acessorias, sem mudanca nos numeros"
+          else
+            echo "Numeros mudaram: $VELHA -> $NOVA"
+            git add data/
+            git commit -m "Atualizacao automatica do painel"
+          fi
 
           # Se alguem publicou no repositorio enquanto a coleta rodava (leva
           # de 8 a 50 minutos), o push e recusado e a rodada inteira se perde.

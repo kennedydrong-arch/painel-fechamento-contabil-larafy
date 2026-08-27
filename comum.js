@@ -14,13 +14,23 @@
 // os números são realmente de sexta).
 const HORAS_ATE_ENVELHECER = 36;
 
-function idadeDosDados(meta) {
-  const t = meta && meta.atualizado_em ? new Date(meta.atualizado_em) : null;
+/* Recebe o meta do JSON e, se houver, o pulso (data/pulso.json). O pulso
+   separa duas coisas que não são a mesma: quando o robô verificou pela
+   última vez, e quando os números realmente mudaram. Rodando de hora em
+   hora, quase toda verificação não traz novidade — e isso não é falha. */
+function idadeDosDados(meta, pulso) {
+  const ref = (pulso && pulso.verificado_em) || (meta && meta.atualizado_em);
+  const t = ref ? new Date(ref) : null;
   if (!t || isNaN(t)) return { horas: null, velho: false, texto: 'data desconhecida' };
   const horas = (Date.now() - t.getTime()) / 3600000;
   const dias = Math.floor(horas / 24);
+  const tDados = pulso && pulso.dados_de ? new Date(pulso.dados_de) : t;
+  const hDados = tDados ? (Date.now() - tDados.getTime()) / 3600000 : horas;
   return {
     horas,
+    horasDados: hDados,
+    dadosDe: tDados ? tDados.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit',
+                                                      hour:'2-digit', minute:'2-digit' }) : '—',
     velho: horas > HORAS_ATE_ENVELHECER,
     quando: t.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit',
                                         hour: '2-digit', minute: '2-digit' }),
