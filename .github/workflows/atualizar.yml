@@ -2,11 +2,12 @@ name: Atualizar painel
 
 on:
   schedule:
-    # De hora em hora das 7h as 20h (Brasilia), de segunda a sexta. Fora
-    # disso ninguem entrega nada no Acessorias e ninguem olha o painel.
-    # Minuto 17 de proposito: o GitHub enfileira e atrasa os agendamentos
-    # que caem no minuto zero, que e quando todo mundo agenda.
-    - cron: '17 10-23 * * 1-5'
+    # De hora em hora, todos os dias - mesmo esquema do painel comercial,
+    # que roda de 15 em 15 min e cujo agendamento funciona. Simples de
+    # proposito: restringir dia e faixa de hora e mais uma coisa que pode
+    # estar errada quando o painel aparecer parado.
+    # Minuto 17 e nao 0: o GitHub enfileira e atrasa o minuto cheio.
+    - cron: '17 * * * *'
   workflow_dispatch:        # permite rodar na mao pelo botao do GitHub
 
 permissions:
@@ -64,11 +65,11 @@ jobs:
             echo "Os numeros nao mudaram ($NOVA). Publicando so o pulso."
             git checkout -- data/fechamento.json data/operacional.json data/historico.json 2>/dev/null || true
             git add data/pulso.json
-            git commit -m "Verificado no Acessorias, sem mudanca nos numeros"
+            git commit -m "dados: verificado, numeros iguais [skip ci]"
           else
             echo "Numeros mudaram: $VELHA -> $NOVA"
             git add data/
-            git commit -m "Atualizacao automatica do painel"
+            git commit -m "dados: atualiza o painel [skip ci]"
           fi
 
           # Se alguem publicou no repositorio enquanto a coleta rodava (leva
@@ -91,7 +92,7 @@ jobs:
               echo "Depois de recalcular, os dados ja estavam publicados."
               exit 0
             fi
-            git commit -m "Atualizacao automatica do painel"
+            git commit -m "dados: atualiza o painel [skip ci]"
           done
           echo "Nao consegui publicar depois de 3 tentativas."
           exit 1
