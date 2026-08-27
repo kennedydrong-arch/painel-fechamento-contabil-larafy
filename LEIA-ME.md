@@ -36,7 +36,10 @@ As três têm as mesmas abas no topo para trocar entre elas.
 ### Deixar numa TV
 
 O `painel.html` é sempre escuro — é onde ele vai ficar: numa TV, ligado o dia
-todo. Não tem botão de tema.
+todo. Não tem botão de tema, e o escuro é fixo: ele não vira claro na máquina
+de quem abrir com o sistema no modo claro.
+
+As duas telas de trabalho seguem o tema do computador de quem abre.
 
 O botão **Tela cheia** (ou a tecla **F**) tira a barra do
 navegador e o painel ocupa a tela inteira. `Esc` volta. Depois de 3 segundos

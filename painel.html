@@ -1,7 +1,7 @@
 <!doctype html>
-<!-- Tema claro fixo: é o padrão do kit LaraFy. Fixo, e não "automático",
-     para não virar escuro na máquina de quem abrir com o sistema em dark. -->
-<html lang="pt-BR" data-theme="light">
+<!-- Tema escuro fixo: o painel vive numa TV. Fixo, e não "automático", para
+     não virar claro na máquina de quem abrir com o sistema em light. -->
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -22,6 +22,16 @@
    na janela. É o que permite manter as medidas do kit em pixel,
    sem deformar peça nenhuma, do notebook à TV.
    ============================================================ */
+
+/* No escuro, o kit usa #2196BA na série — apagado demais para uma TV. A cor
+   do dado passa a ser o #00c4e5 que o site da LaraTAX aplica de verdade (94
+   ocorrências no CSS dele). O #07e0ff segue reservado ao acento. */
+:root[data-theme="dark"] {
+  --s1: #00c4e5;
+  --trilho: #12262F;
+  --fio: #1E333F;
+  --fio2: #17272F;
+}
 
 html, body { height:100%; overflow:hidden; }
 body { margin:0; background:var(--fundo); display:grid; place-items:center; }
@@ -119,6 +129,7 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
   background:#002E43; border:0; color:#C9DEE8; border-radius:var(--r2);
   padding:16px 18px; font-size:13.5px; line-height:1.6;
 }
+:root[data-theme="dark"] .aviso { background:#0B3346; color:#D3E7EF; }
 .aviso b { color:#fff; font-weight:600; }
 .aviso .n { font-family:var(--fm); color:#07E0FF; font-weight:500; }
 
