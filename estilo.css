@@ -209,17 +209,18 @@ footer { padding:6px 26px 26px; color: var(--fr); font-size:12px; text-align:cen
 .erro { padding:14px; border-radius: var(--r); background: var(--malF);
         color: var(--mal); border:1px solid var(--malB); font-size:13.5px; }
 
-/* peça do kit: aviso */
+/* Aviso em navy, não no âmbar do kit: um bloco âmbar grande vira a caixinha
+   amarela genérica. O âmbar continua nas marcas de estado pequenas (.tag). */
 .aviso {
-  display:flex; gap:10px; align-items:flex-start;
-  background: var(--alF); border:1px solid var(--alB); color: var(--al);
-  padding:11px 14px; border-radius: var(--r); font-size:13.5px;
+  display:flex; gap:12px; align-items:flex-start;
+  background:#002E43; border:0; color:#C9DEE8;
+  padding:13px 16px; border-radius: var(--r2); font-size:13.5px; line-height:1.55;
 }
-.aviso b { color: var(--al); font-weight:600; }
+.aviso b { color:#fff; font-weight:600; }
 .aviso-icone {
   flex:none; font-family: var(--fm); font-size:10px; letter-spacing:.13em;
-  text-transform:uppercase; border:1px solid var(--alB); border-radius:3px;
-  padding:1px 6px; margin-top:2px;
+  text-transform:uppercase; color:#07E0FF; border:1px solid rgba(7,224,255,.4);
+  border-radius:3px; padding:1px 6px; margin-top:2px;
 }
 .aviso-linha + .aviso-linha { margin-top:6px; }
 

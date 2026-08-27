@@ -112,6 +112,16 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .meses-r span { flex:1; text-align:center; font-family:var(--fm); font-size:11px; color:var(--fr); }
 .meses-r span.hoje { color:var(--tin); }
 
+/* O aviso do kit é âmbar; num bloco grande isso vira a caixinha amarela de
+   sempre. Navy é a cor de estrutura da marca e carrega o mesmo peso sem o
+   clichê — o âmbar segue reservado às marcas de estado pequenas. */
+.aviso {
+  background:#002E43; border:0; color:#C9DEE8; border-radius:var(--r2);
+  padding:16px 18px; font-size:13.5px; line-height:1.6;
+}
+.aviso b { color:#fff; font-weight:600; }
+.aviso .n { font-family:var(--fm); color:#07E0FF; font-weight:500; }
+
 .carregando { display:grid; place-items:center; height:100%; color:var(--fr); font-size:16px; }
 </style>
 </head>
@@ -427,13 +437,13 @@ function avisoFinal(b) {
   const partes = [];
   const p = OPER ? OPER.passivo : null;
   if (p) partes.push(
-    `<b>${nfmt(p.total)} obrigações</b> de todas as áreas venceram e seguem sem entrega,
-     <b>${nfmt(p.com_multa)}</b> com multa prevista.`);
+    `<b class="n">${nfmt(p.total)}</b> obrigações de todas as áreas venceram e seguem sem
+     entrega, <b class="n">${nfmt(p.com_multa)}</b> com multa prevista.`);
   if (FECH.arrastando_total) partes.push(
-    `<b>${nfmt(FECH.arrastando_total)} empresas</b> estão com o fechamento em aberto há mais de um mês${
-      tres ? `, ${nfmt(tres)} delas há três` : ''}.`);
+    `<b class="n">${nfmt(FECH.arrastando_total)}</b> empresas estão com o fechamento em aberto
+     há mais de um mês${tres ? `, <b class="n">${nfmt(tres)}</b> delas há três` : ''}.`);
   if (pior) partes.push(
-    `<b>${esc(pior.obrigacao)}</b> está atrasada em ${nfmt(pior.atrasadas)} empresas.`);
+    `<b>${esc(pior.obrigacao)}</b> está atrasada em <b class="n">${nfmt(pior.atrasadas)}</b> empresas.`);
   const conf = (b.fora_da_conta || []).filter(x => x.suspeita);
   if (conf.length) partes.push(
     `<b>${nfmt(conf.length)} ${conf.length === 1 ? 'empresa faz' : 'empresas fazem'} balancete
