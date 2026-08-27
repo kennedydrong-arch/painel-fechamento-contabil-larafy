@@ -169,6 +169,28 @@ encanamento frágil não.
 
 ---
 
+## Nunca commitar `data/` junto com mudança de código
+
+Já aconteceu: mexi no painel, rodei `processar.py` com o `bruto.json` da minha
+máquina (de horas antes) e commitei tudo junto. O número publicado **voltou de
+31 para 30 fechadas** — os dados do robô, mais novos, foram sobrescritos pelos
+meus, mais velhos.
+
+Ao mexer em código: `git add` **só os arquivos que você editou**. Os arquivos de
+`data/` são do robô. Se precisar republicá-los, dispare o workflow (`Atualizar
+painel` → `Run workflow`) em vez de subir os seus.
+
+Para conferir antes de subir:
+
+```
+git fetch origin
+git show origin/main:data/fechamento.json | py -c "import json,sys; d=json.load(sys.stdin); print(d['meta']['atualizado_em'])"
+```
+
+Se a data do remoto for mais recente que a sua, os seus dados estão velhos.
+
+---
+
 ## Cuidados
 
 - **`.env` nunca vai para o Git.** O `.gitignore` cobre, mas confira antes de
