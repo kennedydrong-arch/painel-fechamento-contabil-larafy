@@ -75,7 +75,7 @@ workflow**. Leva uns 8 minutos.
 
 | Bloco | Responde |
 |---|---|
-| % do fechamento | quanto do mês está fechado, com concluídas / pendentes / atrasadas / dispensadas |
+| % entregue no prazo | o número grande. Logo abaixo, a barra divide o mês em **no prazo · em atraso · em aberto** — as três somam 100% |
 | Onde cada mês terminou | as últimas 6 competências em barras — a régua de quanto é "normal" |
 | **Ritmo** | quantas empresas por dia útil o time está fechando, quantas **precisaria** fechar para bater o prazo, e onde o mês termina se o ritmo não mudar |
 | Curva do ciclo | o mês atual contra o anterior, dia a dia, com "hoje" marcado |
@@ -118,6 +118,37 @@ dia a dia do time:
 | Tabela | tudo que não foi entregue, com filtro por área, por mês, só com multa, busca e Excel |
 
 Clicar num mês do **Passivo** filtra a tabela por aquele mês.
+
+---
+
+## No prazo x em atraso
+
+O painel separa três coisas, e elas sempre somam 100% das empresas que fecham
+contabilidade:
+
+| | O que é |
+|---|---|
+| **Entregue no prazo** | saiu até a data de vencimento. É o número grande |
+| **Entregue em atraso** | foi entregue, mas depois do vencimento |
+| **Ainda em aberto** | não foi entregue |
+
+### As duas visões
+
+No topo do painel há duas abas (ou a tecla **V**):
+
+| Aba | O número grande passa a ser |
+|---|---|
+| **No prazo** | quanto saiu **até o vencimento**. É o compromisso com o cliente |
+| **Total entregue** | quanto foi entregue **no total**, contando o que entrou depois do prazo. É onde o mês termina |
+
+Em junho, por exemplo, as duas contam histórias diferentes: **25,4% no prazo**,
+mas **56,8% no total** — ou seja, mais da metade do que fecha só fecha atrasado.
+
+A comparação com os meses anteriores acompanha a aba: no prazo compara com no
+prazo, total compara com total. Nunca uma régua contra a outra.
+
+A escolha fica guardada no navegador, então a TV volta na mesma aba depois de
+desligar.
 
 ---
 

@@ -707,6 +707,10 @@ def main():
             "media_anteriores": round(sum(melhores) / len(melhores), 1) if melhores else None,
             "media_no_prazo": round(sum(no_prazo_ant) / len(no_prazo_ant), 1)
                               if no_prazo_ant else None,
+            # onde os meses ACABAM parando, contando o que entrou depois do
+            # prazo: e a segunda leitura do painel ("resultado no fim do mes")
+            "media_terminou": round(sum(x["terminou_em"] for x in antes) / len(antes), 1)
+                              if antes else None,
         }
 
     # Empresas arrastando o fechamento por mais de uma competência. Dentro de

@@ -65,6 +65,15 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
   font-family:var(--fm); font-size:13px; color:#fff; min-width:66px; text-align:center;
   border-bottom:2px solid #07E0FF; padding-bottom:2px;
 }
+.visoes { display:flex; gap:2px; background:rgba(255,255,255,.07);
+           border-radius:5px; padding:2px; margin-left:14px; }
+.visoes button {
+  background:none; border:0; color:#8FB0C0; cursor:pointer; white-space:nowrap;
+  font-family:var(--fb); font-size:12px; padding:5px 13px; border-radius:4px;
+}
+.visoes button.on { background:#07E0FF; color:#002E43; font-weight:600; }
+.visoes button:not(.on):hover { color:#fff; }
+
 .fonte {
   margin-left:auto; display:flex; align-items:center; gap:12px;
   font-family:var(--fm); font-size:11.5px; color:#8FB0C0; white-space:nowrap;
@@ -164,6 +173,15 @@ const MESES_LONGO = { jan:'janeiro', fev:'fevereiro', mar:'março', abr:'abril',
                       out:'outubro', nov:'novembro', dez:'dezembro' };
 let FECH = null, OPER = null, PULSO = null, COMP = null;
 
+/* Duas leituras do mesmo mes:
+   'prazo' - quanto saiu ATE o vencimento (o compromisso)
+   'fim'   - quanto foi entregue no total, contando o que entrou depois
+   A TV lembra a ultima escolhida. */
+let VISAO = 'prazo';
+try { const v = localStorage.getItem('visao'); if (v === 'fim' || v === 'prazo') VISAO = v; }
+catch (e) {}
+const ehPrazo = () => VISAO === 'prazo';
+
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
@@ -252,6 +270,10 @@ function desenhar() {
         <span class="agora">${esc(COMP)}</span>
         <button id="prox" ${depois ? '' : 'disabled'} aria-label="Próxima competência">&rsaquo;</button>
       </div>
+      <div class="visoes">
+        <button data-v="prazo" class="${ehPrazo() ? 'on' : ''}">No prazo</button>
+        <button data-v="fim" class="${ehPrazo() ? '' : 'on'}">Total entregue</button>
+      </div>
       <div class="fonte${idade.velho ? ' velha' : ''}">
         <span class="pt"></span>
         <span>Acessórias · ${nfmt(FECH.meta.total_empresas)} empresas ·
@@ -266,11 +288,13 @@ function desenhar() {
 
     <div class="corpo">
       <div class="abre">
-        <span class="pc" style="color:${corDo(b)}">${pct(pctNoPrazo(b))}</span>
+        <span class="pc" style="color:${corDo(b)}">${pct(pctPrincipal(b))}</span>
         <span class="txt">
-          <span class="l1">entregue no prazo</span>
-          <span class="l2"><u>${nfmt(b.concluidas_no_prazo)}</u> de <u>${nfmt(b.total)}</u>
-            empresas que fecham contabilidade</span>
+          <span class="l1">${ehPrazo() ? 'entregue no prazo' : 'entregue no total'}</span>
+          <span class="l2"><u>${nfmt(ehPrazo() ? b.concluidas_no_prazo : b.concluidas)}</u>
+            de <u>${nfmt(b.total)}</u> empresas que fecham contabilidade${
+            ehPrazo() ? '' : ` · <u>${nfmt(b.concluidas_no_prazo)}</u> no prazo e <u>${
+              nfmt(b.concluidas_atrasadas)}</u> depois do vencimento`}</span>
         </span>
         <span class="marcas">${estado}</span>
       </div>
@@ -319,6 +343,9 @@ function desenhar() {
   $('#ant').onclick = () => { const c = compVizinha(COMP, -1); if (c) { COMP = c; desenhar(); } };
   $('#prox').onclick = () => { const c = compVizinha(COMP, 1); if (c) { COMP = c; desenhar(); } };
   $('#cheia').onclick = alternarTelaCheia;
+  document.querySelectorAll('.visoes button').forEach(bt => {
+    bt.onclick = () => { trocarVisao(bt.dataset.v); };
+  });
   desenharCurva(b);
 }
 
@@ -371,13 +398,14 @@ function composicao(b) {
    Entrega feita depois do prazo continua sendo entrega, mas nao conta aqui —
    ela aparece na linha de baixo e no grafico dos meses. */
 const pctNoPrazo  = b => b.total ? (b.concluidas_no_prazo * 100) / b.total : 0;
+const pctPrincipal = b => ehPrazo() ? pctNoPrazo(b) : (b.percentual || 0);
 const pctAtrasado = b => b.total ? (b.concluidas_atrasadas * 100) / b.total : 0;
 const pctAberto   = b => b.total ? ((b.pendentes + b.atrasadas) * 100) / b.total : 0;
 
 function corDo(b) {
   const r = b.ritmo || {};
   if (!r.prazo_vencido) return 'var(--s1)';
-  const p = pctNoPrazo(b);
+  const p = pctPrincipal(b);
   return p >= 95 ? 'var(--ok)' : p >= 80 ? 'var(--al)' : 'var(--mal)';
 }
 
@@ -391,14 +419,15 @@ function faixaNumeros(b) {
     <div class="v${cls ? ' ' + cls : ''}">${val}</div>
     <div class="d">${det}</div></div>`;
   return `<div class="faixa-num">
-    ${cel('Entregue no prazo', pct(pctNoPrazo(b)), (() => {
+    ${cel(ehPrazo() ? 'Entregue no prazo' : 'Entregue no total', pct(pctPrincipal(b)), (() => {
       const ant = c && c.anteriores && c.anteriores[0];
-      const txt = `${nfmt(b.concluidas_no_prazo)} de ${nfmt(b.total)} empresas`;
+      const quantas = ehPrazo() ? b.concluidas_no_prazo : b.concluidas;
+      const txt = `${nfmt(quantas)} de ${nfmt(b.total)} empresas`;
       if (!ant) return txt;
       // enquanto o robo nao regera o JSON, cai no campo antigo
-      const ref = ant.no_prazo_no_mesmo_ponto !== undefined
-        ? ant.no_prazo_no_mesmo_ponto : ant.no_mesmo_ponto;
-      const d = pctNoPrazo(b) - ref;
+      const ref = ehPrazo() ? ant.no_prazo_no_mesmo_ponto : ant.no_mesmo_ponto;
+      if (ref === undefined || ref === null) return txt;   // JSON ainda sem o campo
+      const d = pctPrincipal(b) - ref;
       return `${txt} · ${d >= 0 ? '+' : '−'}${dec(Math.abs(d))} p.p. vs ${ant.competencia}`;
     })())}
     ${cel('Entregue em atraso', pct(pctAtrasado(b)),
@@ -410,12 +439,23 @@ function faixaNumeros(b) {
           `${nfmt(b.pendentes + b.atrasadas)} de ${nfmt(b.total)}` +
           (b.atrasadas ? ` · ${nfmt(b.atrasadas)} já vencidas` : ' · nenhuma vencida ainda'),
           b.atrasadas ? 'mal' : '')}
-    ${c && (c.media_no_prazo ?? c.media_anteriores) !== null &&
-          (c.media_no_prazo ?? c.media_anteriores) !== undefined
-      ? cel('Média dos meses anteriores', pct(c.media_no_prazo ?? c.media_anteriores),
-            `no mesmo ponto do prazo · ${nfmt(c.anteriores.length)} meses`)
-      : cel('Fechando por dia útil', dec(r.por_dia), `em ${r.dias_uteis_corridos} dias de ciclo`)}
+    ${(() => {
+      const m = c ? (ehPrazo() ? c.media_no_prazo : c.media_terminou) : null;
+      if (m === null || m === undefined)
+        return cel('Fechando por dia útil', dec(r.por_dia), `em ${r.dias_uteis_corridos} dias de ciclo`);
+      return cel(ehPrazo() ? 'Média dos meses anteriores' : 'Onde os meses terminam',
+                 pct(m),
+                 ehPrazo() ? `no mesmo ponto do prazo · ${nfmt(c.anteriores.length)} meses`
+                           : `média final dos ${nfmt(c.anteriores.length)} meses anteriores`);
+    })()}
   </div>`;
+}
+
+function trocarVisao(v) {
+  if (v !== 'prazo' && v !== 'fim') return;
+  VISAO = v;
+  try { localStorage.setItem('visao', v); } catch (e) {}
+  desenhar();
 }
 
 /* Onde a competência anterior estava no MESMO ponto do ciclo. */
@@ -680,6 +720,7 @@ document.addEventListener('mousemove', esconderPonteiroDepois);
 document.addEventListener('keydown', ev => {
   if (ev.ctrlKey || ev.altKey || ev.metaKey) return;
   if (ev.key.toLowerCase() === 'f') { ev.preventDefault(); alternarTelaCheia(); }
+  else if (ev.key === 'v' || ev.key === 'V') trocarVisao(ehPrazo() ? 'fim' : 'prazo');
   else if (ev.key === 'ArrowLeft') { const c = compVizinha(COMP, -1); if (c) { COMP = c; desenhar(); } }
   else if (ev.key === 'ArrowRight') { const c = compVizinha(COMP, 1); if (c) { COMP = c; desenhar(); } }
 });
