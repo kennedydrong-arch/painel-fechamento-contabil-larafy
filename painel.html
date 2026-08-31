@@ -91,6 +91,10 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .abre .txt .l2 { color:var(--tin2); font-size:14.5px; margin-top:5px; }
 .abre .marcas { margin-left:auto; display:flex; gap:8px; padding-bottom:8px; }
 
+.fatias { padding:0 0 14px; }
+.fatias .pilha { height:14px; }
+.fatias .legenda { margin-top:8px; gap:5px 22px; font-size:12.5px; }
+
 .comp-total { padding:0 0 14px; }
 .comp-rot { font-family:var(--fm); font-size:10px; letter-spacing:.13em;
             text-transform:uppercase; color:var(--fr); margin-bottom:7px; }
@@ -118,7 +122,7 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .graf-col .colunas b { opacity:.5; }
 .graf-col .colunas b.hoje { opacity:1; }
 .graf-col .colunas b { border-radius:3px 3px 0 0; }
-/* risco branco dentro da coluna: onde o mes estava no dia do prazo. O que
+/* risco branco dentro da coluna: o quanto saiu dentro do prazo. O que
    esta acima do risco foi entregue depois do prazo. */
 .marca-prazo { position:absolute; left:0; right:0; height:2px; background:var(--pap);
                display:block; text-decoration:none; }
@@ -266,10 +270,25 @@ function desenhar() {
         <span class="txt">
           <span class="l1">entregue no prazo</span>
           <span class="l2"><u>${nfmt(b.concluidas_no_prazo)}</u> de <u>${nfmt(b.total)}</u>
-            empresas que fecham contabilidade${b.concluidas_atrasadas
-              ? ` · mais <u>${nfmt(b.concluidas_atrasadas)}</u> entregues fora do prazo` : ''}</span>
+            empresas que fecham contabilidade</span>
         </span>
         <span class="marcas">${estado}</span>
+      </div>
+
+      <div class="fatias">
+        <span class="pilha">
+          ${b.concluidas_no_prazo ? `<i style="width:${pctNoPrazo(b)}%;background:var(--s1)"
+            title="${nfmt(b.concluidas_no_prazo)} no prazo"></i>` : ''}
+          ${b.concluidas_atrasadas ? `<i style="width:${pctAtrasado(b)}%;background:var(--al)"
+            title="${nfmt(b.concluidas_atrasadas)} em atraso"></i>` : ''}
+          ${(b.pendentes + b.atrasadas) ? `<i style="width:${pctAberto(b)}%;background:var(--trilho)"
+            title="${nfmt(b.pendentes + b.atrasadas)} em aberto"></i>` : ''}
+        </span>
+        <div class="legenda">
+          <span><u style="background:var(--s1)"></u><b>${pct(pctNoPrazo(b))}</b> no prazo</span>
+          <span><u style="background:var(--al)"></u><b>${pct(pctAtrasado(b))}</b> em atraso</span>
+          <span><u style="background:var(--trilho)"></u><b>${pct(pctAberto(b))}</b> em aberto</span>
+        </div>
       </div>
 
       ${composicao(b)}
@@ -289,8 +308,8 @@ function desenhar() {
 
       <div class="fecha">
         <div>
-          <p class="marca">Fechamento no dia do prazo <span style="text-transform:none;
-            letter-spacing:0">— o risco marca onde estava no prazo; o resto entrou depois</span></p>
+          <p class="marca">Entregue no prazo, mês a mês <span style="text-transform:none;
+            letter-spacing:0">— o risco marca o que saiu no prazo; a barra, o total entregue</span></p>
           ${grafMeses()}
         </div>
         <div>${avisoFinal(b)}</div>
@@ -351,7 +370,9 @@ function composicao(b) {
 /* O indicador da gestao e "quanto saiu no prazo", nao "quanto ja entrou".
    Entrega feita depois do prazo continua sendo entrega, mas nao conta aqui —
    ela aparece na linha de baixo e no grafico dos meses. */
-const pctNoPrazo = b => b.total ? (b.concluidas_no_prazo * 100) / b.total : 0;
+const pctNoPrazo  = b => b.total ? (b.concluidas_no_prazo * 100) / b.total : 0;
+const pctAtrasado = b => b.total ? (b.concluidas_atrasadas * 100) / b.total : 0;
+const pctAberto   = b => b.total ? ((b.pendentes + b.atrasadas) * 100) / b.total : 0;
 
 function corDo(b) {
   const r = b.ritmo || {};
@@ -370,20 +391,28 @@ function faixaNumeros(b) {
     <div class="v${cls ? ' ' + cls : ''}">${val}</div>
     <div class="d">${det}</div></div>`;
   return `<div class="faixa-num">
-    ${cel('No prazo', nfmt(b.concluidas_no_prazo), (() => {
+    ${cel('Entregue no prazo', pct(pctNoPrazo(b)), (() => {
       const ant = c && c.anteriores && c.anteriores[0];
-      if (!ant) return `${pct(pctNoPrazo(b))} das ${nfmt(b.total)}`;
-      const d = pctNoPrazo(b) - ant.no_mesmo_ponto;
-      return `${d >= 0 ? '+' : '−'}${dec(Math.abs(d))} p.p. vs ${ant.competencia} no mesmo ponto`;
+      const txt = `${nfmt(b.concluidas_no_prazo)} de ${nfmt(b.total)} empresas`;
+      if (!ant) return txt;
+      // enquanto o robo nao regera o JSON, cai no campo antigo
+      const ref = ant.no_prazo_no_mesmo_ponto !== undefined
+        ? ant.no_prazo_no_mesmo_ponto : ant.no_mesmo_ponto;
+      const d = pctNoPrazo(b) - ref;
+      return `${txt} · ${d >= 0 ? '+' : '−'}${dec(Math.abs(d))} p.p. vs ${ant.competencia}`;
     })())}
-    ${cel('Fora do prazo', nfmt(b.concluidas_atrasadas),
-          b.concluidas_atrasadas ? 'entregues depois do vencimento' : 'nenhuma até agora',
+    ${cel('Entregue em atraso', pct(pctAtrasado(b)),
+          b.concluidas_atrasadas
+            ? `${nfmt(b.concluidas_atrasadas)} de ${nfmt(b.total)} · saíram depois do vencimento`
+            : 'nenhuma até agora',
           b.concluidas_atrasadas ? 'mal' : '')}
-    ${cel('Ainda em aberto', nfmt(b.pendentes + b.atrasadas),
-          b.atrasadas ? `${nfmt(b.atrasadas)} já vencidas` : 'nenhuma vencida ainda',
+    ${cel('Ainda em aberto', pct(pctAberto(b)),
+          `${nfmt(b.pendentes + b.atrasadas)} de ${nfmt(b.total)}` +
+          (b.atrasadas ? ` · ${nfmt(b.atrasadas)} já vencidas` : ' · nenhuma vencida ainda'),
           b.atrasadas ? 'mal' : '')}
-    ${c && c.media_anteriores !== null
-      ? cel('Média dos meses anteriores', pct(c.media_anteriores),
+    ${c && (c.media_no_prazo ?? c.media_anteriores) !== null &&
+          (c.media_no_prazo ?? c.media_anteriores) !== undefined
+      ? cel('Média dos meses anteriores', pct(c.media_no_prazo ?? c.media_anteriores),
             `no mesmo ponto do prazo · ${nfmt(c.anteriores.length)} meses`)
       : cel('Fechando por dia útil', dec(r.por_dia), `em ${r.dias_uteis_corridos} dias de ciclo`)}
   </div>`;
@@ -449,14 +478,14 @@ function grafMeses() {
   const b = FECH.fechamento[COMP];
   const c = b.comparativo;
   if (!c) return grafMesesSimples();
-  const linhas = [{ comp: COMP, noPrazo: b.percentual, fim: b.percentual, atual: true }]
+  const linhas = [{ comp: COMP, noPrazo: pctNoPrazo(b), fim: b.percentual, atual: true }]
     .concat(c.anteriores.map(a => ({
-      comp: a.competencia, noPrazo: a.no_mesmo_ponto, fim: a.terminou_em })))
+      comp: a.competencia,
+      noPrazo: a.terminou_no_prazo !== undefined ? a.terminou_no_prazo : a.no_mesmo_ponto,
+      fim: a.terminou_em })))
     .reverse();
   const alt = 90;
-  const rot = c.dias_do_prazo === 0 ? 'no dia do prazo'
-    : c.dias_do_prazo < 0 ? `a ${Math.abs(c.dias_do_prazo)} dias do prazo`
-    : `${c.dias_do_prazo} dias após o prazo`;
+  const rot = 'no prazo';
   return `
     <div class="graf-col">
       <div class="eixo">

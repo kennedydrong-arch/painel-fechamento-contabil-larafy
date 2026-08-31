@@ -277,12 +277,16 @@ def bloco_fechamento(linhas, competencias, empresas_ativas=None):
 
         # evolucao: quantas empresas fecharam a cada dia (acumulado)
         entregas = sorted(a["data_entrega"] for a in concluidas if a["data_entrega"])
-        curva, acc = [], 0
+        dentro = sorted(a["data_entrega"] for a in no_prazo if a["data_entrega"])
+        curva, acc, acc_np = [], 0, 0
         for dia in sorted(set(entregas)):
             no_dia = entregas.count(dia)
             acc += no_dia
+            acc_np += dentro.count(dia)
             curva.append({"dia": dia, "no_dia": no_dia,
-                          "acumulado": acc, "percentual": pct(acc, total)})
+                          "acumulado": acc, "percentual": pct(acc, total),
+                          "acumulado_no_prazo": acc_np,
+                          "percentual_no_prazo": pct(acc_np, total)})
 
         # ritmo por pessoa
         resp = defaultdict(lambda: {"total": 0, "concluidas": 0, "atrasadas": 0, "pendentes": 0})
@@ -685,16 +689,24 @@ def main():
             antes.append({
                 "competencia": outra,
                 "no_mesmo_ponto": ate[-1]["percentual"] if ate else 0.0,
+                # o mesmo ponto, mas contando so o que saiu dentro do prazo -
+                # e este que compara com o numero grande do painel
+                "no_prazo_no_mesmo_ponto": ate[-1]["percentual_no_prazo"] if ate else 0.0,
                 "terminou_em": o["percentual"],
+                "terminou_no_prazo": pct(o["concluidas_no_prazo"], o["total"]),
                 "dias_para_50_apos_prazo": atraso50,
             })
         antes.sort(key=lambda x: -ordem_comp(x["competencia"]))
         melhores = [x["no_mesmo_ponto"] for x in antes]
+        no_prazo_ant = [x["no_prazo_no_mesmo_ponto"] for x in antes]
+        meu_no_prazo = pct(b["concluidas_no_prazo"], b["total"])
         b["comparativo"] = {
             "dias_do_prazo": dias_do_prazo,
             "anteriores": antes[:5],
-            "melhor_ate_agora": bool(melhores) and b["percentual"] > max(melhores),
+            "melhor_ate_agora": bool(no_prazo_ant) and meu_no_prazo > max(no_prazo_ant),
             "media_anteriores": round(sum(melhores) / len(melhores), 1) if melhores else None,
+            "media_no_prazo": round(sum(no_prazo_ant) / len(no_prazo_ant), 1)
+                              if no_prazo_ant else None,
         }
 
     # Empresas arrastando o fechamento por mais de uma competência. Dentro de
