@@ -132,12 +132,25 @@ contabilidade:
 | **Entregue em atraso** | foi entregue, mas depois do vencimento |
 | **Ainda em aberto** | não foi entregue |
 
-### As duas visões
+### A leitura da tela, de cima para baixo
 
-No topo do painel há duas abas (ou a tecla **V**):
+O painel responde três perguntas, nessa ordem:
 
-| Aba | O número grande passa a ser |
-|---|---|
+1. **Quantas empresas fecharam dentro do prazo** — o número grande, com a barra
+   colorida logo abaixo mostrando o resto (em atraso e em aberto)
+2. **Como estava o mês passado no mesmo ponto do ciclo** — para saber se este mês
+   está melhor ou pior, e não só se o número "parece baixo"
+3. **Onde este mês deve terminar** — a previsão, que é a mediana de onde os 5
+   meses anteriores terminaram, com o menor e o maior ao lado
+
+A previsão só aparece enquanto o prazo não venceu. Depois disso ela vira o
+**resultado real** ("entregue no total"), porque prever um mês que já acabou
+não é previsão.
+
+A comparação com o mês anterior usa a **mesma régua**: % entregue no prazo
+daquele mês, não o total que ele acabou fechando.
+
+---|---|
 | **No prazo** | quanto saiu **até o vencimento**. É o compromisso com o cliente |
 | **Total entregue** | quanto foi entregue **no total**, contando o que entrou depois do prazo. É onde o mês termina |
 

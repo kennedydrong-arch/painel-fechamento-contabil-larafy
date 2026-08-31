@@ -712,6 +712,22 @@ def main():
             "media_terminou": round(sum(x["terminou_em"] for x in antes) / len(antes), 1)
                               if antes else None,
         }
+        # Onde este mes deve terminar. Sem modelo nenhum: e a MEDIANA de onde
+        # os meses anteriores terminaram, com o menor e o maior ao lado. A
+        # mediana em vez da media porque um mes ruim (mar/26) puxa a media e
+        # a gestao le o numero como promessa.
+        fins = sorted(x["terminou_em"] for x in antes[:5])
+        if fins:
+            meio = fins[len(fins) // 2] if len(fins) % 2 else                    round((fins[len(fins) // 2 - 1] + fins[len(fins) // 2]) / 2, 1)
+            b["forecast"] = {
+                "pct": meio,
+                "empresas": int(round(b["total"] * meio / 100)),
+                "menor": fins[0],
+                "maior": fins[-1],
+                "meses": len(fins),
+                # ja passou do que o historico diz? entao nao e mais previsao
+                "ja_passou": b["percentual"] >= meio,
+            }
 
     # Empresas arrastando o fechamento por mais de uma competência. Dentro de
     # um mês só, todas têm o mesmo prazo e "há quantos dias está parada" não
