@@ -262,11 +262,12 @@ function desenhar() {
 
     <div class="corpo">
       <div class="abre">
-        <span class="pc" style="color:${corDo(b)}">${pct(b.percentual)}</span>
+        <span class="pc" style="color:${corDo(b)}">${pct(pctNoPrazo(b))}</span>
         <span class="txt">
-          <span class="l1"><u>${nfmt(b.concluidas)}</u> de <u>${nfmt(b.total)}</u> empresas
-            que fecham contabilidade</span>
-          <span class="l2">faltam ${nfmt(falta)} para o mês fechar</span>
+          <span class="l1">entregue no prazo</span>
+          <span class="l2"><u>${nfmt(b.concluidas_no_prazo)}</u> de <u>${nfmt(b.total)}</u>
+            empresas que fecham contabilidade${b.concluidas_atrasadas
+              ? ` · mais <u>${nfmt(b.concluidas_atrasadas)}</u> entregues fora do prazo` : ''}</span>
         </span>
         <span class="marcas">${estado}</span>
       </div>
@@ -347,35 +348,44 @@ function composicao(b) {
     </div>`;
 }
 
+/* O indicador da gestao e "quanto saiu no prazo", nao "quanto ja entrou".
+   Entrega feita depois do prazo continua sendo entrega, mas nao conta aqui —
+   ela aparece na linha de baixo e no grafico dos meses. */
+const pctNoPrazo = b => b.total ? (b.concluidas_no_prazo * 100) / b.total : 0;
+
 function corDo(b) {
   const r = b.ritmo || {};
   if (!r.prazo_vencido) return 'var(--s1)';
-  return b.percentual >= 95 ? 'var(--ok)' : b.percentual >= 80 ? 'var(--al)' : 'var(--mal)';
+  const p = pctNoPrazo(b);
+  return p >= 95 ? 'var(--ok)' : p >= 80 ? 'var(--al)' : 'var(--mal)';
 }
 
 /* Peça do kit: faixa de números, células separadas por fio. O valor é mono. */
 function faixaNumeros(b) {
   const r = b.ritmo || {};
   const ref = refAnterior(b);
+  const c = b.comparativo;
   const cel = (rot, val, det, cls) => `<div>
     <div class="r">${rot}</div>
     <div class="v${cls ? ' ' + cls : ''}">${val}</div>
     <div class="d">${det}</div></div>`;
   return `<div class="faixa-num">
-    ${cel('Fechadas', nfmt(b.concluidas),
-          ref ? `${ref.dif >= 0 ? '+' : '−'}${dec(Math.abs(ref.dif))} p.p. vs ${ref.comp} no mesmo ponto`
-              : `${pct(b.percentual)} do total`)}
-    ${cel('Em aberto', nfmt(b.pendentes + b.atrasadas),
-          b.atrasadas ? `${nfmt(b.atrasadas)} já em atraso` : 'nenhuma em atraso ainda',
+    ${cel('No prazo', nfmt(b.concluidas_no_prazo), (() => {
+      const ant = c && c.anteriores && c.anteriores[0];
+      if (!ant) return `${pct(pctNoPrazo(b))} das ${nfmt(b.total)}`;
+      const d = pctNoPrazo(b) - ant.no_mesmo_ponto;
+      return `${d >= 0 ? '+' : '−'}${dec(Math.abs(d))} p.p. vs ${ant.competencia} no mesmo ponto`;
+    })())}
+    ${cel('Fora do prazo', nfmt(b.concluidas_atrasadas),
+          b.concluidas_atrasadas ? 'entregues depois do vencimento' : 'nenhuma até agora',
+          b.concluidas_atrasadas ? 'mal' : '')}
+    ${cel('Ainda em aberto', nfmt(b.pendentes + b.atrasadas),
+          b.atrasadas ? `${nfmt(b.atrasadas)} já vencidas` : 'nenhuma vencida ainda',
           b.atrasadas ? 'mal' : '')}
-    ${cel('Fechando por dia útil', dec(r.por_dia),
-          `em ${r.dias_uteis_corridos} dias de ciclo`)}
-    ${b.concluidas
-      ? cel('Entregues no prazo', dec(b.concluidas_no_prazo * 100 / b.concluidas, 0) + '%',
-            `${nfmt(b.concluidas_no_prazo)} de ${nfmt(b.concluidas)} sem atraso`)
-      : cel('Precisaria por dia', r.por_dia_necessario === null ? '—' : dec(r.por_dia_necessario),
-            r.prazo_vencido ? 'prazo vencido' : `nos ${r.dias_uteis_restantes} dias úteis que restam`,
-            r.por_dia_necessario > r.por_dia ? 'mal' : '')}
+    ${c && c.media_anteriores !== null
+      ? cel('Média dos meses anteriores', pct(c.media_anteriores),
+            `no mesmo ponto do prazo · ${nfmt(c.anteriores.length)} meses`)
+      : cel('Fechando por dia útil', dec(r.por_dia), `em ${r.dias_uteis_corridos} dias de ciclo`)}
   </div>`;
 }
 
