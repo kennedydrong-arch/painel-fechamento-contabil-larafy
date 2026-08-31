@@ -6,3 +6,4 @@ __pycache__/
 # capturas de tela de conferencia (comentario tem que ficar em linha propria:
 # na mesma linha do padrao ele vira parte do padrao e nada e ignorado)
 _*.png
+_*.json
