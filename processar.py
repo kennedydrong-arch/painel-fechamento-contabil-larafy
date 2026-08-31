@@ -651,6 +651,52 @@ def main():
 
     os.makedirs(DIR_DATA, exist_ok=True)
 
+    # Comparação no MESMO ponto do ciclo com todas as competências anteriores.
+    # Sem isto o painel mostra "24,8%" e a leitura natural é "está baixo" —
+    # quando 24,8% no dia 20 é o melhor número que o escritório já teve nesse
+    # ponto. O que é baixo é o padrão da casa, não o mês.
+    # A âncora é o PRAZO, não a abertura. O "abre_em" é o menor prazo técnico
+    # das tarefas ativas e se move quando entra tarefa nova no Acessórias — o
+    # mesmo mês chegou a mudar de 24,7% para 5,6% entre duas coletas por causa
+    # disso. O prazo legal é fixo, então "faltam X dias para o prazo" compara
+    # meses diferentes sem mentir.
+    for comp in comps_fech:
+        b = fechamento[comp]
+        d_prazo_atual = data_iso(b["prazo_legal"])
+        if not d_prazo_atual:
+            continue
+        dias_do_prazo = (hoje - d_prazo_atual).days   # negativo = antes do prazo
+        antes = []
+        for outra in comps_fech:
+            if outra == comp or ordem_comp(outra) >= ordem_comp(comp):
+                continue
+            o = fechamento[outra]
+            o_prazo = data_iso(o["prazo_legal"])
+            if not o_prazo or not o["curva"]:
+                continue
+            alvo = (o_prazo + dt.timedelta(days=dias_do_prazo)).isoformat()
+            ate = [p for p in o["curva"] if p["dia"] <= alvo]
+            # quando esse mês passou de 50%, e quantos dias depois do prazo
+            d_prazo = data_iso(o["prazo_legal"])
+            p50 = next((p for p in o["curva"] if p["percentual"] >= 50), None)
+            atraso50 = None
+            if p50 and d_prazo:
+                atraso50 = (data_iso(p50["dia"]) - d_prazo).days
+            antes.append({
+                "competencia": outra,
+                "no_mesmo_ponto": ate[-1]["percentual"] if ate else 0.0,
+                "terminou_em": o["percentual"],
+                "dias_para_50_apos_prazo": atraso50,
+            })
+        antes.sort(key=lambda x: -ordem_comp(x["competencia"]))
+        melhores = [x["no_mesmo_ponto"] for x in antes]
+        b["comparativo"] = {
+            "dias_do_prazo": dias_do_prazo,
+            "anteriores": antes[:5],
+            "melhor_ate_agora": bool(melhores) and b["percentual"] > max(melhores),
+            "media_anteriores": round(sum(melhores) / len(melhores), 1) if melhores else None,
+        }
+
     # Empresas arrastando o fechamento por mais de uma competência. Dentro de
     # um mês só, todas têm o mesmo prazo e "há quantos dias está parada" não
     # separa ninguém; o que separa é quantos meses a empresa acumula em aberto.

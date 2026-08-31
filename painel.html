@@ -118,6 +118,11 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .graf-col .colunas b { opacity:.5; }
 .graf-col .colunas b.hoje { opacity:1; }
 .graf-col .colunas b { border-radius:3px 3px 0 0; }
+/* risco branco dentro da coluna: onde o mes estava no dia do prazo. O que
+   esta acima do risco foi entregue depois do prazo. */
+.marca-prazo { position:absolute; left:0; right:0; height:2px; background:var(--pap);
+               display:block; text-decoration:none; }
+:root[data-theme="dark"] .marca-prazo { background:var(--fundo); }
 .meses-r { display:flex; gap:10px; margin:6px 0 0 46px; max-width:384px; }
 .meses-r span { flex:1; text-align:center; font-family:var(--fm); font-size:11px; color:var(--fr); }
 .meses-r span.hoje { color:var(--tin); }
@@ -229,8 +234,10 @@ function desenhar() {
     ? (falta === 0 ? marca('ok', 'i-check', 'competência fechada')
                    : marca('mal', 'i-x', `prazo venceu em ${dataBR(b.prazo_legal)}`))
     : falta === 0 ? marca('ok', 'i-check', 'competência fechada')
-    : marca('al', 'i-alerta', `prazo em ${r.dias_uteis_restantes} dia${
-        r.dias_uteis_restantes === 1 ? '' : 's'} úteis`);
+    : r.dias_uteis_restantes === 0
+      ? marca('al', 'i-alerta', 'último dia do prazo')
+      : marca('al', 'i-alerta', `prazo em ${r.dias_uteis_restantes} dia${
+          r.dias_uteis_restantes === 1 ? '' : 's'} úteis`);
 
   $('#palco').innerHTML = `
     <header class="topo">
@@ -281,7 +288,8 @@ function desenhar() {
 
       <div class="fecha">
         <div>
-          <p class="marca">Onde cada mês terminou</p>
+          <p class="marca">Fechamento no dia do prazo <span style="text-transform:none;
+            letter-spacing:0">— o risco marca onde estava no prazo; o resto entrou depois</span></p>
           ${grafMeses()}
         </div>
         <div>${avisoFinal(b)}</div>
@@ -362,10 +370,12 @@ function faixaNumeros(b) {
           b.atrasadas ? 'mal' : '')}
     ${cel('Fechando por dia útil', dec(r.por_dia),
           `em ${r.dias_uteis_corridos} dias de ciclo`)}
-    ${cel('Precisaria por dia', r.por_dia_necessario === null ? '—' : dec(r.por_dia_necessario),
-          r.prazo_vencido ? 'prazo vencido'
-            : `nos ${r.dias_uteis_restantes} dias úteis que restam`,
-          r.por_dia_necessario > r.por_dia ? 'mal' : '')}
+    ${b.concluidas
+      ? cel('Entregues no prazo', dec(b.concluidas_no_prazo * 100 / b.concluidas, 0) + '%',
+            `${nfmt(b.concluidas_no_prazo)} de ${nfmt(b.concluidas)} sem atraso`)
+      : cel('Precisaria por dia', r.por_dia_necessario === null ? '—' : dec(r.por_dia_necessario),
+            r.prazo_vencido ? 'prazo vencido' : `nos ${r.dias_uteis_restantes} dias úteis que restam`,
+            r.por_dia_necessario > r.por_dia ? 'mal' : '')}
   </div>`;
 }
 
@@ -398,6 +408,9 @@ function colunaDireita(b) {
     : r.prazo_vencido
       ? `<div class="destaque"><b>${nfmt(falta)} empresas ficaram sem fechamento.</b>
           O prazo terminou em ${dataBR(b.prazo_legal)}.</div>`
+      : r.dias_uteis_restantes === 0
+        ? `<div class="destaque"><b>Hoje é o último dia do prazo e ${nfmt(falta)} empresas
+            seguem em aberto.</b> A partir de amanhã elas contam como atraso.</div>`
       : r.por_dia_necessario > r.por_dia
         ? `<div class="destaque"><b>No ritmo atual seriam necessários
             ${nfmt(r.dias_uteis_no_ritmo)} dias úteis para as ${nfmt(falta)} que faltam.</b>
@@ -419,8 +432,41 @@ function colunaDireita(b) {
     </div>`;
 }
 
-/* Peça do kit: gráfico de colunas com eixo à esquerda. */
+/* Duas barras por mês: onde o mês estava NO DIA DO PRAZO (cheia) e onde ele
+   terminou (clara, atrás). O vão entre as duas é o que o escritório entrega
+   depois do prazo — que é a história que o número sozinho não conta. */
 function grafMeses() {
+  const b = FECH.fechamento[COMP];
+  const c = b.comparativo;
+  if (!c) return grafMesesSimples();
+  const linhas = [{ comp: COMP, noPrazo: b.percentual, fim: b.percentual, atual: true }]
+    .concat(c.anteriores.map(a => ({
+      comp: a.competencia, noPrazo: a.no_mesmo_ponto, fim: a.terminou_em })))
+    .reverse();
+  const alt = 90;
+  const rot = c.dias_do_prazo === 0 ? 'no dia do prazo'
+    : c.dias_do_prazo < 0 ? `a ${Math.abs(c.dias_do_prazo)} dias do prazo`
+    : `${c.dias_do_prazo} dias após o prazo`;
+  return `
+    <div class="graf-col">
+      <div class="eixo">
+        <u style="top:0">100%</u><i style="top:0"></i>
+        <u style="top:${alt / 2}px">50%</u><i style="top:${alt / 2}px"></i>
+        <u style="top:${alt}px">0</u><i style="top:${alt - 1}px;background:var(--fio3)"></i>
+      </div>
+      <div class="colunas">
+        ${linhas.map(l => `<b class="${l.atual ? 'hoje' : ''}" style="height:${Math.max(1.5, l.fim)}%">
+          ${l.fim > l.noPrazo ? `<u class="marca-prazo" style="bottom:${(l.noPrazo / l.fim) * 100}%"></u>` : ''}
+          <span class="dica">${esc(l.comp)} · ${pct(l.noPrazo)} ${esc(rot)}${
+            l.fim > l.noPrazo ? ` · terminou em ${pct(l.fim)}` : ''}</span></b>`).join('')}
+      </div>
+    </div>
+    <div class="meses-r">
+      ${linhas.map(l => `<span class="${l.atual ? 'hoje' : ''}">${esc(l.comp.slice(0, 3))}</span>`).join('')}
+    </div>`;
+}
+
+function grafMesesSimples() {
   const comps = FECH.competencias
     .filter(c => ordemComp(c) <= ordemComp(FECH.competencia_foco))
     .slice(0, 6).reverse();
