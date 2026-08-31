@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>Fechamento Contábil · LaraFy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap">
 <link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="fontes.css">
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
@@ -505,7 +509,7 @@ function montarTabela(b) {
 
   $('tbody').innerHTML = linhas.map(e => `
     <tr>
-      <td><b>${esc(e.empresa)}</b><br><span class="muted" style="font-size:11.5px">${esc(cnpjFmt(e.cnpj))}</span></td>
+      <td><b>${esc(e.empresa)}</b><br><span class="muted mono" style="font-size:11.5px">${esc(cnpjFmt(e.cnpj))}</span></td>
       <td class="muted">${esc(e.uf || '—')}</td>
       <td class="muted">${esc(e.regime)}</td>
       <td>${esc(e.responsavel || '—')}</td>

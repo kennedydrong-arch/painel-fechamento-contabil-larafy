@@ -9,7 +9,9 @@
 <title>Fechamento Contábil · LaraFy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Montserrat:wght@600;700&display=swap">
 <link rel="stylesheet" href="kit.css">
+<link rel="stylesheet" href="fontes.css">
 <style>
 /* ============================================================
    Fechamento contábil — painel de parede.
@@ -51,23 +53,26 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
   display:flex; align-items:center; gap:22px; padding:0 30px;
 }
 .topo img { height:26px; width:auto; display:block; }
-.topo h1 { font-family:var(--fd); font-weight:800; font-size:19px;
+.topo h1 { font-family:var(--fd); font-weight:700; font-size:19px;
            letter-spacing:-.035em; margin:0; white-space:nowrap; }
 .topo h1 span { color:#8FB0C0; font-weight:400; letter-spacing:-.02em; }
 .nav-comp { display:flex; align-items:center; gap:2px; }
 .nav-comp button {
   background:none; border:0; color:#8FB0C0; cursor:pointer; font-size:17px;
+  font-family:var(--fb);
   line-height:1; padding:4px 8px; border-radius:3px;
 }
 .nav-comp button:hover:not(:disabled) { color:#fff; background:rgba(255,255,255,.09); }
 .nav-comp button:disabled { opacity:.25; cursor:default; }
 .nav-comp .agora {
-  font-family:var(--fm); font-size:13px; color:#fff; min-width:66px; text-align:center;
+  font-family:var(--fb); font-weight:500; font-variant-numeric:tabular-nums;
+  font-size:13px; color:#fff; min-width:66px; text-align:center;
   border-bottom:2px solid #07E0FF; padding-bottom:2px;
 }
 .fonte {
   margin-left:auto; display:flex; align-items:center; gap:12px;
-  font-family:var(--fm); font-size:11.5px; color:#8FB0C0; white-space:nowrap;
+  font-family:var(--fb); font-size:11.5px; color:#8FB0C0; white-space:nowrap;
+  font-variant-numeric:tabular-nums;
 }
 .fonte .pt { width:7px; height:7px; border-radius:99px; background:#07E0FF; flex:none; }
 .fonte.velha { color:#F0B3AC; } .fonte.velha .pt { background:#E8807A; }
@@ -82,8 +87,8 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 
 .abre { display:flex; align-items:flex-end; gap:26px; padding:20px 0 16px; }
 .abre .pc {
-  font-family:var(--fd); font-weight:800; font-size:92px; line-height:.82;
-  letter-spacing:-.045em; font-variant-numeric:tabular-nums;
+  font-family:var(--fb); font-weight:700; font-size:92px; line-height:.86;
+  letter-spacing:-.03em; font-variant-numeric:tabular-nums;
   display:flex; align-items:baseline; gap:12px; white-space:nowrap;
 }
 .abre .pc em {
@@ -91,8 +96,9 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
   color:var(--tin2);
 }
 .abre .txt { padding-bottom:6px; }
-.abre .txt .l1 { font-family:var(--fd); font-weight:700; font-size:21px; letter-spacing:-.03em; }
-.abre .txt .l1 u { font-family:var(--fm); font-weight:500; text-decoration:none; }
+.abre .txt .l1 { font-family:var(--fb); font-weight:600; font-size:21px; letter-spacing:-.02em; }
+.abre .txt .l1 u { font-family:var(--fb); font-weight:600; text-decoration:none;
+                   font-variant-numeric:tabular-nums; }
 .abre .txt .l2 { color:var(--tin2); font-size:14.5px; margin-top:5px; }
 .abre .marcas { margin-left:auto; display:flex; gap:8px; padding-bottom:8px; }
 
@@ -101,7 +107,7 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .fatias .legenda { margin-top:8px; gap:5px 22px; font-size:12.5px; }
 
 .comp-total { padding:0 0 14px; }
-.comp-rot { font-family:var(--fm); font-size:10px; letter-spacing:.13em;
+.comp-rot { font-family:var(--fb); font-weight:500; font-size:10px; letter-spacing:.13em;
             text-transform:uppercase; color:var(--fr); margin-bottom:7px; }
 .comp-rot b { color:var(--tin2); font-weight:500; }
 .comp-total .pilha { height:14px; }
@@ -115,9 +121,11 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .tit-graf { display:flex; align-items:baseline; justify-content:space-between; gap:14px; }
 .linha-svg { flex:1; min-height:0; margin-top:10px; }
 .linha-svg svg { width:100%; height:100%; display:block; }
-.eixo-t { fill:var(--fr); font-family:var(--fm); font-size:11px; }
+.eixo-t { fill:var(--fr); font-family:var(--fb); font-size:11px;
+          font-variant-numeric:tabular-nums; }
 .malha-l { stroke:var(--fio2); stroke-width:1; }
-.rot-l { font-family:var(--fm); font-size:12.5px; }
+.rot-l { font-family:var(--fb); font-weight:500; font-size:12.5px;
+         font-variant-numeric:tabular-nums; }
 
 .fecha { flex:none; padding:20px 0 22px; border-top:1px solid var(--fio); margin-top:20px;
          display:grid; grid-template-columns:1fr 470px; gap:38px; align-items:end; }
@@ -133,7 +141,8 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
                display:block; text-decoration:none; }
 :root[data-theme="dark"] .marca-prazo { background:var(--fundo); }
 .meses-r { display:flex; gap:10px; margin:6px 0 0 46px; max-width:384px; }
-.meses-r span { flex:1; text-align:center; font-family:var(--fm); font-size:11px; color:var(--fr); }
+.meses-r span { flex:1; text-align:center; font-family:var(--fb); font-size:11px;
+                color:var(--fr); font-variant-numeric:tabular-nums; }
 .meses-r span.hoje { color:var(--tin); }
 
 /* O aviso do kit é âmbar; num bloco grande isso vira a caixinha amarela de
@@ -145,7 +154,8 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 }
 :root[data-theme="dark"] .aviso { background:#0B3346; color:#D3E7EF; }
 .aviso b { color:#fff; font-weight:600; }
-.aviso .n { font-family:var(--fm); color:#07E0FF; font-weight:500; }
+.aviso .n { font-family:var(--fb); color:#07E0FF; font-weight:600;
+            font-variant-numeric:tabular-nums; }
 
 .carregando { display:grid; place-items:center; height:100%; color:var(--fr); font-size:16px; }
 </style>

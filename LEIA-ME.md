@@ -180,6 +180,28 @@ aparece aqui na próxima atualização.
 
 ---
 
+## As fontes
+
+Regra de 31/08/2026, valendo nas três telas:
+
+| Onde | Fonte |
+|---|---|
+| Texto, interface e tabelas | IBM Plex Sans 400/500 |
+| Títulos institucionais | Montserrat 600/700 |
+| KPIs e números grandes | IBM Plex Sans 600/700 |
+| Valores, datas e percentuais | IBM Plex Sans + `tabular-nums` |
+| CNPJ, códigos, IDs e dados técnicos | IBM Plex Mono 400/500 |
+
+Mora em **`fontes.css`**, que é carregado depois do `kit.css`. O kit segue a
+regra antiga (número em mono) e não se edita aqui — ele é cópia do enxoval.
+Assim, se um dia a regra voltar atrás, basta apagar o `fontes.css`.
+
+As fontes vêm do Google Fonts. **Antes disso elas nunca eram carregadas**: as
+três telas tinham só o `preconnect`, sem o link do CSS, então tudo caía na
+fonte do sistema (Segoe UI) sem ninguém perceber.
+
+---
+
 ## Os arquivos
 
 | Arquivo | Para que serve |
@@ -189,6 +211,7 @@ aparece aqui na próxima atualização.
 | `classificador.py` | Traduz o texto do status ("Ent. PzTéc", "Atrasada!") em concluído/pendente/atrasado |
 | `acessorias.py` | O cliente da API: token, ritmo de chamadas, tentativas |
 | `index.html` | O painel |
+| `fontes.css` | O mapa de fontes (vem depois do `kit.css`) |
 | `servir.py` | Sobe o painel no navegador |
 | `.env` | **O token do Acessórias. Não vai para o Git, não vai para lugar nenhum.** |
 

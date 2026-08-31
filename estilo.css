@@ -20,8 +20,14 @@ body {
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
-.mono, .num { font-family: var(--fm); font-variant-numeric: tabular-nums; }
-.titulo, .card-title, .brand-name, .hero-num, .tile-val { font-family: var(--fd); }
+/* mono so em dado tecnico (CNPJ, codigo, ID) - regra de fontes 31/08/2026 */
+.mono { font-family: var(--fm); font-weight:400; font-variant-numeric: tabular-nums; }
+.num  { font-family: var(--fb); font-variant-numeric: tabular-nums; }
+/* Montserrat so em titulo institucional. KPI (.hero-num, .tile-val) e
+   numero grande: IBM Plex Sans 600/700 - regra de fontes 31/08/2026. */
+.titulo, .card-title, .brand-name { font-family: var(--fd); font-weight:700; }
+.hero-num { font-family: var(--fb); font-weight:700;
+            font-variant-numeric: tabular-nums; }
 .muted { color: var(--fr); }
 
 /* ------------------------------------------------------------- topo */
@@ -36,7 +42,7 @@ header {
 .brand-name i { color:#07E0FF; font-style:normal; }
 .brand-ctx { font-size:13px; color:#8FB0C0; }
 .head-right { display:flex; align-items:center; gap:14px; font-size:12px; }
-.pill { display:flex; gap:7px; align-items:center; font-family: var(--fm); }
+.pill { display:flex; gap:7px; align-items:center; font-family: var(--fb); }
 .pill-lbl { color:#7FA0B2; font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; }
 .pill-val { color:#fff; font-variant-numeric: tabular-nums; }
 .btn-print {
@@ -60,7 +66,7 @@ header {
   position:sticky; top:0; z-index:20;
 }
 .filter-label {
-  font-family: var(--fm); font-size:10px; letter-spacing:.13em;
+  font-family: var(--fb); font-size:10px; letter-spacing:.13em;
   text-transform:uppercase; color: var(--fr);
 }
 .comp-list { display:flex; gap:4px; flex-wrap:wrap; }
@@ -89,7 +95,7 @@ main { padding:20px 26px 40px; max-width:1480px; margin:0 auto; display:grid; ga
 @media (max-width:1080px) { .top { grid-template-columns:1fr; } }
 
 .hero { padding:18px 20px 20px; }
-.hero-cap { font-family: var(--fm); font-size:10px; letter-spacing:.13em;
+.hero-cap { font-family: var(--fb); font-size:10px; letter-spacing:.13em;
             text-transform:uppercase; color: var(--fr); margin-bottom:8px; }
 .hero-num { font-weight:800; font-size:52px; line-height:1; letter-spacing:-.045em;
             font-variant-numeric: tabular-nums; }
@@ -98,7 +104,8 @@ main { padding:20px 26px 40px; max-width:1480px; margin:0 auto; display:grid; ga
 .hero-barra i { display:block; height:100%; }
 .hero-barra i + i { border-left:2px solid var(--pap); }
 .hero-count { margin-top:12px; font-size:14px; }
-.hero-count b { font-family: var(--fm); font-weight:500; }
+.hero-count b { font-family: var(--fb); font-weight:600;
+                font-variant-numeric: tabular-nums; }
 .hero-prazo { margin-top:4px; font-size:13px; color: var(--fr); }
 
 /* peça do kit: faixa de números */
@@ -111,11 +118,12 @@ main { padding:20px 26px 40px; max-width:1480px; margin:0 auto; display:grid; ga
 @media (max-width:900px) { .tile:nth-child(2) { border-right:0; } }
 .tile-top { display:flex; align-items:center; gap:7px; }
 .dot { width:8px; height:8px; border-radius:2px; flex:none; }
-.tile-lbl { font-family: var(--fm); font-size:9.5px; letter-spacing:.13em;
+.tile-lbl { font-family: var(--fb); font-size:9.5px; letter-spacing:.13em;
             text-transform:uppercase; color: var(--fr); }
-.tile-val { font-family: var(--fm); font-size:25px; font-weight:500; letter-spacing:-.025em;
+.tile-val { font-family: var(--fb); font-size:25px; font-weight:600; letter-spacing:-.025em;
+            font-variant-numeric: tabular-nums;
             margin:5px 0 2px; line-height:1.1; font-variant-numeric: tabular-nums; }
-.tile-sub { font-family: var(--fm); font-size:10.5px; color: var(--fr); min-height:14px; }
+.tile-sub { font-family: var(--fb); font-size:10.5px; color: var(--fr); min-height:14px; }
 .tile-bar { display:none; }
 
 .split-2 { display:grid; grid-template-columns:1fr 360px; gap:16px; }
@@ -128,13 +136,14 @@ main { padding:20px 26px 40px; max-width:1480px; margin:0 auto; display:grid; ga
 .chart-wrap { position:relative; }
 svg { display:block; width:100%; overflow:visible; }
 .grid-line { stroke: var(--fio2); stroke-width:1; }
-.axis-txt { fill: var(--fr); font-family: var(--fm); font-size:9.5px; }
+.axis-txt { fill: var(--fr); font-family: var(--fb); font-size:9.5px;
+            font-variant-numeric: tabular-nums; }
 .axis-txt.b { fill: var(--tin2); }
 
 .tip {
   position:absolute; pointer-events:none; opacity:0; transition:opacity var(--t) var(--curva);
   background: var(--tin); color: var(--pap); border-radius:3px; padding:8px 11px;
-  font-family: var(--fm); font-size:11.5px; z-index:30; white-space:nowrap;
+  font-family: var(--fb); font-size:11.5px; z-index:30; white-space:nowrap;
   transform:translate(-50%,-100%);
 }
 .tip-row { display:flex; align-items:center; gap:7px; margin-top:3px; }
@@ -150,7 +159,8 @@ svg { display:block; width:100%; overflow:visible; }
              overflow:hidden; display:flex; }
 .bar-track i { height:100%; display:block; }
 .bar-track i + i { border-left:2px solid var(--pap); }
-.bar-val { font-family: var(--fm); font-size:12.5px; color: var(--tin2);
+.bar-val { font-family: var(--fb); font-size:12.5px; color: var(--tin2);
+           font-variant-numeric: tabular-nums;
            font-variant-numeric: tabular-nums; }
 .bar-val b { color: var(--tin); font-weight:500; }
 /* nome à esquerda, valor à direita, barra embaixo — como no kit */
@@ -182,7 +192,7 @@ svg { display:block; width:100%; overflow:visible; }
 table { width:100%; border-collapse:collapse; font-size:13px; }
 thead th {
   position:sticky; top:0; background: var(--pap); text-align:left;
-  font-family: var(--fm); font-weight:500; font-size:9.5px; letter-spacing:.13em;
+  font-family: var(--fb); font-weight:500; font-size:9.5px; letter-spacing:.13em;
   text-transform:uppercase; color: var(--fr); padding:0 12px 8px 0;
   border-bottom:1px solid var(--fio); white-space:nowrap; z-index:2;
 }
@@ -191,12 +201,12 @@ tbody td:first-child { color: var(--tin); }
 tbody tr { transition: background var(--t-micro) var(--curva); }
 tbody tr:hover { background: var(--reb); }
 tbody tr:last-child td { border-bottom:0; }
-.num { text-align:right; font-family: var(--fm); font-variant-numeric: tabular-nums; white-space:nowrap; }
+.num { text-align:right; font-family: var(--fb); font-variant-numeric: tabular-nums; white-space:nowrap; }
 
 /* peça do kit: marca de estado */
 .tag {
   display:inline-flex; align-items:center; gap:5px; border:1px solid; border-radius:3px;
-  padding:1px 7px; font-family: var(--fm); font-size:11px; white-space:nowrap;
+  padding:1px 7px; font-family: var(--fb); font-size:11px; white-space:nowrap;
 }
 .tag.ok   { color: var(--ok);  background: var(--okF);  border-color: var(--okB); }
 .tag.wait { color: var(--al);  background: var(--alF);  border-color: var(--alB); }
@@ -218,7 +228,7 @@ footer { padding:6px 26px 26px; color: var(--fr); font-size:12px; text-align:cen
 }
 .aviso b { color:#fff; font-weight:600; }
 .aviso-icone {
-  flex:none; font-family: var(--fm); font-size:10px; letter-spacing:.13em;
+  flex:none; font-family: var(--fb); font-size:10px; letter-spacing:.13em;
   text-transform:uppercase; color:#07E0FF; border:1px solid rgba(7,224,255,.4);
   border-radius:3px; padding:1px 6px; margin-top:2px;
 }
@@ -228,30 +238,34 @@ footer { padding:6px 26px 26px; color: var(--fr); font-size:12px; text-align:cen
 .times { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 @media (max-width:980px) { .times { grid-template-columns:1fr; } }
 .time-card { padding:16px 20px 18px; }
-.time-nome { font-family: var(--fm); font-size:9.5px; letter-spacing:.13em;
+.time-nome { font-family: var(--fb); font-size:9.5px; letter-spacing:.13em;
              text-transform:uppercase; color: var(--fr); }
-.time-pct { font-family: var(--fm); font-size:30px; font-weight:500; letter-spacing:-.025em;
+.time-pct { font-family: var(--fb); font-size:30px; font-weight:600; letter-spacing:-.025em;
+            font-variant-numeric: tabular-nums;
             line-height:1.1; margin:5px 0 2px; font-variant-numeric: tabular-nums; }
-.time-sub { font-family: var(--fm); font-size:10.5px; color: var(--fr); }
+.time-sub { font-family: var(--fb); font-size:10.5px; color: var(--fr); }
 .empilhada { display:flex; gap:2px; height:20px; margin-top:12px; }
 .empilhada i { display:block; }
 .empilhada i + i { border-left:0; }
 .empilhada-leg { display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:11px; }
 .empilhada-leg span { display:flex; align-items:center; gap:7px; font-size:12.5px; color: var(--tin2); }
-.empilhada-leg b { font-family: var(--fm); color: var(--tin); font-weight:500;
+.empilhada-leg b { font-family: var(--fb); color: var(--tin); font-weight:500;
+                   font-variant-numeric: tabular-nums;
                    font-variant-numeric: tabular-nums; }
 
 .passivo { }
-.passivo-num { font-family: var(--fm); font-size:42px; font-weight:500; letter-spacing:-.03em;
+.passivo-num { font-family: var(--fb); font-size:42px; font-weight:700; letter-spacing:-.03em;
+               font-variant-numeric: tabular-nums;
                line-height:1; color: var(--mal); font-variant-numeric: tabular-nums; }
 .passivo-grid { display:grid; grid-template-columns:210px 1fr; gap:26px; align-items:start; }
 @media (max-width:860px) { .passivo-grid { grid-template-columns:1fr; } }
 .mini { display:grid; gap:10px; }
 .mini-row { display:grid; grid-template-columns:70px 1fr 56px; gap:10px; align-items:center; }
-.mini-row span:first-child { font-family: var(--fm); font-size:11.5px; color: var(--tin2); }
+.mini-row span:first-child { font-family: var(--fb); font-size:11.5px; color: var(--tin2); }
 .mini-track { height:6px; background: var(--trilho); border-radius:2px; overflow:hidden; }
 .mini-track i { display:block; height:100%; background: var(--mal); }
-.mini-val { font-family: var(--fm); font-size:12px; text-align:right;
+.mini-val { font-family: var(--fb); font-size:12px; text-align:right;
+            font-variant-numeric: tabular-nums;
             font-variant-numeric: tabular-nums; }
 
 /* peça do kit: abas com linha inferior */

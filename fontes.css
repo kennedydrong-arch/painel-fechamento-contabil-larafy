@@ -1,0 +1,51 @@
+/* ============================================================
+   Mapa de fontes LaraFy — regra do dia 31/08/2026.
+
+   | Onde                                | Fonte                          |
+   |-------------------------------------|--------------------------------|
+   | Texto, interface e tabelas          | IBM Plex Sans 400/500          |
+   | Títulos institucionais              | Montserrat 600/700             |
+   | KPIs e números grandes              | IBM Plex Sans 600/700          |
+   | Valores, datas e percentuais        | IBM Plex Sans + tabular-nums   |
+   | CNPJ, códigos, IDs e dados técnicos | IBM Plex Mono 400/500          |
+
+   Este arquivo vem DEPOIS do kit.css de propósito. O kit é cópia do
+   enxoval e segue a regra antiga (mono em número); não se edita ele
+   aqui — a regra nova mora neste arquivo, num lugar só, e some inteira
+   se um dia voltar atrás.
+   ============================================================ */
+
+/* --- Títulos institucionais: Montserrat 600/700 ------------------- */
+h1, h2, .topo h1 { font-family:var(--fd); font-weight:700; }
+
+/* --- Texto, interface e tabelas: IBM Plex Sans 400/500 ------------ */
+.olho, .marca, .idx, .migalha, .nota, .txt-est, .peca .lab, .mrc,
+.faixa-num .r, .faixa-num .d, th, .colunas b .dica,
+.comp-rot, .fonte, .nav-comp .agora, .tit-graf, .card-sub {
+  font-family:var(--fb);
+}
+.olho, .marca, .peca .lab, .faixa-num .r, th, .comp-rot { font-weight:500; }
+
+/* --- Valores, datas e percentuais: Plex Sans + tabular ------------ */
+.faixa-num .v, .n, .legenda b, .deitadas .l1 u, .aviso .n,
+.abre .pc, .abre .txt .l1 u, .nav-comp .agora,
+.eixo u, .eixo-t, .rot-l, .meses span, .meses-r span, .bar-val, .axis-txt {
+  font-family:var(--fb);
+  font-variant-numeric:tabular-nums;
+}
+
+/* --- KPIs e números grandes: Plex Sans 600/700 -------------------- */
+/* O -.045em era do Montserrat, que é mais estreito. No Plex Sans nesse
+   corpo os algarismos encostam um no outro. */
+.abre .pc { font-weight:700; letter-spacing:-.03em; }
+.abre .pc em { font-weight:600; }
+.faixa-num .v { font-weight:600; }
+.abre .txt .l1 { font-family:var(--fb); font-weight:600; }
+
+/* --- CNPJ, códigos, IDs e dado técnico: IBM Plex Mono 400/500 ----- */
+.mono, .cnpj, code, kbd, samp { font-family:var(--fm); font-weight:400; }
+
+/* A dica do gráfico é texto com data e percentual dentro; o kit a define
+   com seletor de dois níveis (.colunas b .dica), então precisa do mesmo
+   peso de seletor para valer. */
+.colunas b .dica { font-family:var(--fb); font-variant-numeric:tabular-nums; }
