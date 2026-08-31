@@ -136,8 +136,9 @@ contabilidade:
 
 O painel responde três perguntas, nessa ordem:
 
-1. **Quantas empresas fecharam dentro do prazo** — o número grande, com a barra
-   colorida logo abaixo mostrando o resto (em atraso e em aberto)
+1. **Quantas empresas fecharam dentro do prazo** — o número grande é a
+   **contagem** ("59 de 230"), não o percentual; o % fica na linha de apoio.
+   A barra colorida logo abaixo mostra o resto (em atraso e em aberto)
 2. **Como estava o mês passado no mesmo ponto do ciclo** — para saber se este mês
    está melhor ou pior, e não só se o número "parece baixo"
 3. **Onde este mês deve terminar** — a previsão, que é a mediana de onde os 5

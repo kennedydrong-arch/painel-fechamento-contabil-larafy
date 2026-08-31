@@ -84,6 +84,11 @@ body { margin:0; background:var(--fundo); display:grid; place-items:center; }
 .abre .pc {
   font-family:var(--fd); font-weight:800; font-size:92px; line-height:.82;
   letter-spacing:-.045em; font-variant-numeric:tabular-nums;
+  display:flex; align-items:baseline; gap:12px; white-space:nowrap;
+}
+.abre .pc em {
+  font-style:normal; font-weight:600; font-size:30px; letter-spacing:-.03em;
+  color:var(--tin2);
 }
 .abre .txt { padding-bottom:6px; }
 .abre .txt .l1 { font-family:var(--fd); font-weight:700; font-size:21px; letter-spacing:-.03em; }
@@ -267,11 +272,11 @@ function desenhar() {
 
     <div class="corpo">
       <div class="abre">
-        <span class="pc" style="color:${corDo(b)}">${pct(pctPrincipal(b))}</span>
+        <span class="pc" style="color:${corDo(b)}">${nfmt(b.concluidas_no_prazo)}<em>de ${
+          nfmt(b.total)}</em></span>
         <span class="txt">
-          <span class="l1">entregue no prazo</span>
-          <span class="l2"><u>${nfmt(b.concluidas_no_prazo)}</u> de <u>${nfmt(b.total)}</u>
-            empresas que fecham contabilidade</span>
+          <span class="l1">empresas entregues dentro do prazo</span>
+          <span class="l2"><u>${pct(pctNoPrazo(b))}</u> das que fecham contabilidade</span>
         </span>
         <span class="marcas">${estado}</span>
       </div>
@@ -384,11 +389,12 @@ function corDo(b) {
 }
 
 /* Peça do kit: faixa de números, células separadas por fio. O valor é mono. */
-/* Faixa de números — a ordem é a que a gestão pergunta, nessa sequência:
-   1. quantas empresas fecharam DENTRO do prazo (o indicador de cima)
-   2. como estava o mês passado no MESMO ponto do ciclo
-   3. onde este mês deve terminar, contando o que ainda entra atrasado
-   Nada aqui repete a barra colorida logo acima — ela já diz atraso e aberto. */
+/* Faixa de números — tudo aqui conta EMPRESAS, igual ao número grande; o
+   percentual desce para a linha de apoio. A ordem é a que a gestão pergunta:
+   1. quantas o mês passado tinha no MESMO ponto do ciclo
+   2. onde este mês deve terminar
+   3. quantas ainda faltam
+   Nada repete a barra colorida logo acima. */
 function faixaNumeros(b) {
   const r = b.ritmo || {};
   const c = b.comparativo;
@@ -398,35 +404,45 @@ function faixaNumeros(b) {
     <div class="v${cls ? ' ' + cls : ''}">${val}</div>
     <div class="d">${det}</div></div>`;
 
-  // 2. o mesmo ponto do ciclo no mês anterior
+  // 1. o mesmo ponto do ciclo no mês anterior
   const ant = c && c.anteriores && c.anteriores[0];
   const antPct = ant ? ant.no_prazo_no_mesmo_ponto : null;
   const celAnterior = (ant && antPct !== null && antPct !== undefined)
     ? (() => {
+        const quantas = ant.no_prazo_empresas;
         const d = pctNoPrazo(b) - antPct;
         const sinal = `${d >= 0 ? '+' : '−'}${dec(Math.abs(d))} p.p.`;
-        return cel(`Mesmo ponto de ${ant.competencia}`, pct(antPct),
+        const temContagem = quantas !== undefined && ant.total_no_mes !== undefined;
+        return cel(`Mesmo ponto de ${ant.competencia}`,
+                   temContagem ? nfmt(quantas) : pct(antPct),
+                   (temContagem ? `de ${nfmt(ant.total_no_mes)} · ${pct(antPct)} · ` : '') +
                    `este mês está ${sinal} ${d >= 0 ? 'à frente' : 'atrás'}`,
                    d >= 0 ? '' : 'mal');
       })()
     : cel('Fechando por dia útil', dec(r.por_dia), `em ${r.dias_uteis_corridos} dias de ciclo`);
 
-  // 3. enquanto dá para prever, previsão. Depois que o prazo venceu, o
+  // 2. enquanto dá para prever, previsão. Depois que o prazo venceu, o
   //    resultado real - dizer "deve terminar em 71%" de um mês que venceu
   //    há dois meses e parou em 50% não é previsão, é ilusão.
   const celForecast = (f && !r.prazo_vencido)
-    ? cel('Deve terminar em', pct(f.pct),
-          `≈ ${nfmt(f.empresas)} de ${nfmt(b.total)} · os ${nfmt(f.meses)} meses anteriores ` +
-          `terminaram entre ${pct(f.menor)} e ${pct(f.maior)}`)
-    : cel('Entregue no total', pct(b.percentual),
-          `${nfmt(b.concluidas)} de ${nfmt(b.total)}` + (b.concluidas_atrasadas
+    ? cel('Deve terminar em', `≈ ${nfmt(f.empresas)}`,
+          `de ${nfmt(b.total)} · ${pct(f.pct)} · os ${nfmt(f.meses)} meses anteriores: ` +
+          `${pct(f.menor)} a ${pct(f.maior)}`)
+    : cel('Entregue no total', nfmt(b.concluidas),
+          `de ${nfmt(b.total)} · ${pct(b.percentual)}` + (b.concluidas_atrasadas
             ? ` · ${nfmt(b.concluidas_atrasadas)} entraram depois do prazo` : ''));
 
+  // 3. o que ainda falta
+  const aberto = b.pendentes + b.atrasadas;
+  const celAberto = cel('Ainda em aberto', nfmt(aberto),
+        `de ${nfmt(b.total)} · ${pct(pctAberto(b))}` +
+        (b.atrasadas ? ` · ${nfmt(b.atrasadas)} já vencidas` : ' · nenhuma vencida ainda'),
+        b.atrasadas ? 'mal' : '');
+
   return `<div class="faixa-num">
-    ${cel('Entregue no prazo', pct(pctNoPrazo(b)),
-          `${nfmt(b.concluidas_no_prazo)} de ${nfmt(b.total)} empresas`)}
     ${celAnterior}
     ${celForecast}
+    ${celAberto}
   </div>`;
 }
 

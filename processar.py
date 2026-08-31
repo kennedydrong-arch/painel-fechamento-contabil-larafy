@@ -692,6 +692,10 @@ def main():
                 # o mesmo ponto, mas contando so o que saiu dentro do prazo -
                 # e este que compara com o numero grande do painel
                 "no_prazo_no_mesmo_ponto": ate[-1]["percentual_no_prazo"] if ate else 0.0,
+                # em EMPRESAS, que e como o painel conta - contado aqui e nao
+                # derivado do percentual la na tela, que erra por arredondamento
+                "no_prazo_empresas": ate[-1]["acumulado_no_prazo"] if ate else 0,
+                "total_no_mes": o["total"],
                 "terminou_em": o["percentual"],
                 "terminou_no_prazo": pct(o["concluidas_no_prazo"], o["total"]),
                 "dias_para_50_apos_prazo": atraso50,
