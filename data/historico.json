@@ -183,27 +183,27 @@
  },
  {
   "dia": "2026-09-02",
-  "em": "2026-09-02T18:50:11+00:00",
+  "em": "2026-09-02T21:58:11+00:00",
   "competencias": {
    "set/26": {
-    "total": 242,
-    "concluidas": 0,
-    "percentual": 0.0
-   },
-   "ago/26": {
     "total": 241,
     "concluidas": 0,
     "percentual": 0.0
    },
+   "ago/26": {
+    "total": 240,
+    "concluidas": 0,
+    "percentual": 0.0
+   },
    "jul/26": {
-    "total": 227,
-    "concluidas": 58,
-    "percentual": 25.6
+    "total": 226,
+    "concluidas": 60,
+    "percentual": 26.5
    },
    "jun/26": {
-    "total": 209,
+    "total": 208,
     "concluidas": 117,
-    "percentual": 56.0
+    "percentual": 56.2
    }
   }
  }
