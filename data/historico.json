@@ -573,7 +573,7 @@
  },
  {
   "dia": "2026-09-17",
-  "em": "2026-09-17T01:33:09+00:00",
+  "em": "2026-09-17T13:34:39+00:00",
   "competencias": {
    "set/26": {
     "total": 231,
@@ -582,8 +582,8 @@
    },
    "ago/26": {
     "total": 230,
-    "concluidas": 6,
-    "percentual": 2.6
+    "concluidas": 7,
+    "percentual": 3.0
    },
    "jul/26": {
     "total": 225,
