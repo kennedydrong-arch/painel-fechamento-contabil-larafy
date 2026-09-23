@@ -726,5 +726,31 @@
     "percentual": 66.5
    }
   }
+ },
+ {
+  "dia": "2026-09-23",
+  "em": "2026-09-23T00:40:19+00:00",
+  "competencias": {
+   "set/26": {
+    "total": 231,
+    "concluidas": 0,
+    "percentual": 0.0
+   },
+   "ago/26": {
+    "total": 230,
+    "concluidas": 28,
+    "percentual": 12.2
+   },
+   "jul/26": {
+    "total": 223,
+    "concluidas": 97,
+    "percentual": 43.5
+   },
+   "jun/26": {
+    "total": 200,
+    "concluidas": 133,
+    "percentual": 66.5
+   }
+  }
  }
 ]
