@@ -963,7 +963,7 @@
  },
  {
   "dia": "2026-10-02",
-  "em": "2026-10-02T02:22:09+00:00",
+  "em": "2026-10-02T16:08:08+00:00",
   "competencias": {
    "out/26": {
     "total": 235,
@@ -977,13 +977,13 @@
    },
    "ago/26": {
     "total": 224,
-    "concluidas": 61,
-    "percentual": 27.2
+    "concluidas": 62,
+    "percentual": 27.7
    },
    "jul/26": {
     "total": 217,
-    "concluidas": 109,
-    "percentual": 50.2
+    "concluidas": 112,
+    "percentual": 51.6
    }
   }
  }
