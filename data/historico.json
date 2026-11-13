@@ -2052,5 +2052,31 @@
     "percentual": 39.7
    }
   }
+ },
+ {
+  "dia": "2026-11-13",
+  "em": "2026-11-13T00:29:17+00:00",
+  "competencias": {
+   "nov/26": {
+    "total": 236,
+    "concluidas": 0,
+    "percentual": 0.0
+   },
+   "out/26": {
+    "total": 236,
+    "concluidas": 4,
+    "percentual": 1.7
+   },
+   "set/26": {
+    "total": 231,
+    "concluidas": 73,
+    "percentual": 31.6
+   },
+   "ago/26": {
+    "total": 214,
+    "concluidas": 85,
+    "percentual": 39.7
+   }
+  }
  }
 ]
