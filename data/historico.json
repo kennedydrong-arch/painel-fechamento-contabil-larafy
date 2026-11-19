@@ -2211,7 +2211,7 @@
  },
  {
   "dia": "2026-11-19",
-  "em": "2026-11-19T03:33:56+00:00",
+  "em": "2026-11-19T13:09:38+00:00",
   "competencias": {
    "nov/26": {
     "total": 236,
@@ -2220,8 +2220,8 @@
    },
    "out/26": {
     "total": 236,
-    "concluidas": 5,
-    "percentual": 2.1
+    "concluidas": 6,
+    "percentual": 2.5
    },
    "set/26": {
     "total": 230,
